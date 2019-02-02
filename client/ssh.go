@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/k1LoW/sshc"
 	"go.uber.org/zap"
@@ -47,6 +48,24 @@ func (c *SSHClient) Read(ctx context.Context, path string) error {
 	c.logger.Info("Create new session")
 	defer session.Close()
 
+	var tzOut []byte
+	err = func() error {
+		session, err := c.client.NewSession()
+		if err != nil {
+			return err
+		}
+		defer session.Close()
+		tzCmd := `date +"%z"`
+		tzOut, err = session.Output(tzCmd)
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
+	if err != nil {
+		return err
+	}
+
 	cmd := fmt.Sprintf("sudo cat %s", path)
 
 	stdout, err := session.StdoutPipe()
@@ -59,7 +78,7 @@ func (c *SSHClient) Read(ctx context.Context, path string) error {
 	// 	return err
 	// }
 
-	go bindReaderAndChan(ctx, c.logger, &stdout, c.lineChan, c.host, path)
+	go bindReaderAndChan(ctx, c.logger, &stdout, c.lineChan, c.host, path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = session.Start(cmd)
 	if err != nil {

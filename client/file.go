@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -30,6 +31,12 @@ func (c *FileClient) Read(ctx context.Context, path string) error {
 	if _, err := os.Lstat(path); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("%s not exists", path))
 	}
+	tzCmd := exec.Command("date", `+"%z"`)
+	tzOut, err := tzCmd.Output()
+	if err != nil {
+		return err
+	}
+
 	cmd := exec.Command("sudo", "cat", path)
 
 	stdout, err := cmd.StdoutPipe()
@@ -44,7 +51,7 @@ func (c *FileClient) Read(ctx context.Context, path string) error {
 
 	r := stdout.(io.Reader)
 
-	go bindReaderAndChan(ctx, c.logger, &r, c.lineChan, "localhost", path)
+	go bindReaderAndChan(ctx, c.logger, &r, c.lineChan, "localhost", path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = cmd.Start()
 	if err != nil {

@@ -16,12 +16,13 @@ type Client interface {
 
 // Line ...
 type Line struct {
-	Host    string
-	Path    string
-	Content string
+	Host     string
+	Path     string
+	Content  string
+	Timezone string
 }
 
-func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string) {
+func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
 	scanner := bufio.NewScanner(*r)
 	defer close(lineChan)
 L:
@@ -31,9 +32,10 @@ L:
 			break L
 		default:
 			lineChan <- Line{
-				Host:    host,
-				Path:    path,
-				Content: scanner.Text(),
+				Host:     host,
+				Path:     path,
+				Content:  scanner.Text(),
+				Timezone: tz,
 			}
 		}
 	}

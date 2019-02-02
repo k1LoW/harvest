@@ -64,7 +64,6 @@ $ hrv cat harvest.db
 - Find lotated logs
 - Support multi-line log
 - Options for cat with host/path
-- Detect timezone
 
 ## References
 
