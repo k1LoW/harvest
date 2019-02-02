@@ -60,7 +60,7 @@ $ hrv cat harvest.db
 
 ## TODO
 
-- Target filter option like `--host 'app-*'`
+- Target filter option like `--host 'app-*'` or label/tag
 - Find lotated logs
 - Support multi-line log
 - Options for cat with host/path
