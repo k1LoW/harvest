@@ -1,6 +1,9 @@
 package parser
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/k1LoW/harvest/client"
 )
 
@@ -15,4 +18,12 @@ type Log struct {
 // Parser ...
 type Parser interface {
 	Parse(lineChan <-chan client.Line) <-chan Log
+}
+
+// parseTime ...
+func parseTime(tf string, tz string, content string) (time.Time, error) {
+	if tz == "" {
+		return time.Parse(fmt.Sprintf("2006-01-02 %s", tf), fmt.Sprintf("%s %s", time.Now().Format("2006-01-02"), content))
+	}
+	return time.Parse(fmt.Sprintf("2006-01-02 -0700 %s", tf), fmt.Sprintf("%s %s %s", time.Now().Format("2006-01-02"), tz, content))
 }

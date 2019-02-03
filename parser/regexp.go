@@ -1,9 +1,7 @@
 package parser
 
 import (
-	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/k1LoW/harvest/client"
 )
@@ -36,11 +34,8 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line) <-chan Log {
 			if p.timeFormat != "" {
 				m := p.regexp.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
-					if line.Timezone != "" {
-						t, _ := time.Parse(fmt.Sprintf("2006-01-02 %s %s", line.Timezone, p.timeFormat), fmt.Sprintf("%s %s", time.Now().Format("2006-01-02 -0700"), m[1]))
-						ts = t.UnixNano()
-					} else {
-						t, _ := time.Parse(fmt.Sprintf("2006-01-02 %s", p.timeFormat), fmt.Sprintf("%s %s", time.Now().Format("2006-01-02"), m[1]))
+					t, err := parseTime(p.timeFormat, line.Timezone, m[1])
+					if err == nil {
 						ts = t.UnixNano()
 					}
 				}

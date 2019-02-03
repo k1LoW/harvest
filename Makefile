@@ -12,5 +12,12 @@ RELEASE_BUILD_LDFLAGS = -s -w $(BUILD_LDFLAGS)
 
 GO ?= GO111MODULE=on go
 
+default: test
+
+ci: test
+
+test:
+	$(GO) test ./... -coverprofile=coverage.txt -covermode=count
+
 build:
 	$(GO) build -ldflags="$(BUILD_LDFLAGS)" -o hrv
