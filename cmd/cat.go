@@ -29,7 +29,7 @@ import (
 
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
-	"github.com/logrusorgru/aurora"
+	"github.com/labstack/gommon/color"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -105,7 +105,11 @@ var catCmd = &cobra.Command{
 			hFmt = fmt.Sprintf("%%-%ds ", hLen)
 		}
 
-		au := aurora.NewAurora(!noColors)
+		if noColors {
+			color.Disable()
+		} else {
+			color.Enable()
+		}
 
 		for log := range d.Cat(cond) {
 			var (
@@ -126,7 +130,7 @@ var catCmd = &cobra.Command{
 				host = fmt.Sprintf(hFmt, log.Path)
 			}
 
-			fmt.Printf("%s%s%s\n", au.Brown(ts), au.Gray(host), log.Content)
+			fmt.Printf("%s%s%s\n", color.Yellow(ts), color.Grey(host), log.Content)
 		}
 	},
 }
