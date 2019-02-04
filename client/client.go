@@ -19,7 +19,7 @@ type Line struct {
 	Host     string
 	Path     string
 	Content  string
-	Timezone string
+	TimeZone string
 }
 
 func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
@@ -35,7 +35,7 @@ L:
 				Host:     host,
 				Path:     path,
 				Content:  scanner.Text(),
-				Timezone: tz,
+				TimeZone: tz,
 			}
 		}
 	}

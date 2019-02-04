@@ -24,12 +24,24 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+)
+
+var (
+	showTimestamp     bool
+	showTimestampNano bool
+	showHost          bool
+	showPath          bool
+	match             string
+	st                string
+	et                string
 )
 
 // catCmd represents the cat command
@@ -61,22 +73,96 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		for log := range d.Cat() {
-			fmt.Printf("%s\n", log.Content)
+		cond, err := buildCondition()
+		if err != nil {
+			l.Error("option error", zap.Error(err))
+			os.Exit(1)
+		}
+
+		var (
+			hostFmt string
+			pathFmt string
+		)
+
+		if showHost {
+			hostLen, err := d.GetColumnMaxLength("host")
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+			hostFmt = fmt.Sprintf("%%-%ds ", hostLen)
+		}
+
+		if showPath {
+			pathLen, err := d.GetColumnMaxLength("path")
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+			pathFmt = fmt.Sprintf("%%-%ds ", pathLen)
+		}
+
+		for log := range d.Cat(cond) {
+			var (
+				ts   string
+				host string
+				path string
+			)
+			if showTimestamp {
+				ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format("2006-01-02T15:04:05-07:00"))
+			}
+			if showTimestampNano {
+				ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format("2006-01-02T15:04:05.000000000-07:00"))
+			}
+			if showHost {
+				host = fmt.Sprintf(hostFmt, log.Host)
+			}
+			if showPath {
+				path = fmt.Sprintf(pathFmt, log.Path)
+			}
+
+			fmt.Printf("%s%s%s%s\n", ts, host, path, log.Content)
 		}
 	},
 }
 
+// buildCondition ...
+func buildCondition() (string, error) {
+	cond := []string{}
+	if match != "" {
+		cond = append(cond, fmt.Sprintf("content MATCH '%s'", match))
+	}
+	loc, err := time.LoadLocation("Local")
+	if err != nil {
+		return "", err
+	}
+	if st != "" {
+		t, err := time.ParseInLocation("2006-01-02 15:04:05", st, loc)
+		if err != nil {
+			return "", err
+		}
+		cond = append(cond, fmt.Sprintf("ts >= %d", t.UnixNano()))
+	}
+	if et != "" {
+		t, err := time.ParseInLocation("2006-01-02 15:04:05", et, loc)
+		if err != nil {
+			return "", err
+		}
+		cond = append(cond, fmt.Sprintf("ts <= %d", t.UnixNano()))
+	}
+	if len(cond) == 0 {
+		return "", nil
+	}
+	return fmt.Sprintf(" WHERE %s", strings.Join(cond, " AND ")), nil
+}
+
 func init() {
 	rootCmd.AddCommand(catCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// catCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// catCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	catCmd.Flags().BoolVarP(&showTimestamp, "show-timestamp", "T", false, "show timestamp")
+	catCmd.Flags().BoolVarP(&showTimestampNano, "show-timestamp-nano", "N", false, "show timestamp nano sec")
+	catCmd.Flags().BoolVarP(&showHost, "show-host", "H", false, "show host")
+	catCmd.Flags().BoolVarP(&showPath, "show-path", "P", false, "show path")
+	catCmd.Flags().StringVarP(&match, "match", "", "", "MATCH Query")
+	catCmd.Flags().StringVarP(&st, "start-time", "", "", "start time")
+	catCmd.Flags().StringVarP(&et, "end-time", "", "", "end time")
 }

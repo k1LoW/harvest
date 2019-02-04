@@ -17,7 +17,7 @@ type Log struct {
 
 // Parser ...
 type Parser interface {
-	Parse(lineChan <-chan client.Line) <-chan Log
+	Parse(lineChan <-chan client.Line, tz string) <-chan Log
 }
 
 // parseTime ...

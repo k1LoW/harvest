@@ -86,11 +86,11 @@ L:
 }
 
 // Cat ...
-func (d *DB) Cat() chan parser.Log {
+func (d *DB) Cat(cond string) chan parser.Log {
 	go func() {
 		defer close(d.logChan)
 		log := parser.Log{}
-		rows, err := d.db.Queryx("SELECT * FROM log ORDER BY ts ASC;")
+		rows, err := d.db.Queryx(fmt.Sprintf("SELECT * FROM log %s ORDER BY ts ASC;", cond))
 		if err != nil {
 			d.logger.Error("DB error", zap.Error(err))
 			return
@@ -106,4 +106,20 @@ func (d *DB) Cat() chan parser.Log {
 	}()
 
 	return d.logChan
+}
+
+// ResultLength ...
+type ResultLength struct {
+	Length int `db:"length"`
+}
+
+// GetColumnMaxLength ...
+func (d *DB) GetColumnMaxLength(colName string) (int, error) {
+	query := fmt.Sprintf("SELECT length(%s) AS length from log GROUP BY %s ORDER by length DESC LIMIT 1;", colName, colName)
+	l := ResultLength{}
+	err := d.db.Get(&l, query)
+	if err != nil {
+		return 0, err
+	}
+	return l.Length, nil
 }

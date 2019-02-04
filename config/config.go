@@ -18,6 +18,7 @@ type Target struct {
 	Type        string `yaml:"type"`
 	Regexp      string `yaml:"regexp"`
 	TimeFormat  string `yaml:"timeFormat"`
+	TimeZone    string `yaml:"timeZone"`
 	Scheme      string
 	Host        string
 	User        string

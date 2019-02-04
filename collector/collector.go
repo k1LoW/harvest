@@ -89,7 +89,7 @@ func (c *Collector) Collect(dbChan chan parser.Log) error {
 
 	go func() {
 	L:
-		for log := range c.parser.Parse(c.client.Out()) {
+		for log := range c.parser.Parse(c.client.Out(), c.target.TimeZone) {
 			select {
 			case <-c.ctx.Done():
 				break L

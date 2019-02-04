@@ -25,16 +25,20 @@ func NewRegexpParser(r string, tf string) (Parser, error) {
 }
 
 // Parse ...
-func (p *RegexpParser) Parse(lineChan <-chan client.Line) <-chan Log {
+func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string) <-chan Log {
 	logChan := make(chan Log)
 	go func() {
+		lineTZ := tz
 		for line := range lineChan {
 			var ts int64
 			ts = 0
+			if tz == "" {
+				lineTZ = line.TimeZone
+			}
 			if p.timeFormat != "" {
 				m := p.regexp.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
-					t, err := parseTime(p.timeFormat, line.Timezone, m[1])
+					t, err := parseTime(p.timeFormat, lineTZ, m[1])
 					if err == nil {
 						ts = t.UnixNano()
 					}

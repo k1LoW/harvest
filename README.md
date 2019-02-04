@@ -28,12 +28,14 @@ targets:
     type: regexp
     regexp: 'time:([^\t]+)'
     timeFormat: 'Jan 02 15:04:05'
+    timeZone: '+0900'
   -
     url: 'ssh://app-2.example.com/var/log/ltsv.log'
     description: app-2 log
     type: regexp
     regexp: 'time:([^\t]+)'
     timeFormat: 'Jan 02 15:04:05'
+    timeZone: '+0900'
   -
     url: 'ssh://db.example.com/var/log/tcpdp/eth0/dump.log'
     description: db dump log
