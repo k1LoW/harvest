@@ -35,6 +35,9 @@ func NewDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
 	)
 	l.Info("DB initialized.")
 
+	db.MustExec("PRAGMA journal_mode = MEMORY")
+	db.MustExec("PRAGMA synchronous = NORMAL")
+
 	return &DB{
 		ctx:     ctx,
 		db:      db,
@@ -53,6 +56,9 @@ func AttachDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
+
+	db.MustExec("PRAGMA journal_mode = MEMORY")
+	db.MustExec("PRAGMA synchronous = NORMAL")
 
 	return &DB{
 		ctx:     ctx,
