@@ -4,8 +4,8 @@
 
 Harvest provides the `hrv` command with the following features.
 
-- Collect remote/local logs to SQLite database via SSH/exec
-- Output logs from SQLite database
+- Fetch remote/local logs to SQLite database via SSH/exec ( `hrv fetch` )
+- Output logs from SQLite database ( `hrv cat` )
 
 ## Usage
 
@@ -57,7 +57,7 @@ $ hrv fetch -c config.yml -o harvest.db
 ### 3. `hrv cat`: cat logs
 
 ``` console
-$ hrv cat harvest.db
+$ hrv cat harvest.db --with-ts --with-host
 ```
 
 ## TODO
