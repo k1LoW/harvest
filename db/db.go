@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/k1LoW/harvest/parser"
@@ -120,8 +121,8 @@ type ResultLength struct {
 }
 
 // GetColumnMaxLength ...
-func (d *DB) GetColumnMaxLength(colName string) (int, error) {
-	query := fmt.Sprintf("SELECT length(%s) AS length from log GROUP BY %s ORDER by length DESC LIMIT 1;", colName, colName)
+func (d *DB) GetColumnMaxLength(colName ...string) (int, error) {
+	query := fmt.Sprintf("SELECT (length(%s)) AS length from log GROUP BY %s ORDER by length DESC LIMIT 1;", strings.Join(colName, ")+length("), strings.Join(colName, ","))
 	l := ResultLength{}
 	err := d.db.Get(&l, query)
 	if err != nil {

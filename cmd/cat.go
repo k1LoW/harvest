@@ -29,19 +29,21 @@ import (
 
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
+	"github.com/logrusorgru/aurora"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
 var (
-	showTimestamp     bool
-	showTimestampNano bool
-	showHost          bool
-	showPath          bool
+	withTimestamp     bool
+	withTimestampNano bool
+	withHost          bool
+	withPath          bool
 	match             string
 	st                string
 	et                string
+	noColors          bool
 )
 
 // catCmd represents the cat command
@@ -79,49 +81,52 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		var (
-			hostFmt string
-			pathFmt string
-		)
-
-		if showHost {
-			hostLen, err := d.GetColumnMaxLength("host")
+		var hFmt string
+		if withHost && withPath {
+			hLen, err := d.GetColumnMaxLength("host", "path")
 			if err != nil {
 				l.Error("option error", zap.Error(err))
 				os.Exit(1)
 			}
-			hostFmt = fmt.Sprintf("%%-%ds ", hostLen)
-		}
-
-		if showPath {
-			pathLen, err := d.GetColumnMaxLength("path")
+			hFmt = fmt.Sprintf("%%-%ds ", hLen)
+		} else if withHost {
+			hLen, err := d.GetColumnMaxLength("host")
 			if err != nil {
 				l.Error("option error", zap.Error(err))
 				os.Exit(1)
 			}
-			pathFmt = fmt.Sprintf("%%-%ds ", pathLen)
+			hFmt = fmt.Sprintf("%%-%ds ", hLen)
+		} else if withPath {
+			hLen, err := d.GetColumnMaxLength("path")
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+			hFmt = fmt.Sprintf("%%-%ds ", hLen)
 		}
+
+		au := aurora.NewAurora(!noColors)
 
 		for log := range d.Cat(cond) {
 			var (
 				ts   string
 				host string
-				path string
 			)
-			if showTimestamp {
+			if withTimestamp {
 				ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format("2006-01-02T15:04:05-07:00"))
 			}
-			if showTimestampNano {
+			if withTimestampNano {
 				ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format("2006-01-02T15:04:05.000000000-07:00"))
 			}
-			if showHost {
-				host = fmt.Sprintf(hostFmt, log.Host)
-			}
-			if showPath {
-				path = fmt.Sprintf(pathFmt, log.Path)
+			if withHost && withPath {
+				host = fmt.Sprintf(hFmt, fmt.Sprintf("%s:%s", log.Host, log.Path))
+			} else if withHost {
+				host = fmt.Sprintf(hFmt, log.Host)
+			} else if withPath {
+				host = fmt.Sprintf(hFmt, log.Path)
 			}
 
-			fmt.Printf("%s%s%s%s\n", ts, host, path, log.Content)
+			fmt.Printf("%s%s%s\n", au.Brown(ts), au.Gray(host), log.Content)
 		}
 	},
 }
@@ -158,11 +163,12 @@ func buildCondition() (string, error) {
 
 func init() {
 	rootCmd.AddCommand(catCmd)
-	catCmd.Flags().BoolVarP(&showTimestamp, "show-timestamp", "T", false, "show timestamp")
-	catCmd.Flags().BoolVarP(&showTimestampNano, "show-timestamp-nano", "N", false, "show timestamp nano sec")
-	catCmd.Flags().BoolVarP(&showHost, "show-host", "H", false, "show host")
-	catCmd.Flags().BoolVarP(&showPath, "show-path", "P", false, "show path")
+	catCmd.Flags().BoolVarP(&withTimestamp, "with-ts", "", false, "with timestamp")
+	catCmd.Flags().BoolVarP(&withTimestampNano, "with-ts-nano", "", false, "with timestamp nano sec")
+	catCmd.Flags().BoolVarP(&withHost, "with-host", "", false, "with host")
+	catCmd.Flags().BoolVarP(&withPath, "with-path", "", false, "with path")
 	catCmd.Flags().StringVarP(&match, "match", "", "", "MATCH Query")
 	catCmd.Flags().StringVarP(&st, "start-time", "", "", "start time")
 	catCmd.Flags().StringVarP(&et, "end-time", "", "", "end time")
+	catCmd.Flags().BoolVarP(&noColors, "no-colors", "", false, "disable colors")
 }
