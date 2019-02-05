@@ -85,7 +85,7 @@ $ hrv cat harvest.db --with-timestamp --with-host
 
 ## TODO
 
-- Target filter option like `--host 'app-*'` or label/tag
+- Target filter option like `--host 'app-*'`
 - Support multi-line log
 
 ## References
