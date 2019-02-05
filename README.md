@@ -13,7 +13,7 @@ Harvest provides the `hrv` command with the following features.
 
 ``` yaml
 ---
-targets:
+logs:
   -
     url: 'ssh://webproxy.example.com/var/log/syslog*'
     description: webproxy syslog

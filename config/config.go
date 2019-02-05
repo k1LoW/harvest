@@ -29,7 +29,7 @@ type Target struct {
 
 // Config ...
 type Config struct {
-	Targets []Target `yaml:"targets"`
+	Targets []Target `yaml:"logs"`
 }
 
 // NewConfig ...
