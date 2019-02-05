@@ -13,12 +13,13 @@ import (
 
 // Target ...
 type Target struct {
-	URL         string `yaml:"url"`
-	Description string `yaml:"description"`
-	Type        string `yaml:"type"`
-	Regexp      string `yaml:"regexp"`
-	TimeFormat  string `yaml:"timeFormat"`
-	TimeZone    string `yaml:"timeZone"`
+	URL         string   `yaml:"url"`
+	Description string   `yaml:"description"`
+	Type        string   `yaml:"type"`
+	Regexp      string   `yaml:"regexp"`
+	TimeFormat  string   `yaml:"timeFormat"`
+	TimeZone    string   `yaml:"timeZone"`
+	Tags        []string `yaml:"tags"`
 	Scheme      string
 	Host        string
 	User        string

@@ -32,7 +32,7 @@ func NewDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
 		return nil, errors.WithStack(err)
 	}
 	db.MustExec(
-		`CREATE VIRTUAL TABLE log USING FTS4(host, path, ts INTEGER, content);`,
+		`CREATE VIRTUAL TABLE log USING FTS4(host, path, tag, ts INTEGER, content);`,
 	)
 	l.Info("DB initialized.")
 
@@ -79,7 +79,7 @@ func (d *DB) StartInsert() {
 	defer close(d.logChan)
 L:
 	for log := range d.logChan {
-		_, err := d.db.NamedExec("INSERT INTO log (host, path, ts, content) VALUES (:host, :path, :ts, :content)", &log)
+		_, err := d.db.NamedExec("INSERT INTO log (host, path, tag, ts, content) VALUES (:host, :path, :tag, :ts, :content)", &log)
 		if err != nil {
 			d.logger.Error("DB error", zap.Error(err))
 			break L

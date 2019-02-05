@@ -40,11 +40,17 @@ var (
 	withTimestampNano bool
 	withHost          bool
 	withPath          bool
+	withTag           bool
 	match             string
+	tag               string
 	st                string
 	et                string
-	noColors          bool
+	noColor           bool
 )
+
+var tsParseFmt = "2006-01-02T15:04:05-07:00"
+var tsNanoParseFmt = "2006-01-02T15:04:05.000000000-07:00"
+var delimiter = ","
 
 // catCmd represents the cat command
 var catCmd = &cobra.Command{
@@ -81,7 +87,10 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		var hFmt string
+		var (
+			hFmt string
+			tFmt string
+		)
 		if withHost && withPath {
 			hLen, err := d.GetColumnMaxLength("host", "path")
 			if err != nil {
@@ -105,7 +114,16 @@ var catCmd = &cobra.Command{
 			hFmt = fmt.Sprintf("%%-%ds ", hLen)
 		}
 
-		if noColors {
+		if withTag {
+			tLen, err := d.GetColumnMaxLength("tag")
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+			tFmt = fmt.Sprintf("%%-%ds ", tLen)
+		}
+
+		if noColor {
 			color.Disable()
 		} else {
 			color.Enable()
@@ -115,12 +133,21 @@ var catCmd = &cobra.Command{
 			var (
 				ts   string
 				host string
+				tag  string
 			)
 			if withTimestamp {
-				ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format("2006-01-02T15:04:05-07:00"))
+				if log.Timestamp == 0 {
+					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds ", len(tsParseFmt)), "-")
+				} else {
+					ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format(tsParseFmt))
+				}
 			}
 			if withTimestampNano {
-				ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format("2006-01-02T15:04:05.000000000-07:00"))
+				if log.Timestamp == 0 {
+					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds ", len(tsNanoParseFmt)), "-")
+				} else {
+					ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format(tsNanoParseFmt))
+				}
 			}
 			if withHost && withPath {
 				host = fmt.Sprintf(hFmt, fmt.Sprintf("%s:%s", log.Host, log.Path))
@@ -129,17 +156,30 @@ var catCmd = &cobra.Command{
 			} else if withPath {
 				host = fmt.Sprintf(hFmt, log.Path)
 			}
+			if withTag {
+				tag = fmt.Sprintf(tFmt, log.Tag)
+			}
 
-			fmt.Printf("%s%s%s\n", color.Yellow(ts), color.Grey(host), log.Content)
+			fmt.Printf("%s%s%s%s\n", color.Yellow(ts), colorizeTag(tag), color.Grey(host), log.Content)
 		}
 	},
 }
 
+func colorizeTag(tag string) string {
+	colorized := []string{}
+	tags := strings.Split(tag, " ")
+	for _, t := range tags {
+		colorized = append(colorized, color.Yellow(t, color.B))
+	}
+	return strings.Join(colorized, " ")
+}
+
 // buildCondition ...
 func buildCondition() (string, error) {
+	matchCond := []string{}
 	cond := []string{}
 	if match != "" {
-		cond = append(cond, fmt.Sprintf("content MATCH '%s'", match))
+		matchCond = append(matchCond, match)
 	}
 	loc, err := time.LoadLocation("Local")
 	if err != nil {
@@ -159,20 +199,31 @@ func buildCondition() (string, error) {
 		}
 		cond = append(cond, fmt.Sprintf("ts <= %d", t.UnixNano()))
 	}
+	if tag != "" {
+		cond = append(cond, fmt.Sprintf("( tag LIKE '%%[%s]%%' )", strings.Join(strings.Split(tag, delimiter), "]%' OR tag LIKE '%[")))
+	}
+
+	if len(matchCond) > 0 {
+		cond = append(cond, fmt.Sprintf("content MATCH '%s'", strings.Join(matchCond, " AND ")))
+	}
+
 	if len(cond) == 0 {
 		return "", nil
 	}
+
 	return fmt.Sprintf(" WHERE %s", strings.Join(cond, " AND ")), nil
 }
 
 func init() {
 	rootCmd.AddCommand(catCmd)
-	catCmd.Flags().BoolVarP(&withTimestamp, "with-ts", "", false, "with timestamp")
-	catCmd.Flags().BoolVarP(&withTimestampNano, "with-ts-nano", "", false, "with timestamp nano sec")
-	catCmd.Flags().BoolVarP(&withHost, "with-host", "", false, "with host")
-	catCmd.Flags().BoolVarP(&withPath, "with-path", "", false, "with path")
-	catCmd.Flags().StringVarP(&match, "match", "", "", "MATCH Query")
-	catCmd.Flags().StringVarP(&st, "start-time", "", "", "start time")
-	catCmd.Flags().StringVarP(&et, "end-time", "", "", "end time")
-	catCmd.Flags().BoolVarP(&noColors, "no-colors", "", false, "disable colors")
+	catCmd.Flags().BoolVarP(&withTimestamp, "with-timestamp", "", false, "output with timestamp")
+	catCmd.Flags().BoolVarP(&withTimestampNano, "with-timestamp-nano", "", false, "output with timestamp nano sec")
+	catCmd.Flags().BoolVarP(&withHost, "with-host", "", false, "output with host")
+	catCmd.Flags().BoolVarP(&withPath, "with-path", "", false, "output with path")
+	catCmd.Flags().BoolVarP(&withTag, "with-tag", "", false, "output with tag")
+	catCmd.Flags().StringVarP(&match, "match", "", "", "filter logs using SQLite FTS `MATCH` query")
+	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag")
+	catCmd.Flags().StringVarP(&st, "start-time", "", "", "log start time")
+	catCmd.Flags().StringVarP(&et, "end-time", "", "", "log end time")
+	catCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")
 }

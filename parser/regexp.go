@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/k1LoW/harvest/client"
 )
@@ -25,7 +27,7 @@ func NewRegexpParser(r string, tf string) (Parser, error) {
 }
 
 // Parse ...
-func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string) <-chan Log {
+func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []string) <-chan Log {
 	logChan := make(chan Log)
 	go func() {
 		lineTZ := tz
@@ -44,9 +46,14 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string) <-chan Log 
 					}
 				}
 			}
+			tStr := ""
+			if len(tag) > 0 {
+				tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
+			}
 			logChan <- Log{
 				Host:      line.Host,
 				Path:      line.Path,
+				Tag:       tStr,
 				Timestamp: ts,
 				Content:   line.Content,
 			}

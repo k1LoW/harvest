@@ -11,13 +11,14 @@ import (
 type Log struct {
 	Host      string `db:"host"`
 	Path      string `db:"path"`
+	Tag       string `db:"tag"`
 	Timestamp int64  `db:"ts"`
 	Content   string `db:"content"`
 }
 
 // Parser ...
 type Parser interface {
-	Parse(lineChan <-chan client.Line, tz string) <-chan Log
+	Parse(lineChan <-chan client.Line, tz string, tag []string) <-chan Log
 }
 
 // parseTime ...
