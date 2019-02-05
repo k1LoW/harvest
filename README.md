@@ -75,6 +75,11 @@ $ hrv fetch -c config.yml -o harvest.db
 $ hrv cat harvest.db --with-ts --with-host
 ```
 
+## Requirements
+
+- sudo
+- cat
+
 ## TODO
 
 - Target filter option like `--host 'app-*'` or label/tag

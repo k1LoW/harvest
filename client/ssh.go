@@ -45,7 +45,7 @@ func (c *SSHClient) Read(ctx context.Context, path string) error {
 	if err != nil {
 		return err
 	}
-	c.logger.Info("Create new session")
+	c.logger.Info("Create new SSH session")
 	defer session.Close()
 
 	var tzOut []byte
