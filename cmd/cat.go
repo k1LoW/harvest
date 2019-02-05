@@ -129,11 +129,17 @@ var catCmd = &cobra.Command{
 			color.Enable()
 		}
 
+		var (
+			toggleBar bool
+			tmpHost   string
+		)
 		for log := range d.Cat(cond) {
 			var (
-				ts   string
-				host string
-				tag  string
+				colorFunc func(interface{}, ...string) string
+				bar       string
+				ts        string
+				host      string
+				tag       string
 			)
 			if withTimestamp {
 				if log.Timestamp == 0 {
@@ -160,16 +166,31 @@ var catCmd = &cobra.Command{
 				tag = fmt.Sprintf(tFmt, log.Tag)
 			}
 
-			fmt.Printf("%s%s%s%s\n", color.Yellow(ts), colorizeTag(tag), color.Grey(host), log.Content)
+			if withTimestamp || withTimestampNano || withHost || withPath {
+				if tmpHost != host {
+					toggleBar = !toggleBar
+				}
+				tmpHost = host
+				if toggleBar {
+					colorFunc = color.Yellow
+				} else {
+					colorFunc = color.Magenta
+				}
+				bar = colorFunc("█ ")
+			} else {
+				colorFunc = color.White
+			}
+
+			fmt.Printf("%s%s%s%s%s\n", bar, colorFunc(ts), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
 		}
 	},
 }
 
-func colorizeTag(tag string) string {
+func colorizeTag(colorFunc func(interface{}, ...string) string, tag string) string {
 	colorized := []string{}
 	tags := strings.Split(tag, " ")
 	for _, t := range tags {
-		colorized = append(colorized, color.Yellow(t, color.B))
+		colorized = append(colorized, colorFunc(t, color.B))
 	}
 	return strings.Join(colorized, " ")
 }
