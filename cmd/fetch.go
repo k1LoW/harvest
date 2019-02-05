@@ -61,6 +61,10 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		if dbPath == "" {
+			dbPath = fmt.Sprintf("harvest-%s.db", time.Now().Format("20060102T150405-0700"))
+		}
+
 		if _, err := os.Lstat(dbPath); err == nil {
 			l.Error(fmt.Sprintf("%s already exists", dbPath), zap.Error(err))
 			os.Exit(1)
@@ -90,7 +94,7 @@ var fetchCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		} else {
-			st = time.Now().Add(-time.Hour * 6)
+			st = time.Now().Add(-time.Hour * 3)
 		}
 
 		go d.StartInsert()
@@ -123,8 +127,8 @@ var fetchCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(fetchCmd)
-	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "harvest.db", "db path")
+	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "", "db path")
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
-	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (defalt: 6 hours ago) (format: 2006-01-02 15:04:05)")
+	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 3 hours ago) (format: 2006-01-02 15:04:05)")
 }
