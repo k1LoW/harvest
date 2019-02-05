@@ -2,8 +2,8 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"strings"
+	"time"
 
 	"github.com/k1LoW/sshc"
 	"go.uber.org/zap"
@@ -40,7 +40,7 @@ func NewSSHClient(l *zap.Logger, host string, user string, port int) (Client, er
 }
 
 // Read ...
-func (c *SSHClient) Read(ctx context.Context, path string) error {
+func (c *SSHClient) Read(ctx context.Context, path string, st time.Time) error {
 	session, err := c.client.NewSession()
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (c *SSHClient) Read(ctx context.Context, path string) error {
 		return err
 	}
 
-	cmd := fmt.Sprintf("sudo cat %s", path)
+	cmd := buildCommand(path, st)
 
 	stdout, err := session.StdoutPipe()
 	if err != nil {

@@ -97,7 +97,7 @@ func (d *DB) Cat(cond string) chan parser.Log {
 	go func() {
 		defer close(d.logChan)
 		log := parser.Log{}
-		rows, err := d.db.Queryx(fmt.Sprintf("SELECT * FROM log %s ORDER BY ts ASC;", cond))
+		rows, err := d.db.Queryx(fmt.Sprintf("SELECT * FROM log %s ORDER BY ts, rowid ASC;", cond))
 		if err != nil {
 			d.logger.Error("DB error", zap.Error(err))
 			return

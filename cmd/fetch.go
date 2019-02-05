@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/k1LoW/harvest/collector"
 	"github.com/k1LoW/harvest/config"
@@ -35,6 +36,7 @@ import (
 )
 
 var (
+	stStr       string
 	dbPath      string
 	configPath  string
 	concurrency int
@@ -75,6 +77,22 @@ var fetchCmd = &cobra.Command{
 
 		l.Info("Start fetching from targets.")
 
+		var st time.Time
+		if stStr != "" {
+			loc, err := time.LoadLocation("Local")
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+			st, err = time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+		} else {
+			st = time.Now().Add(-time.Hour * 6)
+		}
+
 		go d.StartInsert()
 
 		cChan := make(chan struct{}, concurrency)
@@ -89,7 +107,7 @@ var fetchCmd = &cobra.Command{
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
 				}
-				err = c.Collect(d.In())
+				err = c.Collect(d.In(), st)
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
 				}
@@ -108,4 +126,5 @@ func init() {
 	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "harvest.db", "db path")
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
+	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (defalt: 6 hours ago) (format: 2006-01-02 15:04:05)")
 }

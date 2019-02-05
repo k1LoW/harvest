@@ -3,6 +3,7 @@ package collector
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/k1LoW/harvest/client"
 	"github.com/k1LoW/harvest/config"
@@ -83,7 +84,7 @@ func NewCollector(ctx context.Context, t *config.Target) (*Collector, error) {
 }
 
 // Collect ...
-func (c *Collector) Collect(dbChan chan parser.Log) error {
+func (c *Collector) Collect(dbChan chan parser.Log, st time.Time) error {
 	innerCtx, cancel := context.WithCancel(c.ctx)
 	defer cancel()
 
@@ -102,7 +103,7 @@ func (c *Collector) Collect(dbChan chan parser.Log) error {
 		cancel()
 	}()
 
-	err := c.client.Read(innerCtx, c.target.Path)
+	err := c.client.Read(innerCtx, c.target.Path, st)
 	if err != nil {
 		return err
 	}

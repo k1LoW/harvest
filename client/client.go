@@ -3,14 +3,17 @@ package client
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
+	"path/filepath"
+	"time"
 
 	"go.uber.org/zap"
 )
 
 // Client ...
 type Client interface {
-	Read(ctx context.Context, path string) error
+	Read(ctx context.Context, path string, st time.Time) error
 	Out() <-chan Line
 }
 
@@ -20,6 +23,18 @@ type Line struct {
 	Path     string
 	Content  string
 	TimeZone string
+}
+
+// buildCommand ...
+func buildCommand(path string, st time.Time) string {
+	dir := filepath.Dir(path)
+	base := filepath.Base(path)
+
+	stStr := st.Format("2006-01-02 15:04:05 MST")
+
+	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' -newermt '%s' -exec zcat -f {} \\;", dir, base, stStr)
+
+	return cmd
 }
 
 func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
