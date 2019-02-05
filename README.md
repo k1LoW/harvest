@@ -63,16 +63,16 @@ logs:
       - httpd
 ```
 
-### 2. `hrv fecth`: fetch logs from targets
+### 2. Fetch target logs via SSH/exec ( `hrv fecth` )
 
 ``` console
-$ hrv fetch -c config.yml -o harvest.db
+$ hrv fetch -c config.yml
 ```
 
-### 3. `hrv cat`: cat logs
+### 3. Output logs ( `hrv cat` )
 
 ``` console
-$ hrv cat harvest.db --with-timestamp --with-host
+$ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path | less -R
 ```
 
 ## Requirements
