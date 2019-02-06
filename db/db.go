@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/k1LoW/harvest/parser"
@@ -77,6 +78,9 @@ func (d *DB) In() chan parser.Log {
 // StartInsert ...
 func (d *DB) StartInsert() {
 	defer close(d.logChan)
+	count := 0
+	ticker := time.NewTicker(time.Duration(10) * time.Second)
+
 L:
 	for log := range d.logChan {
 		_, err := d.db.NamedExec("INSERT INTO log (host, path, tag, ts, content) VALUES (:host, :path, :tag, :ts, :content)", &log)
@@ -84,8 +88,12 @@ L:
 			d.logger.Error("DB error", zap.Error(err))
 			break L
 		}
+		count++
 		select {
+		case <-ticker.C:
+			d.logger.Info(fmt.Sprintf("%d logs are fetched.", count), zap.String("host", log.Host), zap.String("path", log.Path))
 		case <-d.ctx.Done():
+			d.logger.Info(fmt.Sprintf("%d logs are fetched.", count), zap.String("host", log.Host), zap.String("path", log.Path))
 			break L
 		default:
 		}

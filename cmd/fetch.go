@@ -79,8 +79,6 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		l.Info("Start fetching from targets.")
-
 		var st time.Time
 		if stStr != "" {
 			loc, err := time.LoadLocation("Local")
@@ -96,6 +94,9 @@ var fetchCmd = &cobra.Command{
 		} else {
 			st = time.Now().Add(-time.Hour * 3)
 		}
+
+		l.Info(fmt.Sprintf("Fetch log timestamp: > %s", st.String()))
+		l.Info("Start fetching from targets.")
 
 		go d.StartInsert()
 

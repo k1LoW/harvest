@@ -11,6 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	maxScanTokenSize = 128 * 1024
+	startBufSize     = 4096
+)
+
 // Client ...
 type Client interface {
 	Read(ctx context.Context, path string, st time.Time) error
@@ -39,6 +44,9 @@ func buildCommand(path string, st time.Time) string {
 
 func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
 	scanner := bufio.NewScanner(*r)
+	buf := make([]byte, startBufSize)
+	scanner.Buffer(buf, maxScanTokenSize)
+
 	defer close(lineChan)
 L:
 	for scanner.Scan() {
@@ -53,5 +61,8 @@ L:
 				TimeZone: tz,
 			}
 		}
+	}
+	if scanner.Err() != nil {
+		l.Fatal("Fetch error", zap.Error(scanner.Err()))
 	}
 }

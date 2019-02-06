@@ -29,6 +29,7 @@ func NewRegexpParser(r string, tf string) (Parser, error) {
 // Parse ...
 func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []string) <-chan Log {
 	logChan := make(chan Log)
+
 	go func() {
 		lineTZ := tz
 		for line := range lineChan {
@@ -50,6 +51,7 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []strin
 			if len(tag) > 0 {
 				tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
 			}
+
 			logChan <- Log{
 				Host:      line.Host,
 				Path:      line.Path,
