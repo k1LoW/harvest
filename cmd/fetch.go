@@ -95,6 +95,7 @@ var fetchCmd = &cobra.Command{
 			st = time.Now().Add(-time.Hour * 3)
 		}
 
+		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
 		l.Info(fmt.Sprintf("Fetch log timestamp: > %s", st.String()))
 		l.Info("Start fetching from targets.")
 
