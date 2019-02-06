@@ -96,7 +96,7 @@ var fetchCmd = &cobra.Command{
 		}
 
 		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
-		l.Info(fmt.Sprintf("Fetch log timestamp: > %s", st.String()))
+		l.Info(fmt.Sprintf("Log timestamp: > %s", st.Format("20060102T150405-0700")))
 		l.Info("Start fetching from targets.")
 
 		go d.StartInsert()
