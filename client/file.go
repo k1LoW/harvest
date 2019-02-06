@@ -38,7 +38,10 @@ func (c *FileClient) Read(ctx context.Context, path string, st time.Time) error 
 		return err
 	}
 
-	cmd := exec.Command("sh", "-c", buildCommand(path, st))
+	innerCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	cmd := exec.CommandContext(innerCtx, "sh", "-c", buildCommand(path, st))
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -52,7 +55,7 @@ func (c *FileClient) Read(ctx context.Context, path string, st time.Time) error 
 
 	r := stdout.(io.Reader)
 
-	go bindReaderAndChan(ctx, c.logger, &r, c.lineChan, "localhost", path, strings.TrimRight(string(tzOut), "\n"))
+	go bindReaderAndChan(innerCtx, cancel, c.logger, &r, c.lineChan, "localhost", path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = cmd.Start()
 	if err != nil {
@@ -65,7 +68,7 @@ func (c *FileClient) Read(ctx context.Context, path string, st time.Time) error 
 		return err
 	}
 
-	<-ctx.Done()
+	<-innerCtx.Done()
 	c.logger.Info("Read finished.")
 
 	return nil

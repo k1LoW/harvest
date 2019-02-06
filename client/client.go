@@ -42,12 +42,15 @@ func buildCommand(path string, st time.Time) string {
 	return cmd
 }
 
-func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
+func bindReaderAndChan(ctx context.Context, cancel context.CancelFunc, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
 	scanner := bufio.NewScanner(*r)
 	buf := make([]byte, startBufSize)
 	scanner.Buffer(buf, maxScanTokenSize)
 
-	defer close(lineChan)
+	defer func() {
+		close(lineChan)
+		cancel()
+	}()
 L:
 	for scanner.Scan() {
 		select {
@@ -63,6 +66,6 @@ L:
 		}
 	}
 	if scanner.Err() != nil {
-		l.Fatal("Fetch error", zap.Error(scanner.Err()))
+		l.Error("Fetch error", zap.Error(scanner.Err()))
 	}
 }

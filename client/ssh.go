@@ -78,7 +78,10 @@ func (c *SSHClient) Read(ctx context.Context, path string, st time.Time) error {
 	// 	return err
 	// }
 
-	go bindReaderAndChan(ctx, c.logger, &stdout, c.lineChan, c.host, path, strings.TrimRight(string(tzOut), "\n"))
+	innerCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	go bindReaderAndChan(innerCtx, cancel, c.logger, &stdout, c.lineChan, c.host, path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = session.Start(cmd)
 	if err != nil {
@@ -86,12 +89,17 @@ func (c *SSHClient) Read(ctx context.Context, path string, st time.Time) error {
 	}
 	c.logger.Info("Start reading ...")
 
+	go func() {
+		<-innerCtx.Done()
+		session.Close()
+	}()
+
 	err = session.Wait()
 	if err != nil {
 		return err
 	}
 
-	<-ctx.Done()
+	<-innerCtx.Done()
 	c.logger.Info("Read finished.")
 
 	return nil
