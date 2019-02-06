@@ -37,7 +37,7 @@ func buildCommand(path string, st time.Time) string {
 
 	stStr := st.Format("2006-01-02 15:04:05 MST")
 
-	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' -newermt '%s' -exec zcat -f {} \\;", dir, base, stStr)
+	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' -newermt '%s' | xargs ls -ltr --time-style=+%%Y%%m%%d%%H%%M%%S | awk '{print $7}' | xargs sudo zcat -f", dir, base, stStr)
 
 	return cmd
 }
