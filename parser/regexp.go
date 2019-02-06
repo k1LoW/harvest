@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/k1LoW/harvest/client"
 )
@@ -27,8 +28,9 @@ func NewRegexpParser(r string, tf string) (Parser, error) {
 }
 
 // Parse ...
-func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []string) <-chan Log {
+func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []string, st time.Time) <-chan Log {
 	logChan := make(chan Log)
+	logStarted := false
 
 	go func() {
 		lineTZ := tz
@@ -44,8 +46,14 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []strin
 					t, err := parseTime(p.timeFormat, lineTZ, m[1])
 					if err == nil {
 						ts = t.UnixNano()
+						if !logStarted && ts > st.UnixNano() {
+							logStarted = true
+						}
 					}
 				}
+			}
+			if !logStarted {
+				continue
 			}
 			tStr := ""
 			if len(tag) > 0 {

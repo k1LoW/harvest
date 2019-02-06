@@ -92,7 +92,7 @@ var fetchCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		} else {
-			st = time.Now().Add(-time.Hour * 3)
+			st = time.Now().Add(-time.Hour * 1)
 		}
 
 		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
@@ -132,5 +132,5 @@ func init() {
 	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "", "db path")
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
-	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 3 hours ago) (format: 2006-01-02 15:04:05)")
+	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 }
