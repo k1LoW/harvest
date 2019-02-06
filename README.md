@@ -77,11 +77,14 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 ## Requirements
 
-- sudo
-- zcat
+- awk
 - date
 - find
 - grep
+- ls
+- sudo
+- xargs
+- zcat
 
 ## TODO
 
