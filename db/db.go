@@ -130,15 +130,34 @@ func (d *DB) Cat(cond string) chan parser.Log {
 	return d.logChan
 }
 
-// ResultLength ...
-type ResultLength struct {
+// resultHost ...
+type resultHost struct {
+	Host string `db:"host"`
+}
+
+// GetHosts ...
+func (d *DB) GetHosts() ([]string, error) {
+	query := "SELECT host FROM log GROUP BY host ORDER BY host;"
+	hosts := []string{}
+	r := []resultHost{}
+	err := d.db.Select(&r, query)
+	if err != nil {
+		return []string{}, err
+	}
+	for _, h := range r {
+		hosts = append(hosts, h.Host)
+	}
+	return hosts, nil
+}
+
+type resultLength struct {
 	Length int `db:"length"`
 }
 
 // GetColumnMaxLength ...
 func (d *DB) GetColumnMaxLength(colName ...string) (int, error) {
 	query := fmt.Sprintf("SELECT (length(%s)) AS length from log GROUP BY %s ORDER by length DESC LIMIT 1;", strings.Join(colName, ")+length("), strings.Join(colName, ","))
-	l := ResultLength{}
+	l := resultLength{}
 	err := d.db.Get(&l, query)
 	if err != nil {
 		return 0, err
