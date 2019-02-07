@@ -88,7 +88,6 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 ## TODO
 
-- Target filter option like `--host 'app-*'`
 - Support multi-line log
 - `fetch-check` command
 

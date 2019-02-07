@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -42,6 +43,7 @@ var (
 	dbPath      string
 	configPath  string
 	concurrency int
+	urlRegexp   string
 )
 
 // fetchCmd represents the fetch command
@@ -64,10 +66,11 @@ var fetchCmd = &cobra.Command{
 		}
 
 		targets := []config.Target{}
-		if tag != "" {
+		if tag != "" || urlRegexp != "" {
 			tags := strings.Split(tag, ",")
+			re := regexp.MustCompile(urlRegexp)
 			for _, target := range cfg.Targets {
-				if contains(target.Tags, tags) {
+				if contains(target.Tags, tags) || (urlRegexp != "" && re.MatchString(target.URL)) {
 					targets = append(targets, target)
 				}
 			}
@@ -189,6 +192,7 @@ func init() {
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
 	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
+	fetchCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 }
