@@ -85,6 +85,11 @@ $ hrv fetch -c config.yml
 $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path | less -R
 ```
 
+## What is "middle scale system" ?
+
+- < 50 instances
+- < 1 million logs per `hrv fetch`
+
 ## Requirements
 
 - awk
@@ -96,9 +101,12 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 - xargs
 - zcat
 
-## TODO
+## WANT
 
-- `fetch-check` command
+- `hrv fetch-check`
+- `hrv info`
+- `hrv analyze`
+- Viewer / Visualizer
 
 ## References
 
