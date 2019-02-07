@@ -28,7 +28,8 @@ import (
 )
 
 var (
-	tag string
+	tag       string
+	ignoreTag string
 )
 
 // rootCmd represents the base command when called without any subcommands

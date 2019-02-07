@@ -65,18 +65,7 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		targets := []config.Target{}
-		if tag != "" || urlRegexp != "" {
-			tags := strings.Split(tag, ",")
-			re := regexp.MustCompile(urlRegexp)
-			for _, target := range cfg.Targets {
-				if contains(target.Tags, tags) || (urlRegexp != "" && re.MatchString(target.URL)) {
-					targets = append(targets, target)
-				}
-			}
-		} else {
-			targets = cfg.Targets
-		}
+		targets := filterTargets(cfg.Targets)
 		if len(targets) == 0 {
 			l.Error("No targets")
 			os.Exit(1)
@@ -174,6 +163,32 @@ var fetchCmd = &cobra.Command{
 	},
 }
 
+// filterTargets ...
+func filterTargets(cfgTargets []config.Target) []config.Target {
+	targets := []config.Target{}
+	ignoreTags := strings.Split(ignoreTag, ",")
+	if tag != "" || urlRegexp != "" {
+		tags := strings.Split(tag, ",")
+		re := regexp.MustCompile(urlRegexp)
+		for _, target := range cfgTargets {
+			if contains(target.Tags, tags) || urlRegexp != "" && re.MatchString(target.URL) {
+				if contains(target.Tags, ignoreTags) {
+					continue
+				}
+				targets = append(targets, target)
+			}
+		}
+	} else {
+		for _, target := range cfgTargets {
+			if contains(target.Tags, ignoreTags) {
+				continue
+			}
+			targets = append(targets, target)
+		}
+	}
+	return targets
+}
+
 // contains ...
 func contains(ss1 []string, ss2 []string) bool {
 	for _, s1 := range ss1 {
@@ -192,6 +207,7 @@ func init() {
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
 	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
+	fetchCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
 	fetchCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
