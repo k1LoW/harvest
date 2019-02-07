@@ -94,7 +94,7 @@ L:
 	for log := range d.logChan {
 		_, err := d.db.NamedExec("INSERT INTO log (host, path, tag, ts, filled_by_prev, content) VALUES (:host, :path, :tag, :ts, :filled_by_prev, :content)", &log)
 		if err != nil {
-			d.logger.Error("DB error", zap.Error(err))
+			d.logger.Error("DB error", zap.String("error", err.Error()))
 			break L
 		}
 		count++
@@ -114,13 +114,13 @@ func (d *DB) Cat(cond string) chan parser.Log {
 		log := parser.Log{}
 		rows, err := d.db.Queryx(fmt.Sprintf("SELECT * FROM log %s ORDER BY ts, rowid ASC;", cond))
 		if err != nil {
-			d.logger.Error("DB error", zap.Error(err))
+			d.logger.Error("DB error", zap.String("error", err.Error()))
 			return
 		}
 		for rows.Next() {
 			err := rows.StructScan(&log)
 			if err != nil {
-				d.logger.Error("DB error", zap.Error(err))
+				d.logger.Error("DB error", zap.String("error", err.Error()))
 				break
 			}
 			d.logChan <- log

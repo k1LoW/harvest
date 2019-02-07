@@ -95,7 +95,7 @@ var catCmd = &cobra.Command{
 		dbPath := args[0]
 
 		if _, err := os.Lstat(dbPath); err != nil {
-			l.Error(fmt.Sprintf("%s not exists", dbPath), zap.Error(err))
+			l.Error(fmt.Sprintf("%s not exists", dbPath), zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
@@ -104,13 +104,13 @@ var catCmd = &cobra.Command{
 
 		d, err := db.AttachDB(ctx, l, dbPath)
 		if err != nil {
-			l.Error("DB attach error", zap.Error(err))
+			l.Error("DB attach error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
 		cond, err := buildCondition()
 		if err != nil {
-			l.Error("option error", zap.Error(err))
+			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
@@ -121,21 +121,21 @@ var catCmd = &cobra.Command{
 		if withHost && withPath {
 			hLen, err := d.GetColumnMaxLength("host", "path")
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			hFmt = fmt.Sprintf("%%-%ds ", hLen)
 		} else if withHost {
 			hLen, err := d.GetColumnMaxLength("host")
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			hFmt = fmt.Sprintf("%%-%ds ", hLen)
 		} else if withPath {
 			hLen, err := d.GetColumnMaxLength("path")
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			hFmt = fmt.Sprintf("%%-%ds ", hLen)
@@ -144,7 +144,7 @@ var catCmd = &cobra.Command{
 		if withTag {
 			tLen, err := d.GetColumnMaxLength("tag")
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			tFmt = fmt.Sprintf("%%-%ds ", tLen)
@@ -158,7 +158,7 @@ var catCmd = &cobra.Command{
 
 		hosts, err := d.GetHosts()
 		if err != nil {
-			l.Error("DB query error", zap.Error(err))
+			l.Error("DB query error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 

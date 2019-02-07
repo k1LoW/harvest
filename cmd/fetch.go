@@ -56,12 +56,12 @@ var fetchCmd = &cobra.Command{
 
 		cfg, err := config.NewConfig()
 		if err != nil {
-			l.Error("Config error", zap.Error(err))
+			l.Error("Config error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 		err = cfg.LoadConfigFile(configPath)
 		if err != nil {
-			l.Error("Config error", zap.Error(err))
+			l.Error("Config error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
@@ -89,7 +89,7 @@ var fetchCmd = &cobra.Command{
 		}
 
 		if _, err := os.Lstat(dbPath); err == nil {
-			l.Error(fmt.Sprintf("%s already exists", dbPath), zap.Error(err))
+			l.Error(fmt.Sprintf("%s already exists", dbPath), zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
@@ -98,7 +98,7 @@ var fetchCmd = &cobra.Command{
 
 		d, err := db.NewDB(ctx, l, dbPath)
 		if err != nil {
-			l.Error("DB initialize error", zap.Error(err))
+			l.Error("DB initialize error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
@@ -106,12 +106,12 @@ var fetchCmd = &cobra.Command{
 		if stStr != "" {
 			loc, err := time.LoadLocation("Local")
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			st = &stt
@@ -124,12 +124,12 @@ var fetchCmd = &cobra.Command{
 		if etStr != "" {
 			loc, err := time.LoadLocation("Local")
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
 			if err != nil {
-				l.Error("option error", zap.Error(err))
+				l.Error("option error", zap.String("error", err.Error()))
 				os.Exit(1)
 			}
 			et = &ett
@@ -158,11 +158,11 @@ var fetchCmd = &cobra.Command{
 				defer wg.Done()
 				c, err := collector.NewCollector(ctx, &t)
 				if err != nil {
-					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
+					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
 				err = c.Collect(d.In(), st, et, t.MultiLine)
 				if err != nil {
-					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
+					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
 				<-cChan
 			}(t)
