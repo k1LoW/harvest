@@ -135,26 +135,36 @@ var catCmd = &cobra.Command{
 		)
 		for log := range d.Cat(cond) {
 			var (
-				colorFunc func(interface{}, ...string) string
-				bar       string
-				ts        string
-				host      string
-				tag       string
+				colorFunc    func(interface{}, ...string) string
+				bar          string
+				ts           string
+				filledByPrev string
+				host         string
+				tag          string
 			)
+
 			if withTimestamp {
 				if log.Timestamp == 0 {
-					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds ", len(tsParseFmt)), "-")
+					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds", len(tsParseFmt)), "-")
 				} else {
-					ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format(tsParseFmt))
+					ts = time.Unix(0, log.Timestamp).Format(tsParseFmt)
 				}
 			}
 			if withTimestampNano {
 				if log.Timestamp == 0 {
-					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds ", len(tsNanoParseFmt)), "-")
+					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds", len(tsNanoParseFmt)), "-")
 				} else {
-					ts = fmt.Sprintf("%s ", time.Unix(0, log.Timestamp).Format(tsNanoParseFmt))
+					ts = time.Unix(0, log.Timestamp).Format(tsNanoParseFmt)
 				}
 			}
+			if withTimestamp || withTimestampNano {
+				if log.FilledByPrev {
+					filledByPrev = "* "
+				} else {
+					filledByPrev = "  "
+				}
+			}
+
 			if withHost && withPath {
 				host = fmt.Sprintf(hFmt, fmt.Sprintf("%s:%s", log.Host, log.Path))
 			} else if withHost {
@@ -181,7 +191,7 @@ var catCmd = &cobra.Command{
 				colorFunc = color.White
 			}
 
-			fmt.Printf("%s%s%s%s%s\n", bar, colorFunc(ts), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
+			fmt.Printf("%s%s%s%s%s%s\n", bar, colorFunc(ts), color.White(filledByPrev, color.B), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
 		}
 	},
 }

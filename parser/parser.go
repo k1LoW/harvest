@@ -9,11 +9,12 @@ import (
 
 // Log ...
 type Log struct {
-	Host      string `db:"host"`
-	Path      string `db:"path"`
-	Tag       string `db:"tag"`
-	Timestamp int64  `db:"ts"`
-	Content   string `db:"content"`
+	Host         string `db:"host"`
+	Path         string `db:"path"`
+	Tag          string `db:"tag"`
+	Timestamp    int64  `db:"ts"`
+	FilledByPrev bool   `db:"filled_by_prev"`
+	Content      string `db:"content"`
 }
 
 // Parser ...

@@ -31,11 +31,15 @@ func NewRegexpParser(r string, tf string) (Parser, error) {
 func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []string, st time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
+	var prevTs int64
 
 	go func() {
 		lineTZ := tz
 		for line := range lineChan {
-			var ts int64
+			var (
+				ts           int64
+				filledByPrev bool
+			)
 			ts = 0
 			if tz == "" {
 				lineTZ = line.TimeZone
@@ -49,7 +53,11 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []strin
 						if !logStarted && ts > st.UnixNano() {
 							logStarted = true
 						}
+						prevTs = ts
 					}
+				} else {
+					ts = prevTs
+					filledByPrev = true
 				}
 			}
 			if !logStarted {
@@ -61,11 +69,12 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []strin
 			}
 
 			logChan <- Log{
-				Host:      line.Host,
-				Path:      line.Path,
-				Tag:       tStr,
-				Timestamp: ts,
-				Content:   line.Content,
+				Host:         line.Host,
+				Path:         line.Path,
+				Tag:          tStr,
+				Timestamp:    ts,
+				FilledByPrev: filledByPrev,
+				Content:      line.Content,
 			}
 		}
 		close(logChan)

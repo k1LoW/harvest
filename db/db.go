@@ -33,7 +33,7 @@ func NewDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
 		return nil, errors.WithStack(err)
 	}
 	db.MustExec(
-		`CREATE VIRTUAL TABLE log USING FTS4(host, path, tag, ts INTEGER, content);`,
+		`CREATE VIRTUAL TABLE log USING FTS4(host, path, tag, ts INTEGER, filled_by_prev INTEGER, content);`,
 	)
 	l.Info("DB initialized.")
 
@@ -79,21 +79,28 @@ func (d *DB) In() chan parser.Log {
 func (d *DB) StartInsert() {
 	defer close(d.logChan)
 	count := 0
+
 	ticker := time.NewTicker(time.Duration(10) * time.Second)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				d.logger.Info(fmt.Sprintf("%d logs are fetched. ", count))
+			}
+		}
+	}()
 
 L:
 	for log := range d.logChan {
-		_, err := d.db.NamedExec("INSERT INTO log (host, path, tag, ts, content) VALUES (:host, :path, :tag, :ts, :content)", &log)
+		_, err := d.db.NamedExec("INSERT INTO log (host, path, tag, ts, filled_by_prev, content) VALUES (:host, :path, :tag, :ts, :filled_by_prev, :content)", &log)
 		if err != nil {
 			d.logger.Error("DB error", zap.Error(err))
 			break L
 		}
 		count++
 		select {
-		case <-ticker.C:
-			d.logger.Info(fmt.Sprintf("%d logs are fetched.", count), zap.String("host", log.Host), zap.String("path", log.Path))
 		case <-d.ctx.Done():
-			d.logger.Info(fmt.Sprintf("%d logs are fetched.", count), zap.String("host", log.Host), zap.String("path", log.Path))
+			d.logger.Info(fmt.Sprintf("%d logs are fetched.", count))
 			break L
 		default:
 		}
