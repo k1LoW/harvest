@@ -160,7 +160,7 @@ var fetchCmd = &cobra.Command{
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
 				}
-				err = c.Collect(d.In(), st, et)
+				err = c.Collect(d.In(), st, et, t.MultiLine)
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
 				}

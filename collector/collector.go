@@ -84,13 +84,19 @@ func NewCollector(ctx context.Context, t *config.Target) (*Collector, error) {
 }
 
 // Collect ...
-func (c *Collector) Collect(dbChan chan parser.Log, st *time.Time, et *time.Time) error {
+func (c *Collector) Collect(dbChan chan parser.Log, st *time.Time, et *time.Time, multiLine bool) error {
 	innerCtx, cancel := context.WithCancel(c.ctx)
 	defer cancel()
+	var parseFunc func(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan parser.Log
+	if multiLine {
+		parseFunc = c.parser.ParseMultipleLine
+	} else {
+		parseFunc = c.parser.Parse
+	}
 
 	go func() {
 	L:
-		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, st, et) {
+		for log := range parseFunc(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, st, et) {
 			select {
 			case <-c.ctx.Done():
 				break L

@@ -56,6 +56,16 @@ logs:
       - db
       - query
   -
+    url: 'ssh://db.example.com/var/log/postgresql/postgresql*'
+    description: PostgreSQL log
+    type: regexp
+    regexp: '^\[?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [^ ]{3})'
+    multiLine: true
+    timeFormat: '2006-01-02 15:04:05 MST'
+    tags:
+      - db
+      - postgresql
+  -
     url: 'file:///path/to/httpd/access.log'
     description: local Apache access log
     type: combinedLog
@@ -88,7 +98,6 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 ## TODO
 
-- Support multi-line log
 - `fetch-check` command
 
 ## References

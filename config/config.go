@@ -17,6 +17,7 @@ type Target struct {
 	Description string   `yaml:"description"`
 	Type        string   `yaml:"type"`
 	Regexp      string   `yaml:"regexp"`
+	MultiLine   bool     `yaml:"multiLine"`
 	TimeFormat  string   `yaml:"timeFormat"`
 	TimeZone    string   `yaml:"timeZone"`
 	Tags        []string `yaml:"tags"`

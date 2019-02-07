@@ -21,6 +21,7 @@ type Log struct {
 // Parser ...
 type Parser interface {
 	Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log
+	ParseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log
 }
 
 // parseTime ...
