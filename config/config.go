@@ -47,15 +47,15 @@ func (c *Config) LoadConfigFile(path string) error {
 	}
 	fullPath, err := filepath.Abs(path)
 	if err != nil {
-		return errors.Wrap(errors.WithStack(err), "failed to load config file")
+		return errors.Wrap(err, "failed to load config file")
 	}
 	buf, err := ioutil.ReadFile(fullPath)
 	if err != nil {
-		return errors.Wrap(errors.WithStack(err), "failed to load config file")
+		return errors.Wrap(err, "failed to load config file")
 	}
 	err = yaml.Unmarshal(buf, c)
 	if err != nil {
-		return errors.Wrap(errors.WithStack(err), "failed to load config file")
+		return errors.Wrap(err, "failed to load config file")
 	}
 	for i, t := range c.Targets {
 		u, err := url.Parse(t.URL)
