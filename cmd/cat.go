@@ -35,6 +35,38 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	tsParseFmt     = "2006-01-02T15:04:05-07:00"
+	tsNanoParseFmt = "2006-01-02T15:04:05.000000000-07:00"
+	delimiter      = ","
+)
+
+var colorizeMap = []struct {
+	colorFunc func(interface{}, ...string) string
+	bar       string
+}{
+	{color.Yellow, "█ "},
+	{color.Magenta, "█ "},
+	{color.Green, "█ "},
+	{color.Cyan, "█ "},
+	{color.Yellow, "▚ "},
+	{color.Magenta, "▚ "},
+	{color.Green, "▚ "},
+	{color.Cyan, "▚ "},
+	{color.Yellow, "║ "},
+	{color.Magenta, "║ "},
+	{color.Green, "║ "},
+	{color.Cyan, "║ "},
+	{color.Yellow, "▒ "},
+	{color.Magenta, "▒ "},
+	{color.Green, "▒ "},
+	{color.Cyan, "▒ "},
+	{color.Yellow, "▓ "},
+	{color.Magenta, "▓ "},
+	{color.Green, "▓ "},
+	{color.Cyan, "▓ "},
+}
+
 var (
 	withTimestamp     bool
 	withTimestampNano bool
@@ -47,10 +79,6 @@ var (
 	et                string
 	noColor           bool
 )
-
-var tsParseFmt = "2006-01-02T15:04:05-07:00"
-var tsNanoParseFmt = "2006-01-02T15:04:05.000000000-07:00"
-var delimiter = ","
 
 // catCmd represents the cat command
 var catCmd = &cobra.Command{
@@ -129,19 +157,24 @@ var catCmd = &cobra.Command{
 			color.Enable()
 		}
 
-		var (
-			toggleBar bool
-			tmpHost   string
-		)
+		hosts, err := d.GetHosts()
+		if err != nil {
+			l.Error("DB query error", zap.Error(err))
+			os.Exit(1)
+		}
+
 		for log := range d.Cat(cond) {
 			var (
-				colorFunc    func(interface{}, ...string) string
 				bar          string
 				ts           string
 				filledByPrev string
 				host         string
 				tag          string
 			)
+
+			colorFunc := func(msg interface{}, styles ...string) string {
+				return msg.(string)
+			}
 
 			if withTimestamp {
 				if log.Timestamp == 0 {
@@ -177,18 +210,12 @@ var catCmd = &cobra.Command{
 			}
 
 			if withTimestamp || withTimestampNano || withHost || withPath {
-				if tmpHost != host {
-					toggleBar = !toggleBar
+				for i, h := range hosts {
+					if h == log.Host {
+						colorFunc = colorizeMap[i%len(colorizeMap)].colorFunc
+						bar = colorFunc(colorizeMap[i%len(colorizeMap)].bar)
+					}
 				}
-				tmpHost = host
-				if toggleBar {
-					colorFunc = color.Yellow
-				} else {
-					colorFunc = color.Magenta
-				}
-				bar = colorFunc("█ ")
-			} else {
-				colorFunc = color.White
 			}
 
 			fmt.Printf("%s%s%s%s%s%s\n", bar, colorFunc(ts), color.White(filledByPrev, color.B), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
