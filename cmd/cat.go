@@ -74,7 +74,6 @@ var (
 	withPath          bool
 	withTag           bool
 	match             string
-	tag               string
 	st                string
 	et                string
 	noColor           bool
@@ -280,7 +279,7 @@ func init() {
 	catCmd.Flags().BoolVarP(&withPath, "with-path", "", false, "output with path")
 	catCmd.Flags().BoolVarP(&withTag, "with-tag", "", false, "output with tag")
 	catCmd.Flags().StringVarP(&match, "match", "", "", "filter logs using SQLite FTS `MATCH` query")
-	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag")
+	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag (format: foo,bar)")
 	catCmd.Flags().StringVarP(&st, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
 	catCmd.Flags().StringVarP(&et, "end-time", "", "", "log end time (format: 2006-01-02 15:04:05)")
 	catCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")

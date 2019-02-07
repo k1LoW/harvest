@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -61,6 +62,24 @@ var fetchCmd = &cobra.Command{
 			l.Error("Config error", zap.Error(err))
 			os.Exit(1)
 		}
+
+		targets := []config.Target{}
+		if tag != "" {
+			tags := strings.Split(tag, ",")
+			for _, target := range cfg.Targets {
+				if contains(target.Tags, tags) {
+					targets = append(targets, target)
+				}
+			}
+		} else {
+			targets = cfg.Targets
+		}
+		if len(targets) == 0 {
+			l.Error("No targets")
+			os.Exit(1)
+		}
+
+		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
 
 		if dbPath == "" {
 			dbPath = fmt.Sprintf("harvest-%s.db", time.Now().Format("20060102T150405-0700"))
@@ -129,7 +148,7 @@ var fetchCmd = &cobra.Command{
 		cChan := make(chan struct{}, concurrency)
 		var wg sync.WaitGroup
 
-		for _, t := range cfg.Targets {
+		for _, t := range targets {
 			wg.Add(1)
 			go func(t config.Target) {
 				cChan <- struct{}{}
@@ -152,11 +171,24 @@ var fetchCmd = &cobra.Command{
 	},
 }
 
+// contains ...
+func contains(ss1 []string, ss2 []string) bool {
+	for _, s1 := range ss1 {
+		for _, s2 := range ss2 {
+			if s1 == s2 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func init() {
 	rootCmd.AddCommand(fetchCmd)
 	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "", "db path")
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
+	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
 	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 }
