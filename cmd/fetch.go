@@ -46,6 +46,11 @@ var (
 	urlRegexp   string
 )
 
+const (
+	defaultConcurrency       = 10
+	defaultStartTimeDuration = -1 * time.Hour
+)
+
 // fetchCmd represents the fetch command
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
@@ -105,7 +110,7 @@ var fetchCmd = &cobra.Command{
 			}
 			st = &stt
 		} else {
-			stt := time.Now().Add(-time.Hour * 1)
+			stt := time.Now().Add(defaultStartTimeDuration)
 			st = &stt
 		}
 
@@ -205,7 +210,7 @@ func init() {
 	rootCmd.AddCommand(fetchCmd)
 	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "", "db path")
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
-	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
+	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
 	fetchCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
 	fetchCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
