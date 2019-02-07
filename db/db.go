@@ -83,10 +83,8 @@ func (d *DB) StartInsert() {
 	ticker := time.NewTicker(time.Duration(10) * time.Second)
 	go func() {
 		for {
-			select {
-			case <-ticker.C:
-				d.logger.Info(fmt.Sprintf("%d logs are fetched. ", count))
-			}
+			<-ticker.C
+			d.logger.Info(fmt.Sprintf("%d logs are fetched. ", count))
 		}
 	}()
 
