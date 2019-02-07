@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -19,7 +20,7 @@ type Log struct {
 
 // Parser ...
 type Parser interface {
-	Parse(lineChan <-chan client.Line, tz string, tag []string, st time.Time) <-chan Log
+	Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log
 }
 
 // parseTime ...

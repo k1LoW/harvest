@@ -37,6 +37,7 @@ import (
 
 var (
 	stStr       string
+	etStr       string
 	dbPath      string
 	configPath  string
 	concurrency int
@@ -79,24 +80,48 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		var st time.Time
+		var st *time.Time
 		if stStr != "" {
 			loc, err := time.LoadLocation("Local")
 			if err != nil {
 				l.Error("option error", zap.Error(err))
 				os.Exit(1)
 			}
-			st, err = time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
+			stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
 			if err != nil {
 				l.Error("option error", zap.Error(err))
 				os.Exit(1)
 			}
+			st = &stt
 		} else {
-			st = time.Now().Add(-time.Hour * 1)
+			stt := time.Now().Add(-time.Hour * 1)
+			st = &stt
+		}
+
+		var et *time.Time
+		if etStr != "" {
+			loc, err := time.LoadLocation("Local")
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+			ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
+			if err != nil {
+				l.Error("option error", zap.Error(err))
+				os.Exit(1)
+			}
+			et = &ett
+		} else {
+			et = nil
 		}
 
 		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
-		l.Info(fmt.Sprintf("Log timestamp: > %s", st.Format("20060102T150405-0700")))
+		if et != nil {
+			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
+		} else {
+			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
+		}
+
 		l.Info("Start fetching from targets.")
 
 		go d.StartInsert()
@@ -113,7 +138,7 @@ var fetchCmd = &cobra.Command{
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
 				}
-				err = c.Collect(d.In(), st)
+				err = c.Collect(d.In(), st, et)
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.Error(err))
 				}
@@ -133,4 +158,5 @@ func init() {
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", 5, "concurrency")
 	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
+	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 }

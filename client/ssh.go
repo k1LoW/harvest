@@ -40,7 +40,8 @@ func NewSSHClient(l *zap.Logger, host string, user string, port int) (Client, er
 }
 
 // Read ...
-func (c *SSHClient) Read(ctx context.Context, path string, st time.Time) error {
+func (c *SSHClient) Read(ctx context.Context, path string, st *time.Time, et *time.Time) error {
+	defer close(c.lineChan)
 	session, err := c.client.NewSession()
 	if err != nil {
 		return err
@@ -92,6 +93,7 @@ func (c *SSHClient) Read(ctx context.Context, path string, st time.Time) error {
 	go func() {
 		<-innerCtx.Done()
 		session.Close()
+		c.logger.Info("Close SSH session")
 	}()
 
 	err = session.Wait()

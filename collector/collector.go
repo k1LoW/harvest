@@ -84,13 +84,13 @@ func NewCollector(ctx context.Context, t *config.Target) (*Collector, error) {
 }
 
 // Collect ...
-func (c *Collector) Collect(dbChan chan parser.Log, st time.Time) error {
+func (c *Collector) Collect(dbChan chan parser.Log, st *time.Time, et *time.Time) error {
 	innerCtx, cancel := context.WithCancel(c.ctx)
 	defer cancel()
 
 	go func() {
 	L:
-		for log := range c.parser.Parse(c.client.Out(), c.target.TimeZone, c.target.Tags, st) {
+		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, st, et) {
 			select {
 			case <-c.ctx.Done():
 				break L
@@ -103,7 +103,7 @@ func (c *Collector) Collect(dbChan chan parser.Log, st time.Time) error {
 		cancel()
 	}()
 
-	err := c.client.Read(innerCtx, c.target.Path, st)
+	err := c.client.Read(innerCtx, c.target.Path, st, et)
 	if err != nil {
 		return err
 	}

@@ -100,11 +100,11 @@ L:
 		count++
 		select {
 		case <-d.ctx.Done():
-			d.logger.Info(fmt.Sprintf("%d logs are fetched.", count))
 			break L
 		default:
 		}
 	}
+	d.logger.Info(fmt.Sprintf("%d logs are fetched.", count))
 }
 
 // Cat ...

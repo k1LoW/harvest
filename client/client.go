@@ -18,7 +18,7 @@ const (
 
 // Client ...
 type Client interface {
-	Read(ctx context.Context, path string, st time.Time) error
+	Read(ctx context.Context, path string, st *time.Time, et *time.Time) error
 	Out() <-chan Line
 }
 
@@ -31,7 +31,7 @@ type Line struct {
 }
 
 // buildCommand ...
-func buildCommand(path string, st time.Time) string {
+func buildCommand(path string, st *time.Time) string {
 	dir := filepath.Dir(path)
 	base := filepath.Base(path)
 
@@ -43,14 +43,11 @@ func buildCommand(path string, st time.Time) string {
 }
 
 func bindReaderAndChan(ctx context.Context, cancel context.CancelFunc, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
+	defer cancel()
+
 	scanner := bufio.NewScanner(*r)
 	buf := make([]byte, startBufSize)
 	scanner.Buffer(buf, maxScanTokenSize)
-
-	defer func() {
-		close(lineChan)
-		cancel()
-	}()
 L:
 	for scanner.Scan() {
 		select {

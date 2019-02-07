@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -28,13 +29,15 @@ func NewRegexpParser(r string, tf string) (Parser, error) {
 }
 
 // Parse ...
-func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []string, st time.Time) <-chan Log {
+func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
 	var prevTs int64
 
 	go func() {
+		defer close(logChan)
 		lineTZ := tz
+	L:
 		for line := range lineChan {
 			var (
 				ts           int64
@@ -60,9 +63,21 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []strin
 					filledByPrev = true
 				}
 			}
+
+			select {
+			case <-ctx.Done():
+				break L
+			default:
+			}
+
 			if !logStarted {
 				continue
 			}
+			if et != nil && ts > et.UnixNano() {
+				cancel()
+				continue
+			}
+
 			tStr := ""
 			if len(tag) > 0 {
 				tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
@@ -77,7 +92,6 @@ func (p *RegexpParser) Parse(lineChan <-chan client.Line, tz string, tag []strin
 				Content:      line.Content,
 			}
 		}
-		close(logChan)
 	}()
 
 	return logChan

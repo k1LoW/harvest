@@ -28,7 +28,8 @@ func NewFileClient(l *zap.Logger) (Client, error) {
 }
 
 // Read ...
-func (c *FileClient) Read(ctx context.Context, path string, st time.Time) error {
+func (c *FileClient) Read(ctx context.Context, path string, st *time.Time, et *time.Time) error {
+	defer close(c.lineChan)
 	if _, err := os.Lstat(path); err != nil {
 		return errors.Wrap(err, fmt.Sprintf("%s not exists", path))
 	}
