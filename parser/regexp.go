@@ -47,7 +47,7 @@ func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lin
 	L:
 		for line := range lineChan {
 			var (
-				ts           int64
+				ts             int64
 				filledByPrevTs bool
 			)
 			ts = 0
@@ -80,18 +80,19 @@ func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lin
 			if !logStarted {
 				continue
 			}
+
 			if et != nil && ts > et.UnixNano() {
 				cancel()
 				continue
 			}
 
 			logChan <- Log{
-				Host:         line.Host,
-				Path:         line.Path,
-				Tag:          tStr,
-				Timestamp:    ts,
+				Host:           line.Host,
+				Path:           line.Path,
+				Tag:            tStr,
+				Timestamp:      ts,
 				FilledByPrevTs: filledByPrevTs,
-				Content:      line.Content,
+				Content:        line.Content,
 			}
 		}
 	}()
@@ -117,12 +118,12 @@ func (p *RegexpParser) ParseMultipleLine(ctx context.Context, cancel context.Can
 	go func() {
 		defer func() {
 			logChan <- Log{
-				Host:         hostStash,
-				Path:         pathStash,
-				Tag:          tStr,
-				Timestamp:    prevTs,
+				Host:           hostStash,
+				Path:           pathStash,
+				Tag:            tStr,
+				Timestamp:      prevTs,
 				FilledByPrevTs: false,
-				Content:      strings.Join(contentStash, "\n"),
+				Content:        strings.Join(contentStash, "\n"),
 			}
 			close(logChan)
 		}()
@@ -172,12 +173,12 @@ func (p *RegexpParser) ParseMultipleLine(ctx context.Context, cancel context.Can
 				contentStash = append(contentStash, line.Content)
 				if len(contentStash) > maxContentStash {
 					logChan <- Log{
-						Host:         line.Host,
-						Path:         line.Path,
-						Tag:          tStr,
-						Timestamp:    0,
+						Host:           line.Host,
+						Path:           line.Path,
+						Tag:            tStr,
+						Timestamp:      0,
 						FilledByPrevTs: false,
-						Content:      "Harvest parse error: too many rows.", // FIXME
+						Content:        "Harvest parse error: too many rows.", // FIXME
 					}
 					contentStash = nil
 				}
@@ -187,12 +188,12 @@ func (p *RegexpParser) ParseMultipleLine(ctx context.Context, cancel context.Can
 			// ts > 0
 			if len(contentStash) > 0 {
 				logChan <- Log{
-					Host:         line.Host,
-					Path:         line.Path,
-					Tag:          tStr,
-					Timestamp:    prevTs,
+					Host:           line.Host,
+					Path:           line.Path,
+					Tag:            tStr,
+					Timestamp:      prevTs,
 					FilledByPrevTs: false,
-					Content:      strings.Join(contentStash, "\n"),
+					Content:        strings.Join(contentStash, "\n"),
 				}
 			}
 
