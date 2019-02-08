@@ -15,60 +15,59 @@ Harvest provides the `hrv` command with the following features.
 ---
 logs:
   -
-    url: 'ssh://webproxy.example.com/var/log/syslog*'
     description: webproxy syslog
     type: syslog
+    urls:
+      - 'ssh://webproxy.example.com/var/log/syslog*'
     tags:
       - webproxy
       - syslog
   -
-    url: 'ssh://webproxy.example.com/var/log/nginx/access_log*'
     description: webproxy NGINX access log
     type: combinedLog
+    urls:
+      - 'ssh://webproxy.example.com/var/log/nginx/access_log*'
     tags:
       - webproxy
       - nginx
   -
-    url: 'ssh://app-1.example.com/var/log/ltsv.log*'
-    description: app-1 log
+    description: app log
     type: regexp
     regexp: 'time:([^\t]+)'
     timeFormat: 'Jan 02 15:04:05'
     timeZone: '+0900'
+    urls:
+      - 'ssh://app-1.example.com/var/log/ltsv.log*'
+      - 'ssh://app-2.example.com/var/log/ltsv.log*'
+      - 'ssh://app-3.example.com/var/log/ltsv.log*'
     tags:
       - app
   -
-    url: 'ssh://app-2.example.com/var/log/ltsv.log*'
-    description: app-2 log
-    type: regexp
-    regexp: 'time:([^\t]+)'
-    timeFormat: 'Jan 02 15:04:05'
-    timeZone: '+0900'
-    tags:
-      - app
-  -
-    url: 'ssh://db.example.com/var/log/tcpdp/eth0/dump*'
     description: db dump log
     type: regexp
     regexp: '"ts":"([^"]+)"'
     timeFormat: '2006-01-02T15:04:05.999-0700'
+    urls:
+      - 'ssh://db.example.com/var/log/tcpdp/eth0/dump*'
     tags:
       - db
       - query
   -
-    url: 'ssh://db.example.com/var/log/postgresql/postgresql*'
     description: PostgreSQL log
     type: regexp
     regexp: '^\[?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [^ ]{3})'
     timeFormat: '2006-01-02 15:04:05 MST'
     multiLine: true
+    urls:
+      - 'ssh://db.example.com/var/log/postgresql/postgresql*'
     tags:
       - db
       - postgresql
   -
-    url: 'file:///path/to/httpd/access.log'
     description: local Apache access log
     type: combinedLog
+    urls:
+      - 'file:///path/to/httpd/access.log'
     tags:
       - httpd
 ```

@@ -11,9 +11,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Target ...
-type Target struct {
-	URL         string   `yaml:"url"`
+// Log ...
+type Log struct {
+	URLs        []string `yaml:"urls"`
 	Description string   `yaml:"description"`
 	Type        string   `yaml:"type"`
 	Regexp      string   `yaml:"regexp"`
@@ -21,6 +21,18 @@ type Target struct {
 	TimeFormat  string   `yaml:"timeFormat"`
 	TimeZone    string   `yaml:"timeZone"`
 	Tags        []string `yaml:"tags"`
+}
+
+// Target ...
+type Target struct {
+	URL         string
+	Description string
+	Type        string
+	Regexp      string
+	MultiLine   bool
+	TimeFormat  string
+	TimeZone    string
+	Tags        []string
 	Scheme      string
 	Host        string
 	User        string
@@ -30,13 +42,15 @@ type Target struct {
 
 // Config ...
 type Config struct {
-	Targets []Target `yaml:"logs"`
+	Targets []Target
+	Logs    []Log `yaml:"logs"`
 }
 
 // NewConfig ...
 func NewConfig() (*Config, error) {
 	return &Config{
 		Targets: []Target{},
+		Logs:    []Log{},
 	}, nil
 }
 
@@ -57,21 +71,33 @@ func (c *Config) LoadConfigFile(path string) error {
 	if err != nil {
 		return errors.Wrap(errors.WithStack(err), "failed to load config file")
 	}
-	for i, t := range c.Targets {
-		u, err := url.Parse(t.URL)
-		if err != nil {
-			return err
-		}
-		c.Targets[i].Scheme = u.Scheme
-		c.Targets[i].Path = u.Path
-		c.Targets[i].User = u.User.Username()
-		if strings.Contains(u.Host, ":") {
-			splited := strings.Split(u.Host, ":")
-			c.Targets[i].Host = splited[0]
-			c.Targets[i].Port, _ = strconv.Atoi(splited[1])
-		} else {
-			c.Targets[i].Host = u.Host
-			c.Targets[i].Port = 0
+	for _, l := range c.Logs {
+		for _, URL := range l.URLs {
+			target := Target{}
+			target.Description = l.Description
+			target.Type = l.Type
+			target.Regexp = l.Regexp
+			target.MultiLine = l.MultiLine
+			target.TimeFormat = l.TimeFormat
+			target.TimeZone = l.TimeZone
+			target.Tags = l.Tags
+
+			u, err := url.Parse(URL)
+			if err != nil {
+				return err
+			}
+			target.Scheme = u.Scheme
+			target.Path = u.Path
+			target.User = u.User.Username()
+			if strings.Contains(u.Host, ":") {
+				splited := strings.Split(u.Host, ":")
+				target.Host = splited[0]
+				target.Port, _ = strconv.Atoi(splited[1])
+			} else {
+				target.Host = u.Host
+				target.Port = 0
+			}
+			c.Targets = append(c.Targets, target)
 		}
 	}
 	return nil
