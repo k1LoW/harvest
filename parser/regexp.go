@@ -16,10 +16,11 @@ const maxContentStash = 1000
 type RegexpParser struct {
 	regexp     *regexp.Regexp
 	timeFormat string
+	multiLine  bool
 }
 
 // NewRegexpParser ...
-func NewRegexpParser(r string, tf string) (Parser, error) {
+func NewRegexpParser(r string, tf string, multiLine bool) (Parser, error) {
 	re, err := regexp.Compile(r)
 	if err != nil {
 		return nil, err
@@ -27,11 +28,19 @@ func NewRegexpParser(r string, tf string) (Parser, error) {
 	return &RegexpParser{
 		regexp:     re,
 		timeFormat: tf,
+		multiLine:  multiLine,
 	}, nil
 }
 
 // Parse ...
 func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
+	if p.multiLine {
+		return p.parseMultipleLine(ctx, cancel, lineChan, tz, tag, st, et)
+	}
+	return p.parseSingleLine(ctx, cancel, lineChan, tz, tag, st, et)
+}
+
+func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
 	var prevTs int64
@@ -100,8 +109,7 @@ func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lin
 	return logChan
 }
 
-// ParseMultipleLine ...
-func (p *RegexpParser) ParseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
+func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
 	contentStash := []string{}
