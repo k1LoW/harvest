@@ -1,6 +1,6 @@
 # Harvest
 
-> Portable log aggregation tool for middle scale system operation/observation.
+> Portable log aggregation tool for middle-scale system operation/observation.
 
 Harvest provides the `hrv` command with the following features.
 
@@ -85,10 +85,14 @@ $ hrv fetch -c config.yml
 $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path | less -R
 ```
 
-## What is "middle scale system" ?
+## What is "middle-scale system"?
 
 - < 50 instances
 - < 1 million logs per `hrv fetch`
+
+### What if you are operating a large-scale/super-large-scale/hyper-large-scale system?
+
+Let's consider agent-base log collector/platform, service mesh and distributed tracing platform :+1:
 
 ## Requirements
 
