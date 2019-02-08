@@ -70,65 +70,39 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		targets := filterTargets(cfg.Targets)
-		if len(targets) == 0 {
-			l.Error("No targets")
-			os.Exit(1)
-		}
-
-		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		if dbPath == "" {
 			dbPath = fmt.Sprintf("harvest-%s.db", time.Now().Format("20060102T150405-0700"))
 		}
-
 		if _, err := os.Lstat(dbPath); err == nil {
 			l.Error(fmt.Sprintf("%s already exists", dbPath), zap.String("error", err.Error()))
 			os.Exit(1)
 		}
-
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
 		d, err := db.NewDB(ctx, l, dbPath)
 		if err != nil {
 			l.Error("DB initialize error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
-		var st *time.Time
-		if stStr != "" {
-			loc, err := time.LoadLocation("Local")
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			st = &stt
-		} else {
-			stt := time.Now().Add(defaultStartTimeDuration)
-			st = &stt
+		targets := filterTargets(cfg.Targets)
+		if len(targets) == 0 {
+			l.Error("No targets")
+			os.Exit(1)
+		}
+		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
+
+		st, err := setStartTime(stStr)
+		if err != nil {
+			l.Error("option error", zap.String("error", err.Error()))
+			os.Exit(1)
 		}
 
-		var et *time.Time
-		if etStr != "" {
-			loc, err := time.LoadLocation("Local")
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			et = &ett
-		} else {
-			et = nil
+		et, err := setEndTime(etStr)
+		if err != nil {
+			l.Error("option error", zap.String("error", err.Error()))
+			os.Exit(1)
 		}
 
 		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
@@ -192,6 +166,44 @@ func filterTargets(cfgTargets []config.Target) []config.Target {
 		}
 	}
 	return targets
+}
+
+func setStartTime(stStr string) (*time.Time, error) {
+	var st *time.Time
+	if stStr != "" {
+		loc, err := time.LoadLocation("Local")
+		if err != nil {
+			return nil, err
+		}
+		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
+		if err != nil {
+			return nil, err
+		}
+		st = &stt
+	} else {
+		stt := time.Now().Add(defaultStartTimeDuration)
+		st = &stt
+	}
+	return st, nil
+}
+
+// setEndTime ...
+func setEndTime(etStr string) (*time.Time, error) {
+	var et *time.Time
+	if etStr != "" {
+		loc, err := time.LoadLocation("Local")
+		if err != nil {
+			return nil, err
+		}
+		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
+		if err != nil {
+			return nil, err
+		}
+		et = &ett
+	} else {
+		et = nil
+	}
+	return et, nil
 }
 
 // contains ...
