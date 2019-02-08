@@ -14,7 +14,7 @@ type Log struct {
 	Path         string `db:"path"`
 	Tag          string `db:"tag"`
 	Timestamp    int64  `db:"ts"`
-	FilledByPrev bool   `db:"filled_by_prev"`
+	FilledByPrevTs bool   `db:"filled_by_prev_ts"`
 	Content      string `db:"content"`
 }
 

@@ -166,7 +166,7 @@ var catCmd = &cobra.Command{
 			var (
 				bar          string
 				ts           string
-				filledByPrev string
+				filledByPrevTs string
 				host         string
 				tag          string
 			)
@@ -190,10 +190,10 @@ var catCmd = &cobra.Command{
 				}
 			}
 			if withTimestamp || withTimestampNano {
-				if log.FilledByPrev {
-					filledByPrev = "* "
+				if log.FilledByPrevTs {
+					filledByPrevTs = "* "
 				} else {
-					filledByPrev = "  "
+					filledByPrevTs = "  "
 				}
 			}
 
@@ -217,7 +217,7 @@ var catCmd = &cobra.Command{
 				}
 			}
 
-			fmt.Printf("%s%s%s%s%s%s\n", bar, colorFunc(ts), color.White(filledByPrev, color.B), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
+			fmt.Printf("%s%s%s%s%s%s\n", bar, colorFunc(ts), color.White(filledByPrevTs, color.B), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
 		}
 	},
 }

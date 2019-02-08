@@ -48,7 +48,7 @@ func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lin
 		for line := range lineChan {
 			var (
 				ts           int64
-				filledByPrev bool
+				filledByPrevTs bool
 			)
 			ts = 0
 			if tz == "" {
@@ -67,7 +67,7 @@ func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lin
 					}
 				} else {
 					ts = prevTs
-					filledByPrev = true
+					filledByPrevTs = true
 				}
 			}
 
@@ -90,7 +90,7 @@ func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lin
 				Path:         line.Path,
 				Tag:          tStr,
 				Timestamp:    ts,
-				FilledByPrev: filledByPrev,
+				FilledByPrevTs: filledByPrevTs,
 				Content:      line.Content,
 			}
 		}
@@ -121,7 +121,7 @@ func (p *RegexpParser) ParseMultipleLine(ctx context.Context, cancel context.Can
 				Path:         pathStash,
 				Tag:          tStr,
 				Timestamp:    prevTs,
-				FilledByPrev: false,
+				FilledByPrevTs: false,
 				Content:      strings.Join(contentStash, "\n"),
 			}
 			close(logChan)
@@ -176,7 +176,7 @@ func (p *RegexpParser) ParseMultipleLine(ctx context.Context, cancel context.Can
 						Path:         line.Path,
 						Tag:          tStr,
 						Timestamp:    0,
-						FilledByPrev: false,
+						FilledByPrevTs: false,
 						Content:      "Harvest parse error: too many rows.", // FIXME
 					}
 					contentStash = nil
@@ -191,7 +191,7 @@ func (p *RegexpParser) ParseMultipleLine(ctx context.Context, cancel context.Can
 					Path:         line.Path,
 					Tag:          tStr,
 					Timestamp:    prevTs,
-					FilledByPrev: false,
+					FilledByPrevTs: false,
 					Content:      strings.Join(contentStash, "\n"),
 				}
 			}
