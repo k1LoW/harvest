@@ -92,7 +92,7 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 ### What if you are operating a large-scale/super-large-scale/hyper-large-scale system?
 
-Let's consider agent-base log collector/platform, service mesh and distributed tracing platform :+1:
+Let's consider agent-base log collector/platform, service mesh and distributed tracing platform!
 
 ## Requirements
 
