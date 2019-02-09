@@ -40,13 +40,13 @@ func NewCollector(ctx context.Context, t *config.Target) (*Collector, error) {
 	// Set client
 	switch t.Scheme {
 	case "ssh":
-		sshc, err := client.NewSSHClient(l, host, t.User, t.Port)
+		sshc, err := client.NewSSHClient(l, host, t.User, t.Port, t.Path)
 		if err != nil {
 			return nil, err
 		}
 		c = sshc
 	case "file":
-		filec, err := client.NewFileClient(l)
+		filec, err := client.NewFileClient(l, t.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -103,7 +103,7 @@ func (c *Collector) Collect(dbChan chan parser.Log, st *time.Time, et *time.Time
 		cancel()
 	}()
 
-	err := c.client.Read(innerCtx, c.target.Path, st, et)
+	err := c.client.Read(innerCtx, st, et)
 	if err != nil {
 		return err
 	}

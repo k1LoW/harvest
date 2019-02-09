@@ -18,7 +18,7 @@ const (
 
 // Client ...
 type Client interface {
-	Read(ctx context.Context, path string, st *time.Time, et *time.Time) error
+	Read(ctx context.Context, st *time.Time, et *time.Time) error
 	Out() <-chan Line
 }
 
@@ -30,8 +30,8 @@ type Line struct {
 	TimeZone string
 }
 
-// buildCommand ...
-func buildCommand(path string, st *time.Time) string {
+// buildReadCommand ...
+func buildReadCommand(path string, st *time.Time) string {
 	dir := filepath.Dir(path)
 	base := filepath.Base(path)
 

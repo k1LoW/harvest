@@ -2,37 +2,39 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
 // FileClient ...
 type FileClient struct {
+	path     string
 	lineChan chan Line
 	logger   *zap.Logger
 }
 
 // NewFileClient ...
-func NewFileClient(l *zap.Logger) (Client, error) {
+func NewFileClient(l *zap.Logger, path string) (Client, error) {
 	return &FileClient{
+		path:     path,
 		lineChan: make(chan Line),
 		logger:   l,
 	}, nil
 }
 
 // Read ...
-func (c *FileClient) Read(ctx context.Context, path string, st *time.Time, et *time.Time) error {
+func (c *FileClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
+	cmd := buildReadCommand(c.path, st)
+	return c.Exec(ctx, cmd)
+}
+
+// Exec ...
+func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 	defer close(c.lineChan)
-	if _, err := os.Lstat(path); err != nil {
-		return errors.Wrap(err, fmt.Sprintf("%s not exists", path))
-	}
 	tzCmd := exec.Command("date", `+"%z"`)
 	tzOut, err := tzCmd.Output()
 	if err != nil {
@@ -42,7 +44,7 @@ func (c *FileClient) Read(ctx context.Context, path string, st *time.Time, et *t
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	cmd := exec.CommandContext(innerCtx, "sh", "-c", buildCommand(path, st))
+	cmd := exec.CommandContext(innerCtx, "sh", "-c", cmdStr)
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -56,7 +58,7 @@ func (c *FileClient) Read(ctx context.Context, path string, st *time.Time, et *t
 
 	r := stdout.(io.Reader)
 
-	go bindReaderAndChan(innerCtx, cancel, c.logger, &r, c.lineChan, "localhost", path, strings.TrimRight(string(tzOut), "\n"))
+	go bindReaderAndChan(innerCtx, cancel, c.logger, &r, c.lineChan, "localhost", c.path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = cmd.Start()
 	if err != nil {

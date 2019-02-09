@@ -13,13 +13,14 @@ import (
 // SSHClient ...
 type SSHClient struct {
 	host     string
+	path     string
 	client   *ssh.Client
 	lineChan chan Line
 	logger   *zap.Logger
 }
 
 // NewSSHClient ...
-func NewSSHClient(l *zap.Logger, host string, user string, port int) (Client, error) {
+func NewSSHClient(l *zap.Logger, host string, user string, port int, path string) (Client, error) {
 	options := []sshc.Option{}
 	if user != "" {
 		options = append(options, sshc.User(user))
@@ -34,13 +35,20 @@ func NewSSHClient(l *zap.Logger, host string, user string, port int) (Client, er
 	return &SSHClient{
 		client:   client,
 		host:     host,
+		path:     path,
 		lineChan: make(chan Line),
 		logger:   l,
 	}, nil
 }
 
 // Read ...
-func (c *SSHClient) Read(ctx context.Context, path string, st *time.Time, et *time.Time) error {
+func (c *SSHClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
+	cmd := buildReadCommand(c.path, st)
+	return c.Exec(ctx, cmd)
+}
+
+// Exec ...
+func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	defer close(c.lineChan)
 	session, err := c.client.NewSession()
 	if err != nil {
@@ -67,8 +75,6 @@ func (c *SSHClient) Read(ctx context.Context, path string, st *time.Time, et *ti
 		return err
 	}
 
-	cmd := buildCommand(path, st)
-
 	stdout, err := session.StdoutPipe()
 	if err != nil {
 		return err
@@ -82,7 +88,7 @@ func (c *SSHClient) Read(ctx context.Context, path string, st *time.Time, et *ti
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	go bindReaderAndChan(innerCtx, cancel, c.logger, &stdout, c.lineChan, c.host, path, strings.TrimRight(string(tzOut), "\n"))
+	go bindReaderAndChan(innerCtx, cancel, c.logger, &stdout, c.lineChan, c.host, c.path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = session.Start(cmd)
 	if err != nil {
