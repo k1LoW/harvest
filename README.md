@@ -4,7 +4,7 @@
 
 Harvest provides the `hrv` command with the following features.
 
-- No agents.
+- Agentless.
 - Portable.
 - Fetch various remote/local logs via SSH/exec. ( `hrv fetch` )
 - Output all fetched logs in the order of timestamp. ( `hrv cat` )
@@ -99,6 +99,12 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
 ```
 
+## Installation
+
+```console
+$ go get github.com/k1LoW/harvest
+```
+
 ## What is "middle-scale system"?
 
 - < 50 instances
@@ -125,6 +131,7 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 - `hrv fetch-check`
 - `hrv info`
 - `hrv analyze`
+- `hrv download`
 - tag DAG
 - Viewer / Visualizer
 

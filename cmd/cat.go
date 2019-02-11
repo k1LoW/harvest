@@ -93,7 +93,7 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		so, err := stdout.NewStdout(
+		sout, err := stdout.NewStdout(
 			withTimestamp,
 			withTimestampNano,
 			withHost,
@@ -108,7 +108,7 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		err = so.Out(d.Cat(cond), hosts)
+		err = sout.Out(d.Cat(cond), hosts)
 		if err != nil {
 			l.Error("fetch error", zap.String("error", err.Error()))
 			os.Exit(1)

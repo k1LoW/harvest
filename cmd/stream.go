@@ -72,7 +72,7 @@ var streamCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		so, err := stdout.NewStdout(
+		sout, err := stdout.NewStdout(
 			withTimestamp,
 			withTimestampNano,
 			withHost,
@@ -90,13 +90,12 @@ var streamCmd = &cobra.Command{
 		hosts := getHosts(targets)
 		logChan := make(chan parser.Log)
 
-		go so.Out(logChan, hosts)
+		go sout.Out(logChan, hosts)
 
 		var wg sync.WaitGroup
 
 		for _, t := range targets {
 			wg.Add(1)
-			time.Sleep(100 * time.Millisecond)
 			go func(t config.Target) {
 				defer wg.Done()
 				c, err := collector.NewCollector(ctx, &t)
@@ -108,6 +107,7 @@ var streamCmd = &cobra.Command{
 					l.Error("Stream error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
 			}(t)
+			time.Sleep(100 * time.Millisecond)
 		}
 
 		wg.Wait()
