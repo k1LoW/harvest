@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -65,7 +66,7 @@ var streamCmd = &cobra.Command{
 		}
 		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
 
-		hLen, tLen, err := getStreamStdoutLengthes(cfg, withHost, withPath, withTag)
+		hLen, tLen, err := getStreamStdoutLengthes(targets, withHost, withPath, withTag)
 		if err != nil {
 			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
@@ -121,22 +122,43 @@ func getHosts(targets []config.Target) []string {
 	return hosts
 }
 
-func getStreamStdoutLengthes(cfg *config.Config, withHost, withPath, withTag bool) (int, int, error) {
+func getStreamStdoutLengthes(targets []config.Target, withHost, withPath, withTag bool) (int, int, error) {
 	var (
 		hLen int
 		tLen int
 	)
 	if withHost && withPath {
-		hLen = cfg.GetMaxLength("hostpath")
+		hLen = getMaxLength(targets, "hostpath")
 	} else if withHost {
-		hLen = cfg.GetMaxLength("host")
+		hLen = getMaxLength(targets, "host")
 	} else if withPath {
-		hLen = cfg.GetMaxLength("path")
+		hLen = getMaxLength(targets, "path")
 	}
 	if withTag {
-		tLen = cfg.GetMaxLength("tags")
+		tLen = getMaxLength(targets, "tags")
 	}
 	return hLen, tLen, nil
+}
+
+func getMaxLength(targets []config.Target, key string) int {
+	var length int
+	for _, target := range targets {
+		var c int
+		switch key {
+		case "host":
+			c = len(target.Host)
+		case "path":
+			c = len(target.Path)
+		case "hostpath":
+			c = len(target.Host) + len(target.Path)
+		case "tags":
+			c = len(fmt.Sprintf("[%s]", strings.Join(target.Tags, "][")))
+		}
+		if length < c {
+			length = c
+		}
+	}
+	return length
 }
 
 func init() {
