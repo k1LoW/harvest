@@ -4,12 +4,17 @@
 
 Harvest provides the `hrv` command with the following features.
 
-- Fetch various remote/local logs via SSH/exec ( `hrv fetch` )
-- Output all fetched logs in the order of timestamp ( `hrv cat` )
+- No agents.
+- Portable.
+- Fetch various remote/local logs via SSH/exec. ( `hrv fetch` )
+- Output all fetched logs in the order of timestamp. ( `hrv cat` )
+- Stream various remote/local logs via SSH/exec. ( `hrv stream` )
 
 ## Usage
 
-### 1. Set log URLs (and log type) in config.yml
+### Fetch and output remote/local logs
+
+#### 1. Set log URLs (and log type) in config.yml
 
 ``` yaml
 ---
@@ -72,16 +77,26 @@ logs:
       - httpd
 ```
 
-### 2. Fetch target logs via SSH/exec ( `hrv fecth` )
+#### 2. Fetch target logs via SSH/exec ( `hrv fecth` )
 
 ``` console
 $ hrv fetch -c config.yml
 ```
 
-### 3. Output logs ( `hrv cat` )
+#### 3. Output logs ( `hrv cat` )
 
 ``` console
 $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path | less -R
+```
+
+### Stream remote/local logs
+
+#### 1. Set log URLs (and log type) in config.yml
+
+#### 2. Stream target logs via SSH/exec ( `hrv stream` )
+
+``` console
+$ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
 ```
 
 ## What is "middle-scale system"?
