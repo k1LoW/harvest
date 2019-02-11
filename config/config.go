@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
@@ -74,6 +75,7 @@ func (c *Config) LoadConfigFile(path string) error {
 	for _, l := range c.Logs {
 		for _, URL := range l.URLs {
 			target := Target{}
+			target.URL = URL
 			target.Description = l.Description
 			target.Type = l.Type
 			target.Regexp = l.Regexp
@@ -101,4 +103,26 @@ func (c *Config) LoadConfigFile(path string) error {
 		}
 	}
 	return nil
+}
+
+// GetMaxLength ...
+func (c *Config) GetMaxLength(key string) int {
+	var length int
+	for _, target := range c.Targets {
+		var c int
+		switch key {
+		case "host":
+			c = len(target.Host)
+		case "path":
+			c = len(target.Path)
+		case "hostpath":
+			c = len(target.Host) + len(target.Path)
+		case "tags":
+			c = len(fmt.Sprintf("[%s]", strings.Join(target.Tags, "][")))
+		}
+		if length < c {
+			length = c
+		}
+	}
+	return length
 }

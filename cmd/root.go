@@ -28,20 +28,23 @@ import (
 )
 
 var (
-	tag       string
-	ignoreTag string
+	tag               string
+	ignoreTag         string
+	configPath        string
+	urlRegexp         string
+	withTimestamp     bool
+	withTimestampNano bool
+	withHost          bool
+	withPath          bool
+	withTag           bool
+	noColor           bool
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "hrv",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "hrv",
+	Long:  `hrv.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },

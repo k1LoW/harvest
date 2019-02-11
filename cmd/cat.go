@@ -29,6 +29,7 @@ import (
 
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
+	"github.com/k1LoW/harvest/stdout"
 	"github.com/labstack/gommon/color"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -36,47 +37,13 @@ import (
 )
 
 const (
-	tsParseFmt     = "2006-01-02T15:04:05-07:00"
-	tsNanoParseFmt = "2006-01-02T15:04:05.000000000-07:00"
-	delimiter      = ","
+	delimiter = ","
 )
 
-var colorizeMap = []struct {
-	colorFunc func(interface{}, ...string) string
-	bar       string
-}{
-	{color.Yellow, "█ "},
-	{color.Magenta, "█ "},
-	{color.Green, "█ "},
-	{color.Cyan, "█ "},
-	{color.Yellow, "▚ "},
-	{color.Magenta, "▚ "},
-	{color.Green, "▚ "},
-	{color.Cyan, "▚ "},
-	{color.Yellow, "║ "},
-	{color.Magenta, "║ "},
-	{color.Green, "║ "},
-	{color.Cyan, "║ "},
-	{color.Yellow, "▒ "},
-	{color.Magenta, "▒ "},
-	{color.Green, "▒ "},
-	{color.Cyan, "▒ "},
-	{color.Yellow, "▓ "},
-	{color.Magenta, "▓ "},
-	{color.Green, "▓ "},
-	{color.Cyan, "▓ "},
-}
-
 var (
-	withTimestamp     bool
-	withTimestampNano bool
-	withHost          bool
-	withPath          bool
-	withTag           bool
-	match             string
-	st                string
-	et                string
-	noColor           bool
+	match string
+	st    string
+	et    string
 )
 
 // catCmd represents the cat command
@@ -114,46 +81,10 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		var (
-			hFmt string
-			tFmt string
-		)
-		if withHost && withPath {
-			hLen, err := d.GetColumnMaxLength("host", "path")
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			hFmt = fmt.Sprintf("%%-%ds ", hLen)
-		} else if withHost {
-			hLen, err := d.GetColumnMaxLength("host")
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			hFmt = fmt.Sprintf("%%-%ds ", hLen)
-		} else if withPath {
-			hLen, err := d.GetColumnMaxLength("path")
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			hFmt = fmt.Sprintf("%%-%ds ", hLen)
-		}
-
-		if withTag {
-			tLen, err := d.GetColumnMaxLength("tag")
-			if err != nil {
-				l.Error("option error", zap.String("error", err.Error()))
-				os.Exit(1)
-			}
-			tFmt = fmt.Sprintf("%%-%ds ", tLen)
-		}
-
-		if noColor {
-			color.Disable()
-		} else {
-			color.Enable()
+		hLen, tLen, err := getCatStdoutLengthes(d, withHost, withPath, withTag)
+		if err != nil {
+			l.Error("option error", zap.String("error", err.Error()))
+			os.Exit(1)
 		}
 
 		hosts, err := d.GetHosts()
@@ -162,62 +93,25 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		for log := range d.Cat(cond) {
-			var (
-				bar          string
-				ts           string
-				filledByPrevTs string
-				host         string
-				tag          string
-			)
+		so, err := stdout.NewStdout(
+			withTimestamp,
+			withTimestampNano,
+			withHost,
+			withPath,
+			withTag,
+			hLen,
+			tLen,
+			noColor,
+		)
+		if err != nil {
+			l.Error("fetch error", zap.String("error", err.Error()))
+			os.Exit(1)
+		}
 
-			colorFunc := func(msg interface{}, styles ...string) string {
-				return msg.(string)
-			}
-
-			if withTimestamp {
-				if log.Timestamp == 0 {
-					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds", len(tsParseFmt)), "-")
-				} else {
-					ts = time.Unix(0, log.Timestamp).Format(tsParseFmt)
-				}
-			}
-			if withTimestampNano {
-				if log.Timestamp == 0 {
-					ts = fmt.Sprintf(fmt.Sprintf("%%-%ds", len(tsNanoParseFmt)), "-")
-				} else {
-					ts = time.Unix(0, log.Timestamp).Format(tsNanoParseFmt)
-				}
-			}
-			if withTimestamp || withTimestampNano {
-				if log.FilledByPrevTs {
-					filledByPrevTs = "* "
-				} else {
-					filledByPrevTs = "  "
-				}
-			}
-
-			if withHost && withPath {
-				host = fmt.Sprintf(hFmt, fmt.Sprintf("%s:%s", log.Host, log.Path))
-			} else if withHost {
-				host = fmt.Sprintf(hFmt, log.Host)
-			} else if withPath {
-				host = fmt.Sprintf(hFmt, log.Path)
-			}
-			if withTag {
-				tag = fmt.Sprintf(tFmt, log.Tag)
-			}
-
-			if withTimestamp || withTimestampNano || withHost || withPath {
-				for i, h := range hosts {
-					if h == log.Host {
-						colorFunc = colorizeMap[i%len(colorizeMap)].colorFunc
-						bar = colorFunc(colorizeMap[i%len(colorizeMap)].bar)
-					}
-				}
-			}
-
-			fmt.Printf("%s%s%s%s%s%s\n", bar, colorFunc(ts), color.White(filledByPrevTs, color.B), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
+		err = so.Out(d.Cat(cond), hosts)
+		if err != nil {
+			l.Error("fetch error", zap.String("error", err.Error()))
+			os.Exit(1)
 		}
 	},
 }
@@ -269,6 +163,37 @@ func buildCondition() (string, error) {
 	}
 
 	return fmt.Sprintf(" WHERE %s", strings.Join(cond, " AND ")), nil
+}
+
+func getCatStdoutLengthes(d *db.DB, withHost, withPath, withTag bool) (int, int, error) {
+	var (
+		hLen int
+		tLen int
+		err  error
+	)
+	if withHost && withPath {
+		hLen, err = d.GetColumnMaxLength("host", "path")
+		if err != nil {
+			return 0, 0, err
+		}
+	} else if withHost {
+		hLen, err = d.GetColumnMaxLength("host")
+		if err != nil {
+			return 0, 0, err
+		}
+	} else if withPath {
+		hLen, err = d.GetColumnMaxLength("path")
+		if err != nil {
+			return 0, 0, err
+		}
+	}
+	if withTag {
+		tLen, err = d.GetColumnMaxLength("tag")
+		if err != nil {
+			return 0, 0, err
+		}
+	}
+	return hLen, tLen, nil
 }
 
 func init() {

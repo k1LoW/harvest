@@ -41,9 +41,7 @@ var (
 	stStr       string
 	etStr       string
 	dbPath      string
-	configPath  string
 	concurrency int
-	urlRegexp   string
 )
 
 const (
@@ -128,7 +126,7 @@ var fetchCmd = &cobra.Command{
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
-				err = c.Collect(d.In(), st, et, t.MultiLine)
+				err = c.Fetch(d.In(), st, et, t.MultiLine)
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
@@ -150,7 +148,7 @@ func filterTargets(cfgTargets []config.Target) []config.Target {
 		tags := strings.Split(tag, ",")
 		re := regexp.MustCompile(urlRegexp)
 		for _, target := range cfgTargets {
-			if contains(target.Tags, tags) || urlRegexp != "" && re.MatchString(target.URL) {
+			if contains(target.Tags, tags) || (urlRegexp != "" && re.MatchString(target.URL)) {
 				if contains(target.Tags, ignoreTags) {
 					continue
 				}

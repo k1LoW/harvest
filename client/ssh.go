@@ -47,6 +47,12 @@ func (c *SSHClient) Read(ctx context.Context, st *time.Time, et *time.Time) erro
 	return c.Exec(ctx, cmd)
 }
 
+// Tailf ...
+func (c *SSHClient) Tailf(ctx context.Context) error {
+	cmd := buildTailfCommand(c.path)
+	return c.Exec(ctx, cmd)
+}
+
 // Exec ...
 func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	defer close(c.lineChan)

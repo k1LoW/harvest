@@ -69,7 +69,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 					t, err := parseTime(p.timeFormat, lineTZ, m[1])
 					if err == nil {
 						ts = t.UnixNano()
-						if !logStarted && ts > st.UnixNano() {
+						if !logStarted && (st == nil || ts > st.UnixNano()) {
 							logStarted = true
 						}
 						prevTs = ts
@@ -156,7 +156,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 					t, err := parseTime(p.timeFormat, lineTZ, m[1])
 					if err == nil {
 						ts = t.UnixNano()
-						if !logStarted && ts > st.UnixNano() {
+						if !logStarted && (st == nil || ts > st.UnixNano()) {
 							logStarted = true
 						}
 					}

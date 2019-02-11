@@ -101,6 +101,7 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 - grep
 - ls
 - sudo
+- tail
 - xargs
 - zcat
 

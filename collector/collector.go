@@ -83,8 +83,8 @@ func NewCollector(ctx context.Context, t *config.Target) (*Collector, error) {
 	}, nil
 }
 
-// Collect ...
-func (c *Collector) Collect(dbChan chan parser.Log, st *time.Time, et *time.Time, multiLine bool) error {
+// Fetch ...
+func (c *Collector) Fetch(dbChan chan parser.Log, st *time.Time, et *time.Time, multiLine bool) error {
 	innerCtx, cancel := context.WithCancel(c.ctx)
 	defer cancel()
 
@@ -104,6 +104,34 @@ func (c *Collector) Collect(dbChan chan parser.Log, st *time.Time, et *time.Time
 	}()
 
 	err := c.client.Read(innerCtx, st, et)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Stream ...
+func (c *Collector) Stream(logChan chan parser.Log, multiLine bool) error {
+	innerCtx, cancel := context.WithCancel(c.ctx)
+	defer cancel()
+
+	go func() {
+	L:
+		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, nil, nil) {
+			select {
+			case <-c.ctx.Done():
+				break L
+			case <-innerCtx.Done():
+				break L
+			default:
+				logChan <- log
+			}
+		}
+		cancel()
+	}()
+
+	err := c.client.Tailf(innerCtx)
 	if err != nil {
 		return err
 	}
