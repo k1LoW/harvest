@@ -1,4 +1,4 @@
-# Harvest
+# Harvest [![Build Status](https://travis-ci.org/k1LoW/harvest.svg?branch=master)](https://travis-ci.org/k1LoW/harvest) [![GitHub release](https://img.shields.io/github/release/k1LoW/harvest.svg)](https://github.com/k1LoW/harvest/releases)
 
 > Portable log aggregation tool for middle-scale system operation/observation.
 

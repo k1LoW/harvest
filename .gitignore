@@ -1,3 +1,5 @@
+dist/
+coverage.txt
 *.db
 *.log
 *.yml
