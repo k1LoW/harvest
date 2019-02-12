@@ -6,6 +6,7 @@ Harvest provides the `hrv` command with the following features.
 
 - Agentless.
 - Portable.
+- Only 1 config file.
 - Fetch various remote/local logs via SSH/exec. ( `hrv fetch` )
 - Output all fetched logs in the order of timestamp. ( `hrv cat` )
 - Stream various remote/local logs via SSH/exec. ( `hrv stream` )
@@ -91,7 +92,7 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 ### Stream remote/local logs
 
-#### 1. Set log URLs (and log type) in config.yml
+#### 1. [Set config.yml](#1-set-log-urls-and-log-type-in-configyml)
 
 #### 2. Stream target logs via SSH/exec ( `hrv stream` )
 
@@ -120,19 +121,21 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## Requirements
 
-- awk
-- date
-- find
-- grep
-- ls
+- UNIX commands
+  - awk
+  - date
+  - find
+  - grep
+  - ls
+  - tail
+  - xargs
+  - zcat
 - sudo
-- tail
-- xargs
-- zcat
+- SQLite
 
 ## WANT
 
-- `hrv fetch-check`
+- `hrv configtest
 - `hrv info`
 - `hrv analyze`
 - `hrv download`
@@ -142,3 +145,5 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 ## References
 
 - [Hayabusa](https://github.com/hirolovesbeer/hayabusa): A Simple and Fast Full-Text Search Engine for Massive System Log Data
+    - Make simple with a combination of commands.
+    - Full-Text Search Engine using SQLite FTS.
