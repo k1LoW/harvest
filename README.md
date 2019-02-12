@@ -114,6 +114,10 @@ $ go get github.com/k1LoW/harvest
 
 Let's consider agent-base log collector/platform, service mesh and distributed tracing platform!
 
+## Internal
+
+- [harvest.db database schema](doc/schema)
+
 ## Requirements
 
 - awk
