@@ -21,3 +21,26 @@ test:
 
 build:
 	$(GO) build -ldflags="$(BUILD_LDFLAGS)" -o hrv
+
+depsdev:
+	GO111MODULE=off go get golang.org/x/tools/cmd/cover
+	GO111MODULE=off go get golang.org/x/lint/golint
+	GO111MODULE=off go get github.com/motemen/gobump/cmd/gobump
+	GO111MODULE=off go get github.com/Songmu/goxz/cmd/goxz
+	GO111MODULE=off go get github.com/tcnksm/ghr
+	GO111MODULE=off go get github.com/Songmu/ghch/cmd/ghch
+
+crossbuild: depsdev
+	$(eval ver = v$(shell gobump show -r version/))
+	GO111MODULE=on goxz -pv=$(ver) -os=linux,darwin -arch=386,amd64 -build-ldflags="$(RELEASE_BUILD_LDFLAGS)" \
+	  -d=./dist/$(ver)
+
+prerelease:
+	$(eval ver = v$(shell gobump show -r version/))
+	ghch -w -N ${ver}
+
+release:
+	$(eval ver = v$(shell gobump show -r version/))
+	ghr -username k1LoW -replace ${ver} dist/${ver}
+
+.PHONY: default test
