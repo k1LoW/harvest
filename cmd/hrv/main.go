@@ -21,7 +21,7 @@
 package main
 
 import (
-	"github.com/k1LoW/harvest/cmd"
+	"github.com/k1LoW/harvest/cmd/hrv/cmd"
 	_ "github.com/mattn/go-sqlite3"
 )
 
