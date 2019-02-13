@@ -81,7 +81,7 @@ logs:
 #### 2. Fetch target logs via SSH/exec ( `hrv fecth` )
 
 ``` console
-$ hrv fetch -c config.yml
+$ hrv fetch -c config.yml --tag=webproxy,db
 ```
 
 #### 3. Output logs ( `hrv cat` )
