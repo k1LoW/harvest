@@ -127,7 +127,7 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## Internal
 
-- [harvest.db database schema](doc/schema)
+- [harvest-*.db database schema](doc/schema)
 
 ## Requirements
 
