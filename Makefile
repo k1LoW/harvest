@@ -20,7 +20,7 @@ test:
 	$(GO) test ./... -coverprofile=coverage.txt -covermode=count
 
 build:
-	$(GO) build -ldflags="$(BUILD_LDFLAGS)" -o hrv
+	$(GO) build -ldflags="$(BUILD_LDFLAGS)" ./cmd/hrv
 
 depsdev:
 	GO111MODULE=off go get golang.org/x/tools/cmd/cover
@@ -33,7 +33,7 @@ depsdev:
 crossbuild: depsdev
 	$(eval ver = v$(shell gobump show -r version/))
 	GO111MODULE=on goxz -pv=$(ver) -os=linux,darwin -arch=386,amd64 -build-ldflags="$(RELEASE_BUILD_LDFLAGS)" \
-	  -d=./dist/$(ver)
+	  -d=./dist/$(ver) ./cmd/hrv
 
 prerelease:
 	$(eval ver = v$(shell gobump show -r version/))
