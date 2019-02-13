@@ -127,15 +127,15 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## Internal
 
-- [harvest.db database schema](doc/schema)
+- [harvest-*.db database schema](doc/schema)
 
 ## Requirements
 
 - UNIX commands
-  - awk
   - date
   - find
   - grep
+  - head
   - ls
   - tail
   - xargs
@@ -145,7 +145,6 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## WANT
 
-- `hrv configtest`
 - `hrv ls targets`
 - `hrv info`
 - `hrv analyze`

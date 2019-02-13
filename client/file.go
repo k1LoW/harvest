@@ -38,6 +38,12 @@ func (c *FileClient) Tailf(ctx context.Context) error {
 	return c.Exec(ctx, cmd)
 }
 
+// RandomOne ...
+func (c *FileClient) RandomOne(ctx context.Context) error {
+	cmd := buildRandomOneCommand(c.path)
+	return c.Exec(ctx, cmd)
+}
+
 // Exec ...
 func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 	defer close(c.lineChan)
