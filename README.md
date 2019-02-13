@@ -100,6 +100,16 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
 ```
 
+## Architecture
+
+### `hrv fetch` and `hrv cat`
+
+![img](doc/fetch.png)
+
+### `hrv stream`
+
+![img](doc/stream.png)
+
 ## Installation
 
 ```console
@@ -135,7 +145,8 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## WANT
 
-- `hrv configtest
+- `hrv configtest`
+- `hrv ls targets`
 - `hrv info`
 - `hrv analyze`
 - `hrv download`
