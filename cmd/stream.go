@@ -98,7 +98,7 @@ var streamCmd = &cobra.Command{
 			wg.Add(1)
 			go func(t config.Target) {
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, &t)
+				c, err := collector.NewCollector(ctx, &t, false)
 				if err != nil {
 					l.Error("Stream error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}

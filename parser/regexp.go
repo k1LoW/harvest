@@ -50,6 +50,10 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 		tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
 	}
 
+	if st == nil {
+		logStarted = true
+	}
+
 	go func() {
 		defer close(logChan)
 		lineTZ := tz
@@ -80,12 +84,6 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 				}
 			}
 
-			select {
-			case <-ctx.Done():
-				break L
-			default:
-			}
-
 			if !logStarted {
 				continue
 			}
@@ -102,6 +100,12 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 				Timestamp:      ts,
 				FilledByPrevTs: filledByPrevTs,
 				Content:        line.Content,
+			}
+
+			select {
+			case <-ctx.Done():
+				break L
+			default:
 			}
 		}
 	}()
@@ -121,6 +125,10 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 	)
 	if len(tag) > 0 {
 		tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
+	}
+
+	if st == nil {
+		logStarted = true
 	}
 
 	go func() {
@@ -163,12 +171,6 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 				}
 			}
 
-			select {
-			case <-ctx.Done():
-				break L
-			default:
-			}
-
 			if !logStarted {
 				continue
 			}
@@ -208,6 +210,12 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			contentStash = nil
 			contentStash = append(contentStash, line.Content)
 			prevTs = ts
+
+			select {
+			case <-ctx.Done():
+				break L
+			default:
+			}
 		}
 	}()
 

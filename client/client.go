@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"path/filepath"
 	"time"
 
@@ -20,6 +21,7 @@ const (
 type Client interface {
 	Read(ctx context.Context, st *time.Time, et *time.Time) error
 	Tailf(ctx context.Context) error
+	RandomOne(ctx context.Context) error
 	Out() <-chan Line
 }
 
@@ -38,7 +40,7 @@ func buildReadCommand(path string, st *time.Time) string {
 
 	stStr := st.Format("2006-01-02 15:04:05 MST")
 
-	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' -newermt '%s' | xargs ls -ltr --time-style=+%%Y%%m%%d%%H%%M%%S | awk '{print $7}' | xargs sudo zcat -f", dir, base, stStr)
+	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' -newermt '%s' | xargs ls -tr | xargs sudo zcat -f", dir, base, stStr)
 
 	return cmd
 }
@@ -48,7 +50,19 @@ func buildTailfCommand(path string) string {
 	dir := filepath.Dir(path)
 	base := filepath.Base(path)
 
-	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' | xargs ls -ltr --time-style=+%%Y%%m%%d%%H%%M%%S | awk '{print $7}' | tail -1 | xargs sudo tail -F", dir, base)
+	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' | xargs ls -tr | tail -1 | xargs sudo tail -F", dir, base)
+
+	return cmd
+}
+
+// buildRandomOneCommand ...
+func buildRandomOneCommand(path string) string {
+	dir := filepath.Dir(path)
+	base := filepath.Base(path)
+	rand.Seed(time.Now().UnixNano())
+
+	// why tail -2 -> for 0 line log
+	cmd := fmt.Sprintf("sudo find %s -type f -name '%s' | xargs ls -tr | tail -2 | xargs sudo zcat -f | head -%d | tail -1", dir, base, rand.Intn(100))
 
 	return cmd
 }
@@ -61,16 +75,16 @@ func bindReaderAndChan(ctx context.Context, cancel context.CancelFunc, l *zap.Lo
 	scanner.Buffer(buf, maxScanTokenSize)
 L:
 	for scanner.Scan() {
+		lineChan <- Line{
+			Host:     host,
+			Path:     path,
+			Content:  scanner.Text(),
+			TimeZone: tz,
+		}
 		select {
 		case <-ctx.Done():
 			break L
 		default:
-			lineChan <- Line{
-				Host:     host,
-				Path:     path,
-				Content:  scanner.Text(),
-				TimeZone: tz,
-			}
 		}
 	}
 	if scanner.Err() != nil {

@@ -53,6 +53,13 @@ func (c *SSHClient) Tailf(ctx context.Context) error {
 	return c.Exec(ctx, cmd)
 }
 
+// RandomOne ...
+func (c *SSHClient) RandomOne(ctx context.Context) error {
+	cmd := buildRandomOneCommand(c.path)
+
+	return c.Exec(ctx, cmd)
+}
+
 // Exec ...
 func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	defer close(c.lineChan)

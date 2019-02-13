@@ -32,3 +32,29 @@ func NewLogger() *zap.Logger {
 
 	return logger
 }
+
+// NewSilentLogger ...
+func NewSilentLogger() *zap.Logger {
+	encoderConfig := zapcore.EncoderConfig{
+		TimeKey:        "ts",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		MessageKey:     "msg",
+		StacktraceKey:  "stacktrace",
+		EncodeLevel:    zapcore.CapitalLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.StringDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+	}
+
+	stdoutCore := zapcore.NewCore(
+		zapcore.NewConsoleEncoder(encoderConfig),
+		zapcore.AddSync(os.Stdout),
+		zapcore.ErrorLevel,
+	)
+
+	logger := zap.New(stdoutCore)
+
+	return logger
+}

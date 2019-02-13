@@ -22,7 +22,7 @@ type Collector struct {
 }
 
 // NewCollector ...
-func NewCollector(ctx context.Context, t *config.Target) (*Collector, error) {
+func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Collector, error) {
 	var (
 		host string
 		err  error
@@ -35,7 +35,12 @@ func NewCollector(ctx context.Context, t *config.Target) (*Collector, error) {
 		host = "localhost"
 	}
 
-	l := logger.NewLogger().With(zap.String("host", host), zap.String("path", t.Path))
+	var l *zap.Logger
+	if logSilent {
+		l = logger.NewSilentLogger().With(zap.String("host", host), zap.String("path", t.Path))
+	} else {
+		l = logger.NewLogger().With(zap.String("host", host), zap.String("path", t.Path))
+	}
 
 	// Set client
 	switch t.Scheme {
@@ -89,18 +94,18 @@ func (c *Collector) Fetch(dbChan chan parser.Log, st *time.Time, et *time.Time, 
 	defer cancel()
 
 	go func() {
+		defer cancel()
 	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, st, et) {
+			dbChan <- log
 			select {
 			case <-c.ctx.Done():
 				break L
 			case <-innerCtx.Done():
 				break L
 			default:
-				dbChan <- log
 			}
 		}
-		cancel()
 	}()
 
 	err := c.client.Read(innerCtx, st, et)
@@ -117,21 +122,52 @@ func (c *Collector) Stream(logChan chan parser.Log, multiLine bool) error {
 	defer cancel()
 
 	go func() {
+		defer cancel()
 	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, nil, nil) {
+			logChan <- log
 			select {
 			case <-c.ctx.Done():
 				break L
 			case <-innerCtx.Done():
 				break L
 			default:
-				logChan <- log
 			}
 		}
-		cancel()
 	}()
 
 	err := c.client.Tailf(innerCtx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ConfigTest ...
+func (c *Collector) ConfigTest(logChan chan parser.Log, multiLine bool) error {
+	innerCtx, cancel := context.WithCancel(c.ctx)
+	defer cancel()
+
+	go func() {
+		defer func() {
+			close(logChan)
+			cancel()
+		}()
+	L:
+		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, nil, nil) {
+			logChan <- log
+			select {
+			case <-c.ctx.Done():
+				break L
+			case <-innerCtx.Done():
+				break L
+			default:
+			}
+		}
+	}()
+
+	err := c.client.RandomOne(innerCtx)
 	if err != nil {
 		return err
 	}
