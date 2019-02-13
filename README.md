@@ -13,7 +13,7 @@ Harvest provides the `hrv` command with the following features.
 
 ## Usage
 
-### Fetch and output remote/local logs
+### :beetle: Fetch and output remote/local logs
 
 #### 1. Set log URLs (and log type) in config.yml
 
@@ -61,7 +61,7 @@ logs:
   -
     description: PostgreSQL log
     type: regexp
-    regexp: '^\[?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [^ ]{3})'
+    regexp: '^\[?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \w{3})'
     timeFormat: '2006-01-02 15:04:05 MST'
     multiLine: true
     urls:
@@ -90,7 +90,7 @@ $ hrv fetch -c config.yml --tag=webproxy,db
 $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path | less -R
 ```
 
-### Stream remote/local logs
+### :beetle: Stream remote/local logs
 
 #### 1. [Set config.yml](#1-set-log-urls-and-log-type-in-configyml)
 
