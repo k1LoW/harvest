@@ -116,6 +116,12 @@ $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
 $ brew install k1LoW/tap/harvest
 ```
 
+or
+
+```console
+$ go get github.com/k1LoW/harvest/cmd/hrv
+```
+
 ## What is "middle-scale system"?
 
 - < 50 instances
@@ -151,10 +157,6 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 - `hrv download`
 - tag DAG
 - Viewer / Visualizer
-
-## TODO
-
-- Support `go get` installation
 
 ## References
 
