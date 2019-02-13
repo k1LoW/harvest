@@ -4,4 +4,4 @@ package version
 const Name string = "hrv"
 
 // Version for this
-const Version string = "0.1.0"
+const Version string = "0.2.0"
