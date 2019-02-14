@@ -80,8 +80,9 @@ var configtestCmd = &cobra.Command{
 				}
 				logChan := make(chan parser.Log)
 				go func(t config.Target, logChan chan parser.Log) {
+					fmt.Printf("%s: ", t.URL)
+					logRead := false
 					for log := range logChan {
-						fmt.Printf("%s: ", t.URL)
 						if log.Timestamp > 0 {
 							fmt.Printf("%s\n", color.Green("OK", color.B))
 						} else {
@@ -93,8 +94,13 @@ var configtestCmd = &cobra.Command{
 							fmt.Println("")
 							failure++
 						}
+						logRead = true
 					}
 					defer wg.Done()
+					if !logRead {
+						fmt.Printf("%s\n", color.Red("Log read error", color.B))
+						failure++
+					}
 				}(t, logChan)
 				err = c.ConfigTest(logChan, t.MultiLine)
 				if err != nil {
