@@ -78,6 +78,12 @@ logs:
       - httpd
 ```
 
+You can use `hrv configtest` for config test.
+
+``` console
+$ hrv configtest -c config.yml
+```
+
 #### 2. Fetch target logs via SSH/exec ( `hrv fecth` )
 
 ``` console
