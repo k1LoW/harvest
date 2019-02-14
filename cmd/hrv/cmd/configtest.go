@@ -90,6 +90,7 @@ var configtestCmd = &cobra.Command{
 							fmt.Printf("    %s %s\n", color.Red("      Type:"), color.Red(t.Type))
 							fmt.Printf("    %s %s\n", color.Red("    Regexp:"), color.Red(t.Regexp))
 							fmt.Printf("    %s %s\n", color.Red("TimeFormat:"), color.Red(t.TimeFormat))
+							fmt.Printf("    %s %s\n", color.Red(" MultiLine:"), color.Red(t.MultiLine))
 							fmt.Printf("    %s %s\n", color.Red("       Log:"), color.Red(log.Content))
 							fmt.Println("")
 							failure++
