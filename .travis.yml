@@ -1,0 +1,8 @@
+language: go
+go:
+  - 1.11.x
+  - master
+before_install:
+  - make depsdev
+script:
+  - make ci
