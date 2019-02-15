@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.2.3](https://github.com/k1LoW/harvest/compare/v0.2.2...v0.2.3) (2019-02-15)
+
+* Fix build*Command ( append more `sudo` ) [#6](https://github.com/k1LoW/harvest/pull/6) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.2.2](https://github.com/k1LoW/harvest/compare/v0.2.1...v0.2.2) (2019-02-15)
 
 * Show MultiLine when configtest error [#5](https://github.com/k1LoW/harvest/pull/5) ([k1LoW](https://github.com/k1LoW))
