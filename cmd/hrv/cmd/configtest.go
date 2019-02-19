@@ -81,49 +81,46 @@ var configtestCmd = &cobra.Command{
 		failure := 0
 		for _, t := range targets {
 			wg.Add(1)
-			go func(t config.Target) {
-				cChan <- struct{}{}
-				defer func() {
-					<-cChan
-				}()
-				c, err := collector.NewCollector(ctx, &t, true)
-				if err != nil {
-					failure++
-					wg.Done()
-					l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
-					return
-				}
-				logChan := make(chan parser.Log)
-				go func(t config.Target, logChan chan parser.Log) {
-					fmt.Printf("%s: ", t.URL)
-					logRead := false
-					for log := range logChan {
-						if log.Timestamp > 0 {
-							fmt.Printf("%s\n", color.Green("OK", color.B))
-						} else {
-							fmt.Printf("%s\n", color.Red("Timestamp parse error", color.B))
-							fmt.Printf("    %s %s\n", color.Red("      Type:"), color.Red(t.Type))
-							fmt.Printf("    %s %s\n", color.Red("    Regexp:"), color.Red(t.Regexp))
-							fmt.Printf("    %s %s\n", color.Red("TimeFormat:"), color.Red(t.TimeFormat))
-							fmt.Printf("    %s %s\n", color.Red(" MultiLine:"), color.Red(t.MultiLine))
-							fmt.Printf("    %s %s\n", color.Red("       Log:"), color.Red(log.Content))
-							fmt.Println("")
-							failure++
-						}
-						logRead = true
-					}
-					defer wg.Done()
-					if !logRead {
-						fmt.Printf("%s\n", color.Red("Log read error", color.B))
+			cChan <- struct{}{}
+			c, err := collector.NewCollector(ctx, &t, true)
+			if err != nil {
+				failure++
+				<-cChan
+				wg.Done()
+				l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+				continue
+			}
+			logChan := make(chan parser.Log)
+			go func(t config.Target, logChan chan parser.Log) {
+				fmt.Printf("%s: ", t.URL)
+				logRead := false
+				for log := range logChan {
+					if log.Timestamp > 0 {
+						fmt.Printf("%s\n", color.Green("OK", color.B))
+					} else {
+						fmt.Printf("%s\n", color.Red("Timestamp parse error", color.B))
+						fmt.Printf("    %s %s\n", color.Red("      Type:"), color.Red(t.Type))
+						fmt.Printf("    %s %s\n", color.Red("    Regexp:"), color.Red(t.Regexp))
+						fmt.Printf("    %s %s\n", color.Red("TimeFormat:"), color.Red(t.TimeFormat))
+						fmt.Printf("    %s %s\n", color.Red(" MultiLine:"), color.Red(t.MultiLine))
+						fmt.Printf("    %s %s\n", color.Red("       Log:"), color.Red(log.Content))
+						fmt.Println("")
 						failure++
 					}
-				}(t, logChan)
-				err = c.ConfigTest(logChan, t.MultiLine)
-				if err != nil {
-					failure++
-					l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+					logRead = true
 				}
-			}(t)
+				defer wg.Done()
+				if !logRead {
+					fmt.Printf("%s\n", color.Red("Log read error", color.B))
+					failure++
+				}
+			}(t, logChan)
+			err = c.ConfigTest(logChan, t.MultiLine)
+			if err != nil {
+				failure++
+				l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+			}
+			<-cChan
 		}
 
 		wg.Wait()
