@@ -25,19 +25,20 @@ type Log struct {
 
 // Target ...
 type Target struct {
-	URL         string
-	Description string
-	Type        string
-	Regexp      string
-	MultiLine   bool
-	TimeFormat  string
-	TimeZone    string
-	Tags        []string
-	Scheme      string
-	Host        string
-	User        string
-	Port        int
-	Path        string
+	URL              string
+	Description      string
+	Type             string
+	Regexp           string
+	MultiLine        bool
+	TimeFormat       string
+	TimeZone         string
+	Tags             []string
+	Scheme           string
+	Host             string
+	User             string
+	Port             int
+	Path             string
+	SSHKeyPassphrase []byte
 }
 
 // Config ...

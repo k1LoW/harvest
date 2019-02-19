@@ -28,16 +28,17 @@ import (
 )
 
 var (
-	tag               string
-	ignoreTag         string
-	configPath        string
-	urlRegexp         string
-	withTimestamp     bool
-	withTimestampNano bool
-	withHost          bool
-	withPath          bool
-	withTag           bool
-	noColor           bool
+	tag                    string
+	ignoreTag              string
+	configPath             string
+	urlRegexp              string
+	withTimestamp          bool
+	withTimestampNano      bool
+	withHost               bool
+	withPath               bool
+	withTag                bool
+	noColor                bool
+	presetSSHKeyPassphrase bool
 )
 
 // rootCmd represents the base command when called without any subcommands

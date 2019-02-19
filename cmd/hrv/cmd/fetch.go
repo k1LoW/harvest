@@ -35,6 +35,7 @@ import (
 	"github.com/k1LoW/harvest/logger"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -90,6 +91,14 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
+
+		if presetSSHKeyPassphrase {
+			err = presetSSHKeyPassphraseToTargets(targets)
+			if err != nil {
+				l.Error("option error", zap.String("error", err.Error()))
+				os.Exit(1)
+			}
+		}
 
 		st, err := setStartTime(stStr)
 		if err != nil {
@@ -166,6 +175,37 @@ func filterTargets(cfgTargets []config.Target) []config.Target {
 	return targets
 }
 
+type hostPassphrase struct {
+	host       string
+	passphrase []byte
+}
+
+func presetSSHKeyPassphraseToTargets(targets []config.Target) error {
+	hpMap := map[string]hostPassphrase{}
+
+	for i, target := range targets {
+		if target.Scheme != "ssh" {
+			continue
+		}
+		if hp, ok := hpMap[target.Host]; ok {
+			targets[i].SSHKeyPassphrase = hp.passphrase
+			continue
+		}
+		fmt.Printf("Enter passphrase for host '%s': ", target.Host)
+		passphrase, err := terminal.ReadPassword(0)
+		fmt.Println("")
+		if err != nil {
+			return err
+		}
+		targets[i].SSHKeyPassphrase = passphrase
+		hpMap[target.Host] = hostPassphrase{
+			host:       target.Host,
+			passphrase: passphrase,
+		}
+	}
+	return nil
+}
+
 func setStartTime(stStr string) (*time.Time, error) {
 	var st *time.Time
 	if stStr != "" {
@@ -226,4 +266,5 @@ func init() {
 	fetchCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
+	fetchCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }

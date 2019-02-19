@@ -45,7 +45,7 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 	// Set client
 	switch t.Scheme {
 	case "ssh":
-		sshc, err := client.NewSSHClient(l, host, t.User, t.Port, t.Path)
+		sshc, err := client.NewSSHClient(l, host, t.User, t.Port, t.Path, t.SSHKeyPassphrase)
 		if err != nil {
 			return nil, err
 		}

@@ -63,6 +63,15 @@ var configtestCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
+
+		if presetSSHKeyPassphrase {
+			err = presetSSHKeyPassphraseToTargets(targets)
+			if err != nil {
+				l.Error("option error", zap.String("error", err.Error()))
+				os.Exit(1)
+			}
+		}
+
 		l.Info("Timestamp parse test")
 		fmt.Println("")
 
@@ -128,4 +137,5 @@ func init() {
 	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
 	configtestCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
 	configtestCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	configtestCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }
