@@ -157,7 +157,6 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## WANT
 
-- `hrv ls targets`
 - `hrv info`
 - `hrv analyze`
 - `hrv download`
