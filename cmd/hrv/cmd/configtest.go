@@ -83,9 +83,15 @@ var configtestCmd = &cobra.Command{
 			wg.Add(1)
 			go func(t config.Target) {
 				cChan <- struct{}{}
+				defer func() {
+					<-cChan
+				}()
 				c, err := collector.NewCollector(ctx, &t, true)
 				if err != nil {
+					failure++
+					wg.Done()
 					l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+					return
 				}
 				logChan := make(chan parser.Log)
 				go func(t config.Target, logChan chan parser.Log) {
@@ -114,9 +120,9 @@ var configtestCmd = &cobra.Command{
 				}(t, logChan)
 				err = c.ConfigTest(logChan, t.MultiLine)
 				if err != nil {
+					failure++
 					l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
-				<-cChan
 			}(t)
 		}
 
