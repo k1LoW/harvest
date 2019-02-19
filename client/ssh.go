@@ -20,7 +20,7 @@ type SSHClient struct {
 }
 
 // NewSSHClient ...
-func NewSSHClient(l *zap.Logger, host string, user string, port int, path string) (Client, error) {
+func NewSSHClient(l *zap.Logger, host string, user string, port int, path string, passphrase []byte) (Client, error) {
 	options := []sshc.Option{}
 	if user != "" {
 		options = append(options, sshc.User(user))
@@ -28,6 +28,8 @@ func NewSSHClient(l *zap.Logger, host string, user string, port int, path string
 	if port > 0 {
 		options = append(options, sshc.Port(port))
 	}
+	options = append(options, sshc.Passphrase(passphrase))
+
 	client, err := sshc.NewClient(host, options...)
 	if err != nil {
 		return nil, err

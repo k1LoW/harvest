@@ -63,6 +63,15 @@ var configtestCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
+
+		if presetSSHKeyPassphrase {
+			err = presetSSHKeyPassphraseToTargets(targets)
+			if err != nil {
+				l.Error("option error", zap.String("error", err.Error()))
+				os.Exit(1)
+			}
+		}
+
 		l.Info("Timestamp parse test")
 		fmt.Println("")
 
@@ -74,9 +83,15 @@ var configtestCmd = &cobra.Command{
 			wg.Add(1)
 			go func(t config.Target) {
 				cChan <- struct{}{}
+				defer func() {
+					<-cChan
+				}()
 				c, err := collector.NewCollector(ctx, &t, true)
 				if err != nil {
+					failure++
+					wg.Done()
 					l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+					return
 				}
 				logChan := make(chan parser.Log)
 				go func(t config.Target, logChan chan parser.Log) {
@@ -105,9 +120,9 @@ var configtestCmd = &cobra.Command{
 				}(t, logChan)
 				err = c.ConfigTest(logChan, t.MultiLine)
 				if err != nil {
+					failure++
 					l.Error("ConfigTest error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
-				<-cChan
 			}(t)
 		}
 
@@ -128,4 +143,5 @@ func init() {
 	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
 	configtestCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
 	configtestCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	configtestCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }

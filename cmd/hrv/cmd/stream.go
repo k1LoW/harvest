@@ -66,6 +66,14 @@ var streamCmd = &cobra.Command{
 		}
 		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
 
+		if presetSSHKeyPassphrase {
+			err = presetSSHKeyPassphraseToTargets(targets)
+			if err != nil {
+				l.Error("option error", zap.String("error", err.Error()))
+				os.Exit(1)
+			}
+		}
+
 		hLen, tLen, err := getStreamStdoutLengthes(targets, withHost, withPath, withTag)
 		if err != nil {
 			l.Error("option error", zap.String("error", err.Error()))
@@ -173,4 +181,5 @@ func init() {
 	streamCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
 	streamCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	streamCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")
+	streamCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }
