@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.3.0](https://github.com/k1LoW/harvest/compare/v0.2.3...v0.3.0) (2019-02-19)
+
+* Add `hrv ls-targets` [#7](https://github.com/k1LoW/harvest/pull/7) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.2.3](https://github.com/k1LoW/harvest/compare/v0.2.2...v0.2.3) (2019-02-15)
 
 * Fix build*Command ( append more `sudo` ) [#6](https://github.com/k1LoW/harvest/pull/6) ([k1LoW](https://github.com/k1LoW))
