@@ -11,8 +11,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Log ...
-type Log struct {
+// TargetSet ...
+type TargetSet struct {
 	URLs        []string `yaml:"urls"`
 	Description string   `yaml:"description"`
 	Type        string   `yaml:"type"`
@@ -43,15 +43,15 @@ type Target struct {
 
 // Config ...
 type Config struct {
-	Targets []Target
-	Logs    []Log `yaml:"logs"`
+	Targets    []Target
+	TargetSets []TargetSet `yaml:"targetSets"`
 }
 
 // NewConfig ...
 func NewConfig() (*Config, error) {
 	return &Config{
-		Targets: []Target{},
-		Logs:    []Log{},
+		Targets:    []Target{},
+		TargetSets: []TargetSet{},
 	}, nil
 }
 
@@ -72,17 +72,17 @@ func (c *Config) LoadConfigFile(path string) error {
 	if err != nil {
 		return errors.Wrap(errors.WithStack(err), "failed to load config file")
 	}
-	for _, l := range c.Logs {
-		for _, URL := range l.URLs {
+	for _, t := range c.TargetSets {
+		for _, URL := range t.URLs {
 			target := Target{}
 			target.URL = URL
-			target.Description = l.Description
-			target.Type = l.Type
-			target.Regexp = l.Regexp
-			target.MultiLine = l.MultiLine
-			target.TimeFormat = l.TimeFormat
-			target.TimeZone = l.TimeZone
-			target.Tags = l.Tags
+			target.Description = t.Description
+			target.Type = t.Type
+			target.Regexp = t.Regexp
+			target.MultiLine = t.MultiLine
+			target.TimeFormat = t.TimeFormat
+			target.TimeZone = t.TimeZone
+			target.Tags = t.Tags
 
 			u, err := url.Parse(URL)
 			if err != nil {

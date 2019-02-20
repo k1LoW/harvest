@@ -20,7 +20,7 @@ Harvest provides the `hrv` command with the following features.
 
 ``` yaml
 ---
-logs:
+targetSets:
   -
     description: webproxy syslog
     type: syslog
