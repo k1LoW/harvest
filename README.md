@@ -7,13 +7,14 @@ Harvest provides the `hrv` command with the following features.
 - Agentless.
 - Portable.
 - Only 1 config file.
-- Fetch various remote/local logs via SSH/exec. ( `hrv fetch` )
+- Fetch various remote/local log data via SSH/exec. ( `hrv fetch` )
 - Output all fetched logs in the order of timestamp. ( `hrv cat` )
 - Stream various remote/local logs via SSH/exec. ( `hrv stream` )
+- Copy remote/local raw logs via SSH/exec. ( `hrv cp` )
 
 ## Usage
 
-### :beetle: Fetch and output remote/local logs
+### :beetle: Fetch and output remote/local log data
 
 #### 1. Set log URLs (and log type) in config.yml
 
@@ -84,13 +85,13 @@ You can use `hrv configtest` for config test.
 $ hrv configtest -c config.yml
 ```
 
-#### 2. Fetch target logs via SSH/exec ( `hrv fecth` )
+#### 2. Fetch target log data via SSH/exec ( `hrv fecth` )
 
 ``` console
 $ hrv fetch -c config.yml --tag=webproxy,db
 ```
 
-#### 3. Output logs ( `hrv cat` )
+#### 3. Output log data ( `hrv cat` )
 
 ``` console
 $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path | less -R
@@ -104,6 +105,16 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 ``` console
 $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
+```
+
+### :beetle: Copy remote/local raw logs
+
+#### 1. [Set config.yml](#1-set-log-urls-and-log-type-in-configyml)
+
+#### 2. Copy remote/local raw logs to local directory via SSH/exec ( `hrv cp` )
+
+``` console
+$ hrv cp -c config.yml
 ```
 
 ## Architecture
@@ -159,7 +170,6 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 - `hrv info`
 - `hrv analyze`
-- `hrv download`
 - tag DAG
 - Viewer / Visualizer
 
