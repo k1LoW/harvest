@@ -2,8 +2,11 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -36,6 +39,29 @@ func (c *FileClient) Read(ctx context.Context, st *time.Time, et *time.Time) err
 func (c *FileClient) Tailf(ctx context.Context) error {
 	cmd := buildTailfCommand(c.path)
 	return c.Exec(ctx, cmd)
+}
+
+// Ls ...
+func (c *FileClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error {
+	cmd := buildLsCommand(c.path, st)
+	return c.Exec(ctx, cmd)
+}
+
+// Copy ...
+func (c *FileClient) Copy(ctx context.Context, filePath string, dstDir string) error {
+	dstLogFilePath := filepath.Join(dstDir, filePath)
+	dstLogDir := filepath.Dir(dstLogFilePath)
+	err := os.MkdirAll(dstLogDir, 0755)
+	if err != nil {
+		return err
+	}
+	catCmd := fmt.Sprintf("sudo cat %s > %s", filePath, dstLogFilePath)
+	cmd := exec.CommandContext(ctx, "sh", "-c", catCmd)
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // RandomOne ...

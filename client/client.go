@@ -22,6 +22,8 @@ type Client interface {
 	Read(ctx context.Context, st *time.Time, et *time.Time) error
 	Tailf(ctx context.Context) error
 	RandomOne(ctx context.Context) error
+	Ls(ctx context.Context, st *time.Time, et *time.Time) error
+	Copy(ctx context.Context, filePath string, dstDir string) error
 	Out() <-chan Line
 }
 
@@ -51,6 +53,18 @@ func buildTailfCommand(path string) string {
 	base := filepath.Base(path)
 
 	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' | xargs sudo ls -tr | tail -1 | xargs sudo tail -F", dir, base)
+
+	return cmd
+}
+
+// buildLsCommand ...
+func buildLsCommand(path string, st *time.Time) string {
+	dir := filepath.Dir(path)
+	base := filepath.Base(path)
+
+	stStr := st.Format("2006-01-02 15:04:05 MST")
+
+	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr", dir, base, stStr)
 
 	return cmd
 }

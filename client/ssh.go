@@ -2,6 +2,10 @@ package client
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -53,6 +57,29 @@ func (c *SSHClient) Read(ctx context.Context, st *time.Time, et *time.Time) erro
 func (c *SSHClient) Tailf(ctx context.Context) error {
 	cmd := buildTailfCommand(c.path)
 	return c.Exec(ctx, cmd)
+}
+
+// Ls ...
+func (c *SSHClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error {
+	cmd := buildLsCommand(c.path, st)
+	return c.Exec(ctx, cmd)
+}
+
+// Copy ...
+func (c *SSHClient) Copy(ctx context.Context, filePath string, dstDir string) error {
+	dstLogFilePath := filepath.Join(dstDir, c.host, filePath)
+	dstLogDir := filepath.Dir(dstLogFilePath)
+	err := os.MkdirAll(dstLogDir, 0755)
+	if err != nil {
+		return err
+	}
+	catCmd := fmt.Sprintf("ssh %s sudo cat %s > %s", c.host, filePath, dstLogFilePath)
+	cmd := exec.CommandContext(ctx, "sh", "-c", catCmd)
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // RandomOne ...
