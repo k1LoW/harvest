@@ -207,6 +207,7 @@ func (c *Collector) Copy(logChan chan parser.Log, st *time.Time, et *time.Time, 
 
 	go func() {
 		defer func() {
+			cancel()
 			waiter <- struct{}{}
 		}()
 		files := []parser.Log{}
@@ -243,7 +244,6 @@ func (c *Collector) ConfigTest(logChan chan parser.Log, multiLine bool) error {
 
 	go func() {
 		defer func() {
-			close(logChan)
 			cancel()
 			waiter <- struct{}{}
 		}()
@@ -266,5 +266,6 @@ func (c *Collector) ConfigTest(logChan chan parser.Log, multiLine bool) error {
 	}
 
 	<-waiter
+	close(logChan)
 	return nil
 }
