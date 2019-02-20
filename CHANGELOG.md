@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.4.0](https://github.com/k1LoW/harvest/compare/v0.3.0...v0.4.0) (2019-02-21)
+
+* Add `hrv ls-logs` [#12](https://github.com/k1LoW/harvest/pull/12) ([k1LoW](https://github.com/k1LoW))
+* Change config.yml format ( `logs:` -> `targetSets:` ) [#11](https://github.com/k1LoW/harvest/pull/11) ([k1LoW](https://github.com/k1LoW))
+* Add `hrv cp` [#10](https://github.com/k1LoW/harvest/pull/10) ([k1LoW](https://github.com/k1LoW))
+* Fix configtest targets order [#9](https://github.com/k1LoW/harvest/pull/9) ([k1LoW](https://github.com/k1LoW))
+* Add `--preset-ssh-key-passphrase` option [#8](https://github.com/k1LoW/harvest/pull/8) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.3.0](https://github.com/k1LoW/harvest/compare/v0.2.3...v0.3.0) (2019-02-19)
 
 * Add `hrv ls-targets` [#7](https://github.com/k1LoW/harvest/pull/7) ([k1LoW](https://github.com/k1LoW))

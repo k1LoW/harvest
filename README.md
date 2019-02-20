@@ -168,7 +168,6 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## WANT
 
-- `hrv info`
 - `hrv analyze`
 - tag DAG
 - Viewer / Visualizer
