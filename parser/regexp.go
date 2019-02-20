@@ -188,7 +188,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 						Tag:            tStr,
 						Timestamp:      0,
 						FilledByPrevTs: false,
-						Content:        "Harvest parse error: too many rows.", // FIXME
+						Content:        "Harvest parse error: too many rows", // FIXME
 					}
 					contentStash = nil
 				}

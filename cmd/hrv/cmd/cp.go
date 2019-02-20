@@ -71,6 +71,8 @@ var cpCmd = &cobra.Command{
 			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
+		l.Info(fmt.Sprintf("Mkdir %s", dstDir))
+		l.Info("Directory initialized")
 
 		if _, err := os.Lstat(dstDir); err == nil {
 			l.Error(fmt.Sprintf("%s already exists", dstDir), zap.String("error", err.Error()))
@@ -111,7 +113,7 @@ var cpCmd = &cobra.Command{
 			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
 		}
 
-		l.Info("Start copy targets.")
+		l.Info("Start copying logs from targets")
 
 		sout, err := stdout.NewStdout(
 			withTimestamp,
@@ -155,7 +157,7 @@ var cpCmd = &cobra.Command{
 
 		wg.Wait()
 
-		l.Info("Copy finished.")
+		l.Info("Copy finished")
 	},
 }
 

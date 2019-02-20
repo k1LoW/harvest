@@ -27,7 +27,7 @@ func NewDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	l.Info(fmt.Sprintf("Create %s.", fullPath))
+	l.Info(fmt.Sprintf("Create %s", fullPath))
 	db, err := sqlx.Connect("sqlite3", dbPath)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -35,7 +35,7 @@ func NewDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
 	db.MustExec(
 		`CREATE VIRTUAL TABLE log USING FTS4(host, path, tag, ts INTEGER, filled_by_prev_ts INTEGER, content);`,
 	)
-	l.Info("DB initialized.")
+	l.Info("DB initialized")
 
 	db.MustExec("PRAGMA journal_mode = MEMORY")
 	db.MustExec("PRAGMA synchronous = NORMAL")
@@ -84,7 +84,7 @@ func (d *DB) StartInsert() {
 	go func() {
 		for {
 			<-ticker.C
-			d.logger.Info(fmt.Sprintf("%d logs are fetched. ", count))
+			d.logger.Info(fmt.Sprintf("%d log data are fetched", count))
 		}
 	}()
 
@@ -102,7 +102,7 @@ L:
 		default:
 		}
 	}
-	d.logger.Info(fmt.Sprintf("%d logs are fetched.", count))
+	d.logger.Info(fmt.Sprintf("%d log data are fetched", count))
 }
 
 // Cat ...

@@ -136,7 +136,6 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	if err != nil {
 		return err
 	}
-	c.logger.Info("Start reading ...")
 
 	go func() {
 		<-innerCtx.Done()
@@ -150,7 +149,6 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	}
 
 	<-innerCtx.Done()
-	c.logger.Info("Read finished.")
 
 	return nil
 }

@@ -119,7 +119,7 @@ var fetchCmd = &cobra.Command{
 			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
 		}
 
-		l.Info("Start fetching from targets.")
+		l.Info("Start fetching from targets")
 
 		go d.StartInsert()
 
@@ -145,7 +145,7 @@ var fetchCmd = &cobra.Command{
 
 		wg.Wait()
 
-		l.Info("Fetch finished.")
+		l.Info("Fetch finished")
 	},
 }
 

@@ -216,7 +216,7 @@ func (c *Collector) Copy(logChan chan parser.Log, st *time.Time, et *time.Time, 
 		}
 		for _, file := range files {
 			filePath := file.Content
-			c.logger.Info(fmt.Sprintf("Start copying %s ...", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
+			c.logger.Info(fmt.Sprintf("Start copying %s", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
 			err := c.client.Copy(innerCtx, filePath, dstDir)
 			if err != nil {
 				c.logger.Error("Copy error", zap.String("host", c.target.Host), zap.String("path", c.target.Path), zap.String("error", err.Error()))

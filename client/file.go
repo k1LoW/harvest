@@ -73,6 +73,7 @@ func (c *FileClient) RandomOne(ctx context.Context) error {
 // Exec ...
 func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 	defer close(c.lineChan)
+	c.logger.Info("Create new local exec session")
 	tzCmd := exec.Command("date", `+"%z"`)
 	tzOut, err := tzCmd.Output()
 	if err != nil {
@@ -102,7 +103,6 @@ func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 	if err != nil {
 		return err
 	}
-	c.logger.Info("Start reading ...")
 
 	err = cmd.Wait()
 	if err != nil {
@@ -110,8 +110,7 @@ func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 	}
 
 	<-innerCtx.Done()
-	c.logger.Info("Read finished.")
-
+	c.logger.Info("Close local exec session")
 	return nil
 }
 
