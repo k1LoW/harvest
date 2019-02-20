@@ -178,7 +178,6 @@ func (c *Collector) LsLogs(logChan chan parser.Log, st *time.Time, et *time.Time
 				Path:    line.Path,
 				Tag:     tStr,
 				Content: line.Content,
-				Scheme:  c.target.Scheme,
 			}
 			select {
 			case <-c.ctx.Done():
@@ -201,8 +200,10 @@ func (c *Collector) LsLogs(logChan chan parser.Log, st *time.Time, et *time.Time
 
 // Copy ...
 func (c *Collector) Copy(logChan chan parser.Log, st *time.Time, et *time.Time, dstDir string) error {
-	fileChan := make(chan parser.Log)
 	waiter := make(chan struct{})
+	innerCtx, cancel := context.WithCancel(c.ctx)
+	defer cancel()
+	fileChan := make(chan parser.Log)
 
 	go func() {
 		defer func() {
@@ -212,7 +213,16 @@ func (c *Collector) Copy(logChan chan parser.Log, st *time.Time, et *time.Time, 
 		for file := range fileChan {
 			files = append(files, file)
 		}
-		fmt.Printf("%v\n", files)
+		for _, file := range files {
+			filePath := file.Content
+			c.logger.Info(fmt.Sprintf("Start copying %s ...", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
+			err := c.client.Copy(innerCtx, filePath, dstDir)
+			if err != nil {
+				c.logger.Error("Copy error", zap.String("host", c.target.Host), zap.String("path", c.target.Path), zap.String("error", err.Error()))
+			} else {
+				c.logger.Info(fmt.Sprintf("Copy %s finished", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
+			}
+		}
 	}()
 
 	err := c.LsLogs(fileChan, st, et)
