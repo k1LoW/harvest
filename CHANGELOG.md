@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.0](https://github.com/k1LoW/harvest/compare/v0.4.0...v0.5.0) (2019-02-27)
+
+* Preset default passphrase for all targets [#13](https://github.com/k1LoW/harvest/pull/13) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.4.0](https://github.com/k1LoW/harvest/compare/v0.3.0...v0.4.0) (2019-02-21)
 
 * Add `hrv ls-logs` [#12](https://github.com/k1LoW/harvest/pull/12) ([k1LoW](https://github.com/k1LoW))
