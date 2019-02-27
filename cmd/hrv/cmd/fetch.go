@@ -29,13 +29,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Songmu/prompter"
 	"github.com/k1LoW/harvest/collector"
 	"github.com/k1LoW/harvest/config"
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -182,21 +182,29 @@ type hostPassphrase struct {
 
 func presetSSHKeyPassphraseToTargets(targets []config.Target) error {
 	hpMap := map[string]hostPassphrase{}
+	var defaultPassohrase []byte
+
+	yn := prompter.YN("Do you preset default passphrase for all targets?", true)
+	if yn {
+		fmt.Println("Preset default passphrase")
+		defaultPassohrase = []byte(prompter.Password("Enter default passphrase"))
+	} else {
+		fmt.Println("Preset passphrase for each target")
+	}
 
 	for i, target := range targets {
 		if target.Scheme != "ssh" {
+			continue
+		}
+		if yn {
+			targets[i].SSHKeyPassphrase = defaultPassohrase
 			continue
 		}
 		if hp, ok := hpMap[target.Host]; ok {
 			targets[i].SSHKeyPassphrase = hp.passphrase
 			continue
 		}
-		fmt.Printf("Enter passphrase for host '%s': ", target.Host)
-		passphrase, err := terminal.ReadPassword(0)
-		fmt.Println("")
-		if err != nil {
-			return err
-		}
+		passphrase := []byte(prompter.Password(fmt.Sprintf("Enter passphrase for host '%s'", target.Host)))
 		targets[i].SSHKeyPassphrase = passphrase
 		hpMap[target.Host] = hostPassphrase{
 			host:       target.Host,
