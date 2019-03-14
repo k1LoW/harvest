@@ -99,6 +99,7 @@ var catCmd = &cobra.Command{
 			withHost,
 			withPath,
 			withTag,
+			withoutMark,
 			hLen,
 			tLen,
 			noColor,
@@ -203,6 +204,7 @@ func init() {
 	catCmd.Flags().BoolVarP(&withHost, "with-host", "", false, "output with host")
 	catCmd.Flags().BoolVarP(&withPath, "with-path", "", false, "output with path")
 	catCmd.Flags().BoolVarP(&withTag, "with-tag", "", false, "output with tag")
+	catCmd.Flags().BoolVarP(&withoutMark, "without-mark", "", false, "output without prefix mark")
 	catCmd.Flags().StringVarP(&match, "match", "", "", "filter logs using SQLite FTS `MATCH` query")
 	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag (format: foo,bar)")
 	catCmd.Flags().StringVarP(&st, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")

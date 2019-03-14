@@ -47,6 +47,7 @@ type Stdout struct {
 	withHost          bool
 	withPath          bool
 	withTag           bool
+	withoutMark       bool
 	hFmt              string
 	tFmt              string
 	noColor           bool
@@ -58,6 +59,7 @@ func NewStdout(withTimestamp bool,
 	withHost bool,
 	withPath bool,
 	withTag bool,
+	withoutMark bool,
 	hLen int,
 	tLen int,
 	noColor bool,
@@ -68,6 +70,7 @@ func NewStdout(withTimestamp bool,
 		withHost:          withHost,
 		withPath:          withPath,
 		withTag:           withTag,
+		withoutMark:       withoutMark,
 		hFmt:              fmt.Sprintf("%%-%ds ", hLen),
 		tFmt:              fmt.Sprintf("%%-%ds ", tLen),
 		noColor:           noColor,
@@ -132,7 +135,11 @@ func (s *Stdout) Out(logChan chan parser.Log, hosts []string) error {
 			for i, h := range hosts {
 				if h == log.Host {
 					colorFunc = colorizeMap[i%len(colorizeMap)].colorFunc
-					bar = colorFunc(colorizeMap[i%len(colorizeMap)].bar)
+					if s.withoutMark {
+						bar = ""
+					} else {
+						bar = colorFunc(colorizeMap[i%len(colorizeMap)].bar)
+					}
 				}
 			}
 		}

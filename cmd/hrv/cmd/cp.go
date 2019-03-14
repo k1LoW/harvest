@@ -116,11 +116,12 @@ var cpCmd = &cobra.Command{
 		l.Info("Start copying logs from targets")
 
 		sout, err := stdout.NewStdout(
-			withTimestamp,
-			withTimestampNano,
-			withHost,
-			withPath,
-			withTag,
+			false,
+			false,
+			false,
+			false,
+			false,
+			false,
 			0,
 			0,
 			noColor,
