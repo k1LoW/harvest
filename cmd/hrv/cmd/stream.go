@@ -86,6 +86,7 @@ var streamCmd = &cobra.Command{
 			withHost,
 			withPath,
 			withTag,
+			withoutMark,
 			hLen,
 			tLen,
 			noColor,
@@ -177,6 +178,7 @@ func init() {
 	streamCmd.Flags().BoolVarP(&withHost, "with-host", "", false, "output with host")
 	streamCmd.Flags().BoolVarP(&withPath, "with-path", "", false, "output with path")
 	streamCmd.Flags().BoolVarP(&withTag, "with-tag", "", false, "output with tag")
+	streamCmd.Flags().BoolVarP(&withoutMark, "without-mark", "", false, "output without prefix mark")
 	streamCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
 	streamCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
 	streamCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")

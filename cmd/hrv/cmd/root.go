@@ -37,6 +37,7 @@ var (
 	withHost               bool
 	withPath               bool
 	withTag                bool
+	withoutMark            bool
 	noColor                bool
 	presetSSHKeyPassphrase bool
 )
