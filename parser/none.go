@@ -101,7 +101,15 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 						Tag:            tStr,
 						Timestamp:      0,
 						FilledByPrevTs: false,
-						Content:        "Harvest parse error: too many rows", // FIXME
+						Content:        strings.Join(contentStash, "\n"),
+					}
+					logChan <- Log{
+						Host:           line.Host,
+						Path:           line.Path,
+						Tag:            tStr,
+						Timestamp:      0,
+						FilledByPrevTs: false,
+						Content:        "Harvest parse error: too many rows",
 					}
 					contentStash = nil
 				}

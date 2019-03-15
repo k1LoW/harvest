@@ -184,9 +184,17 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 						Host:           line.Host,
 						Path:           line.Path,
 						Tag:            tStr,
+						Timestamp:      prevTs,
+						FilledByPrevTs: false,
+						Content:        strings.Join(contentStash, "\n"),
+					}
+					logChan <- Log{
+						Host:           line.Host,
+						Path:           line.Path,
+						Tag:            tStr,
 						Timestamp:      0,
 						FilledByPrevTs: false,
-						Content:        "Harvest parse error: too many rows", // FIXME
+						Content:        "Harvest parse error: too many rows",
 					}
 					contentStash = nil
 				}
