@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.6.0](https://github.com/k1LoW/harvest/compare/v0.5.0...v0.6.0) (2019-03-16)
+
+* Use goreleaser [#17](https://github.com/k1LoW/harvest/pull/17) ([k1LoW](https://github.com/k1LoW))
+* Fix maxContentStash logic [#16](https://github.com/k1LoW/harvest/pull/16) ([k1LoW](https://github.com/k1LoW))
+* Add parser type `none` [#15](https://github.com/k1LoW/harvest/pull/15) ([k1LoW](https://github.com/k1LoW))
+* Add `--without-mark` option [#14](https://github.com/k1LoW/harvest/pull/14) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.5.0](https://github.com/k1LoW/harvest/compare/v0.4.0...v0.5.0) (2019-02-27)
 
 * Preset default passphrase for all targets [#13](https://github.com/k1LoW/harvest/pull/13) ([k1LoW](https://github.com/k1LoW))
