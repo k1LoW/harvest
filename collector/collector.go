@@ -73,6 +73,11 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 		if err != nil {
 			return nil, err
 		}
+	case "none":
+		p, err = parser.NewNoneParser(t.MultiLine)
+		if err != nil {
+			return nil, err
+		}
 	default: // regexp
 		p, err = parser.NewRegexpParser(t.Regexp, t.TimeFormat, t.MultiLine)
 		if err != nil {

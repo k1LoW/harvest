@@ -8,6 +8,8 @@ import (
 	"github.com/k1LoW/harvest/client"
 )
 
+const maxContentStash = 1000
+
 // Log ...
 type Log struct {
 	Host           string `db:"host"`
