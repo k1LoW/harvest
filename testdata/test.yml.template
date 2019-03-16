@@ -1,0 +1,10 @@
+---
+targetSets:
+  -
+    description: dummy access.log
+    type: combinedLog
+    urls:
+      - 'file://__PWD__/testdata/apache.log*'
+    tags:
+      - httpd
+
