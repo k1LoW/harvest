@@ -13,6 +13,8 @@ builds:
     - CXX=o64-clang++
   goos:
     - darwin
+  goarch:
+    - amd64
 - binary: hrv
   main: ./cmd/hrv/main.go
   ldflags:
