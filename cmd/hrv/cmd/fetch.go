@@ -76,7 +76,7 @@ var fetchCmd = &cobra.Command{
 			dbPath = fmt.Sprintf("harvest-%s.db", time.Now().Format("20060102T150405-0700"))
 		}
 		if _, err := os.Lstat(dbPath); err == nil {
-			l.Error(fmt.Sprintf("%s already exists", dbPath), zap.String("error", err.Error()))
+			l.Error(fmt.Sprintf("%s already exists", dbPath))
 			os.Exit(1)
 		}
 		d, err := db.NewDB(ctx, l, dbPath)

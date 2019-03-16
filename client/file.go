@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -32,6 +33,10 @@ func NewFileClient(l *zap.Logger, path string) (Client, error) {
 // Read ...
 func (c *FileClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
 	cmd := buildReadCommand(c.path, st)
+	if runtime.GOOS == "darwin" {
+		cmd = strings.Replace(cmd, "zcat", "gzcat", -1)
+	}
+
 	return c.Exec(ctx, cmd)
 }
 
@@ -67,6 +72,9 @@ func (c *FileClient) Copy(ctx context.Context, filePath string, dstDir string) e
 // RandomOne ...
 func (c *FileClient) RandomOne(ctx context.Context) error {
 	cmd := buildRandomOneCommand(c.path)
+	if runtime.GOOS == "darwin" {
+		cmd = strings.Replace(cmd, "zcat", "gzcat", -1)
+	}
 	return c.Exec(ctx, cmd)
 }
 
@@ -74,7 +82,7 @@ func (c *FileClient) RandomOne(ctx context.Context) error {
 func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 	defer close(c.lineChan)
 	c.logger.Info("Create new local exec session")
-	tzCmd := exec.Command("date", `+"%z"`)
+	tzCmd := exec.Command("date", `+%z`)
 	tzOut, err := tzCmd.Output()
 	if err != nil {
 		return err
@@ -97,18 +105,17 @@ func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 
 	r := stdout.(io.Reader)
 
-	go bindReaderAndChan(innerCtx, cancel, c.logger, &r, c.lineChan, "localhost", c.path, strings.TrimRight(string(tzOut), "\n"))
-
 	err = cmd.Start()
 	if err != nil {
 		return err
 	}
 
+	bindReaderAndChan(innerCtx, cancel, c.logger, &r, c.lineChan, "localhost", c.path, strings.TrimRight(string(tzOut), "\n"))
+
 	err = cmd.Wait()
 	if err != nil {
 		return err
 	}
-
 	<-innerCtx.Done()
 	c.logger.Info("Close local exec session")
 	return nil
