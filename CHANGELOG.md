@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.6.2](https://github.com/k1LoW/harvest/compare/v0.6.1...v0.6.2) (2019-03-16)
+
+* Fix goreleaser.yml for  for CGO_ENABLED=1 [#20](https://github.com/k1LoW/harvest/pull/20) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.6.1](https://github.com/k1LoW/harvest/compare/v0.6.0...v0.6.1) (2019-03-16)
 
 * Fix `file://` log aggregation [#19](https://github.com/k1LoW/harvest/pull/19) ([k1LoW](https://github.com/k1LoW))
