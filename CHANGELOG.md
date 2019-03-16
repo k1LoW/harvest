@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.6.1](https://github.com/k1LoW/harvest/compare/v0.6.0...v0.6.1) (2019-03-16)
+
+* Fix `file://` log aggregation [#19](https://github.com/k1LoW/harvest/pull/19) ([k1LoW](https://github.com/k1LoW))
+* Fix CGO_ENABLED [#18](https://github.com/k1LoW/harvest/pull/18) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.6.0](https://github.com/k1LoW/harvest/compare/v0.5.0...v0.6.0) (2019-03-16)
 
 * Use goreleaser [#17](https://github.com/k1LoW/harvest/pull/17) ([k1LoW](https://github.com/k1LoW))
