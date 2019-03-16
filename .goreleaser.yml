@@ -9,8 +9,6 @@ builds:
     - -s -w -X github.com/k1LoW/harvest.version={{.Version}} -X github.com/k1LoW/harvest.commit={{.FullCommit}} -X github.com/k1LoW/harvest.date={{.Date}} -X github.com/k1LoW/harvest/version.Version={{.Version}}
   env:
     - CGO_ENABLED=1
-    - CC=o64-clang
-    - CXX=o64-clang++
   goos:
     - darwin
   goarch:
@@ -19,10 +17,15 @@ builds:
   main: ./cmd/hrv/main.go
   ldflags:
     - -s -w -X github.com/k1LoW/harvest.version={{.Version}} -X github.com/k1LoW/harvest.commit={{.FullCommit}} -X github.com/k1LoW/harvest.date={{.Date}} -X github.com/k1LoW/harvest/version.Version={{.Version}}
+    - -linkmode external
+    - -extldflags "-static"
   env:
     - CGO_ENABLED=1
+    - CC=/usr/local/bin/x86_64-linux-musl-cc
   goos:
     - linux
+  goarch:
+    - amd64
 archive:
   name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
   format_overrides:
