@@ -2,6 +2,8 @@
 
 > Portable log aggregation tool for middle-scale system operation/observation.
 
+![screencast](screencast.svg)
+
 Harvest provides the `hrv` command with the following features.
 
 - Agentless.
