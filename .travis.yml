@@ -7,8 +7,12 @@ matrix:
     env: GO111MODULE=on
   - go: master
     env: GO111MODULE=on
+addons:
+  apt:
+    update: true
 install:
   - echo $TRAVIS_GO_VERSION
+  - sudo apt-get install clang
   - make depsdev
 script:
   - make ci
