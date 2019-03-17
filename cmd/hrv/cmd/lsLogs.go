@@ -121,11 +121,11 @@ var lsLogsCmd = &cobra.Command{
 				defer wg.Done()
 				c, err := collector.NewCollector(ctx, &t, true)
 				if err != nil {
-					l.Error("Copy error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+					l.Error("Ls error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
 				err = c.LsLogs(logChan, st, et)
 				if err != nil {
-					l.Error("Copy error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+					l.Error("Ls error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
 				<-cChan
 			}(t)
