@@ -21,7 +21,7 @@ CREATE VIRTUAL TABLE log USING FTS4(host, path, tag, ts INTEGER, filled_by_prev_
 | path |  |  | true |  |  | path |
 | tag |  |  | true |  |  | tag |
 | ts |  |  | true |  |  | timestamp (unixtime nano) |
-| filled_by_prev_ts |  |  | true |  |  |  |
+| filled_by_prev_ts |  |  | true |  |  | if filled by prev row ts, true |
 | content |  |  | true |  |  | raw log content |
 
 ## Relations

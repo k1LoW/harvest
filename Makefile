@@ -13,16 +13,22 @@ BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 
 default: test
 
-ci: test integration
+ci: test build integration
 
 test:
 	go test ./... -coverprofile=coverage.txt -covermode=count
 
-integration: build
+integration:
 	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml
 	@./hrv fetch -c testdata/test.yml -o test.db --start-time='2019-01-01 00:00:00'
 	test `./hrv cat test.db | grep -c ''` -gt 0 || exit 1
 	@rm test.db
+
+dbdoc:
+	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml
+	@./hrv fetch -c testdata/test.yml -o harvest.db --start-time='2019-01-01 00:00:00'
+	@tbls doc -f
+	@rm harvest.db
 
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)" ./cmd/hrv
