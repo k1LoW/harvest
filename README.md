@@ -1,6 +1,6 @@
 # Harvest [![Build Status](https://travis-ci.org/k1LoW/harvest.svg?branch=master)](https://travis-ci.org/k1LoW/harvest) [![GitHub release](https://img.shields.io/github/release/k1LoW/harvest.svg)](https://github.com/k1LoW/harvest/releases) [![Go Report Card](https://goreportcard.com/badge/github.com/k1LoW/harvest)](https://goreportcard.com/report/github.com/k1LoW/harvest)
 
-> Portable log aggregation tool for middle-scale system operation/observation.
+> Portable log aggregation tool for middle-scale system operation/troubleshooting.
 
 ![screencast](doc/screencast.svg)
 
