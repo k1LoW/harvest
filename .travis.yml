@@ -4,6 +4,7 @@ go:
   - 1.12.x
   - master
 env: GO111MODULE=on
+dist: xenial
 addons:
   apt:
     update: true
