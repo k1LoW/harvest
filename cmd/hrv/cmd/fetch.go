@@ -157,7 +157,7 @@ func filterTargets(cfgTargets []config.Target) []config.Target {
 		tags := strings.Split(tag, ",")
 		re := regexp.MustCompile(urlRegexp)
 		for _, target := range cfgTargets {
-			if contains(target.Tags, tags) || (urlRegexp != "" && re.MatchString(target.URL)) {
+			if contains(target.Tags, tags) && (urlRegexp == "" || re.MatchString(target.URL)) {
 				if contains(target.Tags, ignoreTags) {
 					continue
 				}
