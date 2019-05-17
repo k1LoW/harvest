@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.6.3](https://github.com/k1LoW/harvest/compare/v0.6.2...v0.6.3) (2019-05-17)
+
+* Fix target filter [#22](https://github.com/k1LoW/harvest/pull/22) ([k1LoW](https://github.com/k1LoW))
+* Skip configtest when target type = 'none' [#21](https://github.com/k1LoW/harvest/pull/21) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.6.2](https://github.com/k1LoW/harvest/compare/v0.6.1...v0.6.2) (2019-03-16)
 
 * Fix goreleaser.yml for  for CGO_ENABLED=1 [#20](https://github.com/k1LoW/harvest/pull/20) ([k1LoW](https://github.com/k1LoW))
