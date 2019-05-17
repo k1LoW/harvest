@@ -3,7 +3,9 @@ before:
     - go mod download
     - go mod tidy
 builds:
-- binary: hrv
+-
+  id: hrv-darwin
+  binary: hrv
   main: ./cmd/hrv/main.go
   ldflags:
     - -s -w -X github.com/k1LoW/harvest.version={{.Version}} -X github.com/k1LoW/harvest.commit={{.FullCommit}} -X github.com/k1LoW/harvest.date={{.Date}} -X github.com/k1LoW/harvest/version.Version={{.Version}}
@@ -13,7 +15,9 @@ builds:
     - darwin
   goarch:
     - amd64
-- binary: hrv
+-
+  id: hrv-linux
+  binary: hrv
   main: ./cmd/hrv/main.go
   ldflags:
     - -s -w -X github.com/k1LoW/harvest.version={{.Version}} -X github.com/k1LoW/harvest.commit={{.FullCommit}} -X github.com/k1LoW/harvest.date={{.Date}} -X github.com/k1LoW/harvest/version.Version={{.Version}}
