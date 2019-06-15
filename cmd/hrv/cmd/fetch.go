@@ -24,12 +24,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"regexp"
 	"sync"
 	"time"
 
-	"github.com/Songmu/prompter"
-	"github.com/antonmedv/expr"
 	"github.com/k1LoW/harvest/collector"
 	"github.com/k1LoW/harvest/config"
 	"github.com/k1LoW/harvest/db"
@@ -151,124 +148,6 @@ var fetchCmd = &cobra.Command{
 
 		l.Info("Fetch finished")
 	},
-}
-
-// filterTargets ...
-func filterTargets(cfg *config.Config, exprTag string) ([]config.Target, error) {
-	allTags := cfg.Tags()
-	targets := []config.Target{}
-	if tag != "" || urlRegexp != "" {
-		re := regexp.MustCompile(urlRegexp)
-		for _, target := range cfg.Targets {
-			tags := map[string]interface{}{}
-			for tag, _ := range allTags {
-				if contains(target.Tags, tag) {
-					tags[tag] = true
-				} else {
-					tags[tag] = false
-				}
-			}
-			out, err := expr.Eval(exprTag, tags)
-			if err != nil {
-				return targets, err
-			}
-			if out.(bool) && (urlRegexp == "" || re.MatchString(target.Source)) {
-				targets = append(targets, target)
-			}
-		}
-	} else {
-		for _, target := range cfg.Targets {
-			targets = append(targets, target)
-		}
-	}
-	return targets, nil
-}
-
-type hostPassphrase struct {
-	host       string
-	passphrase []byte
-}
-
-func presetSSHKeyPassphraseToTargets(targets []config.Target) error {
-	hpMap := map[string]hostPassphrase{}
-	var defaultPassohrase []byte
-
-	yn := prompter.YN("Do you preset default passphrase for all targets?", true)
-	if yn {
-		fmt.Println("Preset default passphrase")
-		defaultPassohrase = []byte(prompter.Password("Enter default passphrase"))
-	} else {
-		fmt.Println("Preset passphrase for each target")
-	}
-
-	for i, target := range targets {
-		if target.Scheme != "ssh" {
-			continue
-		}
-		if yn {
-			targets[i].SSHKeyPassphrase = defaultPassohrase
-			continue
-		}
-		if hp, ok := hpMap[target.Host]; ok {
-			targets[i].SSHKeyPassphrase = hp.passphrase
-			continue
-		}
-		passphrase := []byte(prompter.Password(fmt.Sprintf("Enter passphrase for host '%s'", target.Host)))
-		targets[i].SSHKeyPassphrase = passphrase
-		hpMap[target.Host] = hostPassphrase{
-			host:       target.Host,
-			passphrase: passphrase,
-		}
-	}
-	return nil
-}
-
-func setStartTime(stStr string) (*time.Time, error) {
-	var st *time.Time
-	if stStr != "" {
-		loc, err := time.LoadLocation("Local")
-		if err != nil {
-			return nil, err
-		}
-		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
-		if err != nil {
-			return nil, err
-		}
-		st = &stt
-	} else {
-		stt := time.Now().Add(defaultStartTimeDuration)
-		st = &stt
-	}
-	return st, nil
-}
-
-// setEndTime ...
-func setEndTime(etStr string) (*time.Time, error) {
-	var et *time.Time
-	if etStr != "" {
-		loc, err := time.LoadLocation("Local")
-		if err != nil {
-			return nil, err
-		}
-		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
-		if err != nil {
-			return nil, err
-		}
-		et = &ett
-	} else {
-		et = nil
-	}
-	return et, nil
-}
-
-// contains ...
-func contains(ss1 []string, ss2 string) bool {
-	for _, s1 := range ss1 {
-		if s1 == ss2 {
-			return true
-		}
-	}
-	return false
 }
 
 func init() {
