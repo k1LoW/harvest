@@ -171,7 +171,7 @@ func init() {
 	cpCmd.Flags().StringVarP(&dstDir, "out", "o", "", "dst dir")
 	cpCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	cpCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
-	cpCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
+	cpCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	cpCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	cpCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	cpCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")

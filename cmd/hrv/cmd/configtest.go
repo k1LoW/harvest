@@ -143,7 +143,7 @@ var configtestCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(configtestCmd)
 	configtestCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
-	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
+	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	configtestCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	configtestCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }
