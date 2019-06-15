@@ -4,9 +4,11 @@ import (
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/antonmedv/expr"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -118,4 +120,43 @@ func (c *Config) Tags() Tags {
 		}
 	}
 	return tags
+}
+
+func (c *Config) FilterTargets(exprTag, regexSource string) ([]Target, error) {
+	allTags := c.Tags()
+	targets := []Target{}
+	if exprTag != "" || regexSource != "" {
+		re := regexp.MustCompile(regexSource)
+		for _, target := range c.Targets {
+			tags := map[string]interface{}{}
+			for tag, _ := range allTags {
+				if contains(target.Tags, tag) {
+					tags[tag] = true
+				} else {
+					tags[tag] = false
+				}
+			}
+			out, err := expr.Eval(exprTag, tags)
+			if err != nil {
+				return targets, err
+			}
+			if out.(bool) && (regexSource == "" || re.MatchString(target.Source)) {
+				targets = append(targets, target)
+			}
+		}
+	} else {
+		for _, target := range c.Targets {
+			targets = append(targets, target)
+		}
+	}
+	return targets, nil
+}
+
+func contains(ss []string, t string) bool {
+	for _, s := range ss {
+		if s == t {
+			return true
+		}
+	}
+	return false
 }

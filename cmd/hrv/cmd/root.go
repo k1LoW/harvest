@@ -23,11 +23,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/Songmu/prompter"
-	"github.com/antonmedv/expr"
 	"github.com/k1LoW/harvest/config"
 	"github.com/spf13/cobra"
 )
@@ -61,36 +59,6 @@ func Execute() {
 }
 
 func init() {}
-
-func filterTargets(cfg *config.Config, exprTag string) ([]config.Target, error) {
-	allTags := cfg.Tags()
-	targets := []config.Target{}
-	if tag != "" || urlRegexp != "" {
-		re := regexp.MustCompile(urlRegexp)
-		for _, target := range cfg.Targets {
-			tags := map[string]interface{}{}
-			for tag, _ := range allTags {
-				if contains(target.Tags, tag) {
-					tags[tag] = true
-				} else {
-					tags[tag] = false
-				}
-			}
-			out, err := expr.Eval(exprTag, tags)
-			if err != nil {
-				return targets, err
-			}
-			if out.(bool) && (urlRegexp == "" || re.MatchString(target.Source)) {
-				targets = append(targets, target)
-			}
-		}
-	} else {
-		for _, target := range cfg.Targets {
-			targets = append(targets, target)
-		}
-	}
-	return targets, nil
-}
 
 type hostPassphrase struct {
 	host       string
@@ -166,13 +134,4 @@ func setEndTime(etStr string) (*time.Time, error) {
 		et = nil
 	}
 	return et, nil
-}
-
-func contains(ss []string, t string) bool {
-	for _, s := range ss {
-		if s == t {
-			return true
-		}
-	}
-	return false
 }

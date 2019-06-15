@@ -59,7 +59,7 @@ var streamCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		targets, err := filterTargets(cfg, tag)
+		targets, err := cfg.FilterTargets(tag, urlRegexp)
 		if err != nil {
 			l.Error("tag option error", zap.String("error", err.Error()))
 			os.Exit(1)

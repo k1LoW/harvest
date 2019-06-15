@@ -48,7 +48,7 @@ var targetsCmd = &cobra.Command{
 			l.Error("Config error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
-		targets, err := filterTargets(cfg, tag)
+		targets, err := cfg.FilterTargets(tag, urlRegexp)
 		if err != nil {
 			l.Error("tag option error", zap.String("error", err.Error()))
 			os.Exit(1)
