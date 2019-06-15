@@ -2,6 +2,7 @@ module github.com/k1LoW/harvest
 
 require (
 	github.com/Songmu/prompter v0.2.0
+	github.com/antonmedv/expr v1.1.4
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/k1LoW/sshc v0.0.0-20190401143141-dafe6dec2b54

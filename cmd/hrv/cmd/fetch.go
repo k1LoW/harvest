@@ -25,11 +25,11 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/antonmedv/expr"
 	"github.com/k1LoW/harvest/collector"
 	"github.com/k1LoW/harvest/config"
 	"github.com/k1LoW/harvest/db"
@@ -85,7 +85,11 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		targets := filterTargets(cfg.Targets)
+		targets, err := filterTargets(cfg, tag)
+		if err != nil {
+			l.Error("tag option error", zap.String("error", err.Error()))
+			os.Exit(1)
+		}
 		if len(targets) == 0 {
 			l.Error("No targets")
 			os.Exit(1)
@@ -150,22 +154,34 @@ var fetchCmd = &cobra.Command{
 }
 
 // filterTargets ...
-func filterTargets(cfgTargets []config.Target) []config.Target {
+func filterTargets(cfg *config.Config, exprTag string) ([]config.Target, error) {
+	allTags := cfg.Tags()
 	targets := []config.Target{}
 	if tag != "" || urlRegexp != "" {
-		tags := strings.Split(tag, ",")
 		re := regexp.MustCompile(urlRegexp)
-		for _, target := range cfgTargets {
-			if contains(target.Tags, tags) && (urlRegexp == "" || re.MatchString(target.Source)) {
+		for _, target := range cfg.Targets {
+			tags := map[string]interface{}{}
+			for tag, _ := range allTags {
+				if contains(target.Tags, tag) {
+					tags[tag] = true
+				} else {
+					tags[tag] = false
+				}
+			}
+			out, err := expr.Eval(exprTag, tags)
+			if err != nil {
+				return targets, err
+			}
+			if out.(bool) && (urlRegexp == "" || re.MatchString(target.Source)) {
 				targets = append(targets, target)
 			}
 		}
 	} else {
-		for _, target := range cfgTargets {
+		for _, target := range cfg.Targets {
 			targets = append(targets, target)
 		}
 	}
-	return targets
+	return targets, nil
 }
 
 type hostPassphrase struct {
@@ -246,12 +262,10 @@ func setEndTime(etStr string) (*time.Time, error) {
 }
 
 // contains ...
-func contains(ss1 []string, ss2 []string) bool {
+func contains(ss1 []string, ss2 string) bool {
 	for _, s1 := range ss1 {
-		for _, s2 := range ss2 {
-			if s1 == s2 {
-				return true
-			}
+		if s1 == ss2 {
+			return true
 		}
 	}
 	return false

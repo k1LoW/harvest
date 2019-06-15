@@ -41,6 +41,8 @@ type Target struct {
 	SSHKeyPassphrase []byte
 }
 
+type Tags map[string]int
+
 // Config ...
 type Config struct {
 	Targets    []Target
@@ -103,4 +105,17 @@ func (c *Config) LoadConfigFile(path string) error {
 		}
 	}
 	return nil
+}
+
+func (c *Config) Tags() Tags {
+	tags := map[string]int{}
+	for _, t := range c.TargetSets {
+		for _, tag := range t.Tags {
+			if _, ok := tags[tag]; !ok {
+				tags[tag] = 0
+			}
+			tags[tag] = tags[tag] + 1
+		}
+	}
+	return tags
 }
