@@ -29,7 +29,6 @@ import (
 
 var (
 	tag                    string
-	ignoreTag              string
 	configPath             string
 	urlRegexp              string
 	withTimestamp          bool

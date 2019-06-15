@@ -63,6 +63,5 @@ func init() {
 	rootCmd.AddCommand(targetsCmd)
 	targetsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	targetsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	targetsCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
 	targetsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 }
