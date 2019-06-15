@@ -24,12 +24,6 @@ integration:
 	test `./hrv cat test.db | grep -c ''` -gt 0 || exit 1
 	@rm test.db
 
-dbdoc:
-	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml
-	@./hrv fetch -c testdata/test.yml -o harvest.db --start-time='2019-01-01 00:00:00'
-	@tbls doc -f
-	@rm harvest.db
-
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)" ./cmd/hrv
 
@@ -38,6 +32,12 @@ depsdev:
 	go get golang.org/x/lint/golint
 	go get github.com/linyows/git-semv/cmd/git-semv
 	go get github.com/Songmu/ghch/cmd/ghch
+
+dbdoc: build
+	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml
+	@./hrv fetch -c testdata/test.yml -o harvest.db --start-time='2019-01-01 00:00:00'
+	@tbls doc -f
+	@rm harvest.db
 
 prerelease:
 	ghch -w -N ${VER}
