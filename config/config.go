@@ -13,7 +13,7 @@ import (
 
 // TargetSet ...
 type TargetSet struct {
-	URLs        []string `yaml:"urls"`
+	Sources     []string `yaml:"sources"`
 	Description string   `yaml:"description"`
 	Type        string   `yaml:"type"`
 	Regexp      string   `yaml:"regexp"`
@@ -25,7 +25,7 @@ type TargetSet struct {
 
 // Target ...
 type Target struct {
-	URL              string
+	Source           string
 	Description      string
 	Type             string
 	Regexp           string
@@ -73,9 +73,9 @@ func (c *Config) LoadConfigFile(path string) error {
 		return errors.Wrap(errors.WithStack(err), "failed to load config file")
 	}
 	for _, t := range c.TargetSets {
-		for _, URL := range t.URLs {
+		for _, src := range t.Sources {
 			target := Target{}
-			target.URL = URL
+			target.Source = src
 			target.Description = t.Description
 			target.Type = t.Type
 			target.Regexp = t.Regexp
@@ -84,7 +84,7 @@ func (c *Config) LoadConfigFile(path string) error {
 			target.TimeZone = t.TimeZone
 			target.Tags = t.Tags
 
-			u, err := url.Parse(URL)
+			u, err := url.Parse(src)
 			if err != nil {
 				return err
 			}

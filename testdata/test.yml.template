@@ -3,8 +3,7 @@ targetSets:
   -
     description: dummy access.log
     type: combinedLog
-    urls:
+    sources:
       - 'file://__PWD__/testdata/apache.log*'
     tags:
       - httpd
-
