@@ -30,9 +30,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// lsTargetsCmd represents the targets command
-var lsTargetsCmd = &cobra.Command{
-	Use:   "ls-targets",
+// targetsCmd represents the targets command
+var targetsCmd = &cobra.Command{
+	Use:   "targets",
 	Short: "list targets",
 	Long:  `list targets.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -60,9 +60,9 @@ var lsTargetsCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(lsTargetsCmd)
-	lsTargetsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
-	lsTargetsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	lsTargetsCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
-	lsTargetsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	rootCmd.AddCommand(targetsCmd)
+	targetsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	targetsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
+	targetsCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
+	targetsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 }

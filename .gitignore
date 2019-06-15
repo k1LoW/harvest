@@ -6,3 +6,4 @@ coverage.txt
 *.yml
 .envrc
 .go-version
+!cmd/hrv
