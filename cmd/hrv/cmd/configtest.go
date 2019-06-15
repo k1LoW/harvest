@@ -93,7 +93,7 @@ var configtestCmd = &cobra.Command{
 			logChan := make(chan parser.Log)
 			go func(t config.Target, logChan chan parser.Log) {
 				defer wg.Done()
-				fmt.Printf("%s: ", t.URL)
+				fmt.Printf("%s: ", t.Source)
 				logRead := false
 				for log := range logChan {
 					if log.Timestamp > 0 {
