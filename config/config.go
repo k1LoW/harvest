@@ -4,9 +4,11 @@ import (
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/antonmedv/expr"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -40,6 +42,8 @@ type Target struct {
 	Path             string
 	SSHKeyPassphrase []byte
 }
+
+type Tags map[string]int
 
 // Config ...
 type Config struct {
@@ -103,4 +107,57 @@ func (c *Config) LoadConfigFile(path string) error {
 		}
 	}
 	return nil
+}
+
+func (c *Config) Tags() Tags {
+	tags := map[string]int{}
+	for _, t := range c.TargetSets {
+		for _, tag := range t.Tags {
+			if _, ok := tags[tag]; !ok {
+				tags[tag] = 0
+			}
+			tags[tag] = tags[tag] + 1
+		}
+	}
+	return tags
+}
+
+func (c *Config) FilterTargets(exprTag, regexSource string) ([]Target, error) {
+	allTags := c.Tags()
+	targets := []Target{}
+	exprTag = strings.Replace(exprTag, ",", " or ", -1)
+	if exprTag != "" || regexSource != "" {
+		re := regexp.MustCompile(regexSource)
+		for _, target := range c.Targets {
+			tags := map[string]interface{}{}
+			for tag, _ := range allTags {
+				if contains(target.Tags, tag) {
+					tags[tag] = true
+				} else {
+					tags[tag] = false
+				}
+			}
+			out, err := expr.Eval(exprTag, tags)
+			if err != nil {
+				return targets, err
+			}
+			if out.(bool) && (regexSource == "" || re.MatchString(target.Source)) {
+				targets = append(targets, target)
+			}
+		}
+	} else {
+		for _, target := range c.Targets {
+			targets = append(targets, target)
+		}
+	}
+	return targets, nil
+}
+
+func contains(ss []string, t string) bool {
+	for _, s := range ss {
+		if s == t {
+			return true
+		}
+	}
+	return false
 }

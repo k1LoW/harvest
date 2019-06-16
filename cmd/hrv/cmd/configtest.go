@@ -57,7 +57,11 @@ var configtestCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		targets := filterTargets(cfg.Targets)
+		targets, err := cfg.FilterTargets(tag, urlRegexp)
+		if err != nil {
+			l.Error("tag option error", zap.String("error", err.Error()))
+			os.Exit(1)
+		}
 		if len(targets) == 0 {
 			l.Error("No targets")
 			os.Exit(1)
@@ -139,8 +143,7 @@ var configtestCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(configtestCmd)
 	configtestCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
-	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	configtestCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
+	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	configtestCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	configtestCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }

@@ -206,7 +206,7 @@ func init() {
 	catCmd.Flags().BoolVarP(&withTag, "with-tag", "", false, "output with tag")
 	catCmd.Flags().BoolVarP(&withoutMark, "without-mark", "", false, "output without prefix mark")
 	catCmd.Flags().StringVarP(&match, "match", "", "", "filter logs using SQLite FTS `MATCH` query")
-	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag (format: foo,bar)")
+	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag")
 	catCmd.Flags().StringVarP(&st, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
 	catCmd.Flags().StringVarP(&et, "end-time", "", "", "log end time (format: 2006-01-02 15:04:05)")
 	catCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")

@@ -56,7 +56,11 @@ var logsCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		targets := filterTargets(cfg.Targets)
+		targets, err := cfg.FilterTargets(tag, urlRegexp)
+		if err != nil {
+			l.Error("tag option error", zap.String("error", err.Error()))
+			os.Exit(1)
+		}
 		if len(targets) == 0 {
 			l.Error("No targets")
 			os.Exit(1)
@@ -131,8 +135,7 @@ func init() {
 	rootCmd.AddCommand(logsCmd)
 	logsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	logsCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
-	logsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	logsCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
+	logsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	logsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
 	logsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	logsCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
