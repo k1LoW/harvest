@@ -48,7 +48,7 @@ var targetsCmd = &cobra.Command{
 			l.Error("Config error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
-		targets, err := cfg.FilterTargets(tag, urlRegexp)
+		targets, err := cfg.FilterTargets(tag, sourceRe)
 		if err != nil {
 			l.Error("tag option error", zap.String("error", err.Error()))
 			os.Exit(1)
@@ -71,5 +71,5 @@ func init() {
 	rootCmd.AddCommand(targetsCmd)
 	targetsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	targetsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	targetsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	targetsCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 }

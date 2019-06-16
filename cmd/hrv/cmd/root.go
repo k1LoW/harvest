@@ -33,7 +33,7 @@ import (
 var (
 	tag                    string
 	configPath             string
-	urlRegexp              string
+	sourceRe               string
 	withTimestamp          bool
 	withTimestampNano      bool
 	withHost               bool

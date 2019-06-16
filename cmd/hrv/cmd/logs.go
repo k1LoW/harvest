@@ -56,7 +56,7 @@ var logsCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		targets, err := cfg.FilterTargets(tag, urlRegexp)
+		targets, err := cfg.FilterTargets(tag, sourceRe)
 		if err != nil {
 			l.Error("tag option error", zap.String("error", err.Error()))
 			os.Exit(1)
@@ -136,7 +136,7 @@ func init() {
 	logsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	logsCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	logsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
-	logsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	logsCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	logsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	logsCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 	logsCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
