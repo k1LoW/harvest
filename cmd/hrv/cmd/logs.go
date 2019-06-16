@@ -110,10 +110,10 @@ var logsCmd = &cobra.Command{
 
 		for _, t := range targets {
 			wg.Add(1)
-			go func(t config.Target) {
+			go func(t *config.Target) {
 				cChan <- struct{}{}
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, &t, true)
+				c, err := collector.NewCollector(ctx, t, true)
 				if err != nil {
 					l.Error("Ls error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}

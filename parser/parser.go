@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/k1LoW/harvest/client"
+	"github.com/k1LoW/harvest/config"
 )
 
 const maxContentStash = 1000
@@ -14,15 +15,15 @@ const maxContentStash = 1000
 type Log struct {
 	Host           string `db:"host"`
 	Path           string `db:"path"`
-	Tag            string `db:"tag"`
 	Timestamp      int64  `db:"ts"`
 	FilledByPrevTs bool   `db:"filled_by_prev_ts"`
 	Content        string `db:"content"`
+	Target         *config.Target
 }
 
 // Parser ...
 type Parser interface {
-	Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log
+	Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log
 }
 
 // parseTime ...

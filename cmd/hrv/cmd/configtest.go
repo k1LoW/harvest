@@ -86,7 +86,7 @@ var configtestCmd = &cobra.Command{
 		for _, t := range targets {
 			wg.Add(1)
 			cChan <- struct{}{}
-			c, err := collector.NewCollector(ctx, &t, true)
+			c, err := collector.NewCollector(ctx, t, true)
 			if err != nil {
 				failure++
 				<-cChan
@@ -95,7 +95,7 @@ var configtestCmd = &cobra.Command{
 				continue
 			}
 			logChan := make(chan parser.Log)
-			go func(t config.Target, logChan chan parser.Log) {
+			go func(t *config.Target, logChan chan parser.Log) {
 				defer wg.Done()
 				fmt.Printf("%s: ", t.Source)
 				logRead := false

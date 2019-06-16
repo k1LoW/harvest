@@ -65,7 +65,7 @@ type hostPassphrase struct {
 	passphrase []byte
 }
 
-func presetSSHKeyPassphraseToTargets(targets []config.Target) error {
+func presetSSHKeyPassphraseToTargets(targets []*config.Target) error {
 	hpMap := map[string]hostPassphrase{}
 	var defaultPassohrase []byte
 

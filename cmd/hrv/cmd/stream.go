@@ -109,9 +109,9 @@ var streamCmd = &cobra.Command{
 
 		for _, t := range targets {
 			wg.Add(1)
-			go func(t config.Target) {
+			go func(t *config.Target) {
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, &t, false)
+				c, err := collector.NewCollector(ctx, t, false)
 				if err != nil {
 					l.Error("Stream error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
@@ -127,7 +127,7 @@ var streamCmd = &cobra.Command{
 	},
 }
 
-func getHosts(targets []config.Target) []string {
+func getHosts(targets []*config.Target) []string {
 	hosts := []string{}
 	for _, target := range targets {
 		hosts = append(hosts, target.Host)
@@ -135,7 +135,7 @@ func getHosts(targets []config.Target) []string {
 	return hosts
 }
 
-func getStreamStdoutLengthes(targets []config.Target, withHost, withPath, withTag bool) (int, int, error) {
+func getStreamStdoutLengthes(targets []*config.Target, withHost, withPath, withTag bool) (int, int, error) {
 	var (
 		hLen int
 		tLen int
@@ -153,7 +153,7 @@ func getStreamStdoutLengthes(targets []config.Target, withHost, withPath, withTa
 	return hLen, tLen, nil
 }
 
-func getMaxLength(targets []config.Target, key string) int {
+func getMaxLength(targets []*config.Target, key string) int {
 	var length int
 	for _, target := range targets {
 		var c int

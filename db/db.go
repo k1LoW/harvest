@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/k1LoW/harvest/config"
 	"github.com/k1LoW/harvest/parser"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -22,7 +23,7 @@ type DB struct {
 }
 
 // NewDB ...
-func NewDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
+func NewDB(ctx context.Context, l *zap.Logger, c *config.Config, dbPath string) (*DB, error) {
 	fullPath, err := filepath.Abs(dbPath)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -60,9 +61,64 @@ CREATE TABLE targets_tags (
   tag_id INTEGER NOT NULL,
   UNIQUE(target_id, tag_id)
 );
-CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id, ts INTEGER, filled_by_prev_ts INTEGER, content);
+CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id INTEGER, ts INTEGER, filled_by_prev_ts INTEGER, content);
 `,
 	)
+
+	tags := map[string]int64{}
+	for tag, _ := range c.Tags() {
+		res, err := db.Exec(`INSERT INTO tags (name) VALUES ($1);`, tag)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		id, err := res.LastInsertId()
+		tags[tag] = id
+	}
+
+	for _, t := range c.Targets {
+		res, err := db.NamedExec(`
+INSERT INTO targets (
+  source,
+  description,
+  type,
+  regexp,
+  multi_line,
+  time_format,
+  time_zone,
+  scheme,
+  host,
+  user,
+  port,
+  path
+) VALUES (
+  :source,
+  :description,
+  :type,
+  :regexp,
+  :multi_line,
+  :time_format,
+  :time_zone,
+  :scheme,
+  :host,
+  :user,
+  :port,
+  :path
+);`, t)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		id, err := res.LastInsertId()
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+		t.Id = id
+		for _, tag := range t.Tags {
+			_, err := db.Exec(`INSERT INTO targets_tags (target_id, tag_id) VALUES ($1, $2);`, id, tags[tag])
+			if err != nil {
+				return nil, errors.WithStack(err)
+			}
+		}
+	}
 	l.Info("DB initialized")
 
 	db.MustExec("PRAGMA journal_mode = MEMORY")
@@ -118,7 +174,22 @@ func (d *DB) StartInsert() {
 
 L:
 	for log := range d.logChan {
-		_, err := d.db.NamedExec("INSERT INTO log (host, path, tag, ts, filled_by_prev_ts, content) VALUES (:host, :path, :tag, :ts, :filled_by_prev_ts, :content)", &log)
+		_, err := d.db.Exec(`
+INSERT INTO logs (
+  host,
+  path,
+  ts,
+  target_id,
+  filled_by_prev_ts,
+  content
+) VALUES ($1, $2, $3, $4, $5, $6);`,
+			log.Host,
+			log.Path,
+			log.Timestamp,
+			log.Target.Id,
+			log.FilledByPrevTs,
+			log.Content,
+		)
 		if err != nil {
 			d.logger.Error("DB error", zap.String("error", err.Error()))
 			break L
@@ -138,7 +209,7 @@ func (d *DB) Cat(cond string) chan parser.Log {
 	go func() {
 		defer close(d.logChan)
 		log := parser.Log{}
-		rows, err := d.db.Queryx(fmt.Sprintf("SELECT * FROM log %s ORDER BY ts, rowid ASC;", cond))
+		rows, err := d.db.Queryx(fmt.Sprintf("SELECT * FROM logs %s ORDER BY ts, rowid ASC;", cond))
 		if err != nil {
 			d.logger.Error("DB error", zap.String("error", err.Error()))
 			return
@@ -163,7 +234,7 @@ type resultHost struct {
 
 // GetHosts ...
 func (d *DB) GetHosts() ([]string, error) {
-	query := "SELECT host FROM log GROUP BY host ORDER BY host;"
+	query := "SELECT host FROM logs GROUP BY host ORDER BY host;"
 	hosts := []string{}
 	r := []resultHost{}
 	err := d.db.Select(&r, query)
@@ -182,7 +253,7 @@ type resultLength struct {
 
 // GetColumnMaxLength ...
 func (d *DB) GetColumnMaxLength(colName ...string) (int, error) {
-	query := fmt.Sprintf("SELECT (length(%s)) AS length from log GROUP BY %s ORDER by length DESC LIMIT 1;", strings.Join(colName, ")+length("), strings.Join(colName, ","))
+	query := fmt.Sprintf("SELECT (length(%s)) AS length from logs GROUP BY %s ORDER by length DESC LIMIT 1;", strings.Join(colName, ")+length("), strings.Join(colName, ","))
 	l := resultLength{}
 	err := d.db.Get(&l, query)
 	if err != nil {

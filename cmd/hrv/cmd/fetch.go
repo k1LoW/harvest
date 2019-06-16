@@ -76,7 +76,7 @@ var fetchCmd = &cobra.Command{
 			l.Error(fmt.Sprintf("%s already exists", dbPath))
 			os.Exit(1)
 		}
-		d, err := db.NewDB(ctx, l, dbPath)
+		d, err := db.NewDB(ctx, l, cfg, dbPath)
 		if err != nil {
 			l.Error("DB initialize error", zap.String("error", err.Error()))
 			os.Exit(1)
@@ -129,10 +129,10 @@ var fetchCmd = &cobra.Command{
 
 		for _, t := range targets {
 			wg.Add(1)
-			go func(t config.Target) {
+			go func(t *config.Target) {
 				cChan <- struct{}{}
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, &t, false)
+				c, err := collector.NewCollector(ctx, t, false)
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}

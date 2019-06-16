@@ -2,51 +2,40 @@ package parser
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/k1LoW/harvest/client"
+	"github.com/k1LoW/harvest/config"
 )
 
 // RegexpParser ...
 type RegexpParser struct {
-	regexp     *regexp.Regexp
-	timeFormat string
-	multiLine  bool
+	t *config.Target
 }
 
 // NewRegexpParser ...
-func NewRegexpParser(r string, tf string, multiLine bool) (Parser, error) {
-	re, err := regexp.Compile(r)
-	if err != nil {
-		return nil, err
-	}
+func NewRegexpParser(t *config.Target) (Parser, error) {
 	return &RegexpParser{
-		regexp:     re,
-		timeFormat: tf,
-		multiLine:  multiLine,
+		t: t,
 	}, nil
 }
 
 // Parse ...
-func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
-	if p.multiLine {
-		return p.parseMultipleLine(ctx, cancel, lineChan, tz, tag, st, et)
+func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log {
+	if p.t.MultiLine {
+		return p.parseMultipleLine(ctx, cancel, lineChan, tz, st, et)
 	}
-	return p.parseSingleLine(ctx, cancel, lineChan, tz, tag, st, et)
+	return p.parseSingleLine(ctx, cancel, lineChan, tz, st, et)
 }
 
-func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
+func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
-	var prevTs int64
-	var tStr string
+	re := regexp.MustCompile(p.t.Regexp)
 
-	if len(tag) > 0 {
-		tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
-	}
+	var prevTs int64
 
 	if st == nil {
 		logStarted = true
@@ -65,10 +54,10 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 			if tz == "" {
 				lineTZ = line.TimeZone
 			}
-			if p.timeFormat != "" {
-				m := p.regexp.FindStringSubmatch(line.Content)
+			if p.t.TimeFormat != "" {
+				m := re.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
-					t, err := parseTime(p.timeFormat, lineTZ, m[1])
+					t, err := parseTime(p.t.TimeFormat, lineTZ, m[1])
 					if err == nil {
 						ts = t.UnixNano()
 						if !logStarted && (st == nil || ts > st.UnixNano()) {
@@ -94,10 +83,10 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 			logChan <- Log{
 				Host:           line.Host,
 				Path:           line.Path,
-				Tag:            tStr,
 				Timestamp:      ts,
 				FilledByPrevTs: filledByPrevTs,
 				Content:        line.Content,
+				Target:         p.t,
 			}
 
 			select {
@@ -111,19 +100,16 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 	return logChan
 }
 
-func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
+func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
+	re := regexp.MustCompile(p.t.Regexp)
 	contentStash := []string{}
 	var (
 		prevTs    int64
-		tStr      string
 		hostStash string
 		pathStash string
 	)
-	if len(tag) > 0 {
-		tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
-	}
 
 	if st == nil {
 		logStarted = true
@@ -134,10 +120,10 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			logChan <- Log{
 				Host:           hostStash,
 				Path:           pathStash,
-				Tag:            tStr,
 				Timestamp:      prevTs,
 				FilledByPrevTs: false,
 				Content:        strings.Join(contentStash, "\n"),
+				Target:         p.t,
 			}
 			close(logChan)
 		}()
@@ -156,10 +142,10 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			if tz == "" {
 				lineTZ = line.TimeZone
 			}
-			if p.timeFormat != "" {
-				m := p.regexp.FindStringSubmatch(line.Content)
+			if p.t.TimeFormat != "" {
+				m := re.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
-					t, err := parseTime(p.timeFormat, lineTZ, m[1])
+					t, err := parseTime(p.t.TimeFormat, lineTZ, m[1])
 					if err == nil {
 						ts = t.UnixNano()
 						if !logStarted && (st == nil || ts > st.UnixNano()) {
@@ -183,18 +169,18 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 					logChan <- Log{
 						Host:           line.Host,
 						Path:           line.Path,
-						Tag:            tStr,
 						Timestamp:      prevTs,
 						FilledByPrevTs: false,
 						Content:        strings.Join(contentStash, "\n"),
+						Target:         p.t,
 					}
 					logChan <- Log{
 						Host:           line.Host,
 						Path:           line.Path,
-						Tag:            tStr,
 						Timestamp:      0,
 						FilledByPrevTs: false,
 						Content:        "Harvest parse error: too many rows",
+						Target:         p.t,
 					}
 					contentStash = nil
 				}
@@ -206,10 +192,10 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 				logChan <- Log{
 					Host:           line.Host,
 					Path:           line.Path,
-					Tag:            tStr,
 					Timestamp:      prevTs,
 					FilledByPrevTs: false,
 					Content:        strings.Join(contentStash, "\n"),
+					Target:         p.t,
 				}
 			}
 

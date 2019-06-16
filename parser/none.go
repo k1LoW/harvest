@@ -2,40 +2,35 @@ package parser
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/k1LoW/harvest/client"
+	"github.com/k1LoW/harvest/config"
 )
 
 // NoneParser ...
 type NoneParser struct {
-	multiLine bool
+	t *config.Target
 }
 
 // NewNoneParser ...
-func NewNoneParser(multiLine bool) (Parser, error) {
+func NewNoneParser(t *config.Target) (Parser, error) {
 	return &NoneParser{
-		multiLine: multiLine,
+		t: t,
 	}, nil
 }
 
 // Parse ...
-func (p *NoneParser) Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string, st *time.Time, et *time.Time) <-chan Log {
-	if p.multiLine {
-		return p.parseMultipleLine(ctx, cancel, lineChan, tz, tag)
+func (p *NoneParser) Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log {
+	if p.t.MultiLine {
+		return p.parseMultipleLine(ctx, cancel, lineChan, tz)
 	}
-	return p.parseSingleLine(ctx, cancel, lineChan, tz, tag)
+	return p.parseSingleLine(ctx, cancel, lineChan, tz)
 }
 
-func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string) <-chan Log {
+func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string) <-chan Log {
 	logChan := make(chan Log)
-	var tStr string
-
-	if len(tag) > 0 {
-		tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
-	}
 
 	go func() {
 		defer close(logChan)
@@ -44,10 +39,10 @@ func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelF
 			logChan <- Log{
 				Host:           line.Host,
 				Path:           line.Path,
-				Tag:            tStr,
 				Timestamp:      0,
 				FilledByPrevTs: false,
 				Content:        line.Content,
+				Target:         p.t,
 			}
 
 			select {
@@ -61,29 +56,24 @@ func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelF
 	return logChan
 }
 
-func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, tag []string) <-chan Log {
+func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string) <-chan Log {
 	logChan := make(chan Log)
 	contentStash := []string{}
 
 	var (
-		tStr      string
 		hostStash string
 		pathStash string
 	)
-
-	if len(tag) > 0 {
-		tStr = fmt.Sprintf("[%s]", strings.Join(tag, "]["))
-	}
 
 	go func() {
 		defer func() {
 			logChan <- Log{
 				Host:           hostStash,
 				Path:           pathStash,
-				Tag:            tStr,
 				Timestamp:      0,
 				FilledByPrevTs: false,
 				Content:        strings.Join(contentStash, "\n"),
+				Target:         p.t,
 			}
 			close(logChan)
 		}()
@@ -98,18 +88,18 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 					logChan <- Log{
 						Host:           line.Host,
 						Path:           line.Path,
-						Tag:            tStr,
 						Timestamp:      0,
 						FilledByPrevTs: false,
 						Content:        strings.Join(contentStash, "\n"),
+						Target:         p.t,
 					}
 					logChan <- Log{
 						Host:           line.Host,
 						Path:           line.Path,
-						Tag:            tStr,
 						Timestamp:      0,
 						FilledByPrevTs: false,
 						Content:        "Harvest parse error: too many rows",
+						Target:         p.t,
 					}
 					contentStash = nil
 				}
@@ -120,10 +110,10 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 				logChan <- Log{
 					Host:           line.Host,
 					Path:           line.Path,
-					Tag:            tStr,
 					Timestamp:      0,
 					FilledByPrevTs: false,
 					Content:        strings.Join(contentStash, "\n"),
+					Target:         p.t,
 				}
 			}
 
