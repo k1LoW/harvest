@@ -8,8 +8,8 @@ import (
 
 func TestFilterTargets(t *testing.T) {
 	var tests = []struct {
-		exprTag     string
-		regexSource string
+		tagExpr     string
+		sourceRe string
 		want        int
 	}{
 		{"webproxy", "", 2},
@@ -28,7 +28,7 @@ func TestFilterTargets(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%v", err)
 		}
-		filtered, err := c.FilterTargets(tt.exprTag, tt.regexSource)
+		filtered, err := c.FilterTargets(tt.tagExpr, tt.sourceRe)
 		if err != nil {
 			t.Fatalf("%v", err)
 		}

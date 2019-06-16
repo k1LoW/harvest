@@ -122,12 +122,12 @@ func (c *Config) Tags() Tags {
 	return tags
 }
 
-func (c *Config) FilterTargets(exprTag, regexSource string) ([]Target, error) {
+func (c *Config) FilterTargets(tagExpr, sourceRe string) ([]Target, error) {
 	allTags := c.Tags()
 	targets := []Target{}
-	exprTag = strings.Replace(exprTag, ",", " or ", -1)
-	if exprTag != "" || regexSource != "" {
-		re := regexp.MustCompile(regexSource)
+	tagExpr = strings.Replace(tagExpr, ",", " or ", -1)
+	if tagExpr != "" || sourceRe != "" {
+		re := regexp.MustCompile(sourceRe)
 		for _, target := range c.Targets {
 			tags := map[string]interface{}{}
 			for tag, _ := range allTags {
@@ -137,11 +137,11 @@ func (c *Config) FilterTargets(exprTag, regexSource string) ([]Target, error) {
 					tags[tag] = false
 				}
 			}
-			out, err := expr.Eval(exprTag, tags)
+			out, err := expr.Eval(tagExpr, tags)
 			if err != nil {
 				return targets, err
 			}
-			if out.(bool) && (regexSource == "" || re.MatchString(target.Source)) {
+			if out.(bool) && (sourceRe == "" || re.MatchString(target.Source)) {
 				targets = append(targets, target)
 			}
 		}
