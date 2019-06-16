@@ -137,14 +137,14 @@ func (c *Config) FilterTargets(tagExpr, sourceRe string) ([]Target, error) {
 				tags[tag] = false
 			}
 		}
-		targetExpr := tagExpr
+		targetExpr := []string{"true"}
+		if tagExpr != "" {
+			targetExpr = append(targetExpr, fmt.Sprintf("(%s)", tagExpr))
+		}
 		if sourceRe != "" {
-			targetExpr = targetExpr + fmt.Sprintf(` and (hrv_source matches "%s")`, sourceRe)
+			targetExpr = append(targetExpr, fmt.Sprintf(`(hrv_source matches "%s")`, sourceRe))
 		}
-		if targetExpr == "" {
-			targetExpr = "true"
-		}
-		out, err := expr.Eval(targetExpr, tags)
+		out, err := expr.Eval(strings.Join(targetExpr, " and "), tags)
 		if err != nil {
 			return targets, err
 		}

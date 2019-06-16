@@ -19,7 +19,7 @@ func TestFilterTargets(t *testing.T) {
 		{"!app", "", 5},
 		{"webproxy,app", "", 5},
 		{"app", ".*app-1.*", 1},
-		{"app", "app-1", 1},
+		{"", "app-1", 1},
 		{"db", ".*app-1.*", 0},
 	}
 
