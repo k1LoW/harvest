@@ -58,7 +58,11 @@ var targetsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		for _, t := range targets {
-			fmt.Printf("%s:%s\n", t.Host, t.Path)
+			host := t.Host
+			if host == "" {
+				host = "localhost"
+			}
+			fmt.Printf("%s:%s\n", host, t.Path)
 		}
 	},
 }
