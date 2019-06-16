@@ -125,6 +125,7 @@ func (c *Config) Tags() Tags {
 func (c *Config) FilterTargets(exprTag, regexSource string) ([]Target, error) {
 	allTags := c.Tags()
 	targets := []Target{}
+	exprTag = strings.Replace(exprTag, ",", " or ", -1)
 	if exprTag != "" || regexSource != "" {
 		re := regexp.MustCompile(regexSource)
 		for _, target := range c.Targets {

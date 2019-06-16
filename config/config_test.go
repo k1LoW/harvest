@@ -16,6 +16,7 @@ func TestFilterTargets(t *testing.T) {
 		{"webproxy and syslog", "", 1},
 		{"webproxy or app", "", 5},
 		{"!app", "", 5},
+		{"webproxy,app", "", 5},
 	}
 
 	for _, tt := range tests {
