@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.7.0](https://github.com/k1LoW/harvest/compare/v0.6.3...v0.7.0) (2019-06-16)
+
+* Add `hrv tags` [#26](https://github.com/k1LoW/harvest/pull/26) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING CHANGE] Change filter logic of `--tag` option  [#25](https://github.com/k1LoW/harvest/pull/25) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING CHANGE] Change command [#24](https://github.com/k1LoW/harvest/pull/24) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Change config format `urls:` -> `sources:` [#23](https://github.com/k1LoW/harvest/pull/23) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.6.3](https://github.com/k1LoW/harvest/compare/v0.6.2...v0.6.3) (2019-05-17)
 
 * Fix target filter [#22](https://github.com/k1LoW/harvest/pull/22) ([k1LoW](https://github.com/k1LoW))
