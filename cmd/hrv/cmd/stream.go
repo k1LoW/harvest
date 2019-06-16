@@ -59,7 +59,7 @@ var streamCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		targets, err := cfg.FilterTargets(tag, urlRegexp)
+		targets, err := cfg.FilterTargets(tag, sourceRe)
 		if err != nil {
 			l.Error("tag option error", zap.String("error", err.Error()))
 			os.Exit(1)
@@ -184,7 +184,7 @@ func init() {
 	streamCmd.Flags().BoolVarP(&withTag, "with-tag", "", false, "output with tag")
 	streamCmd.Flags().BoolVarP(&withoutMark, "without-mark", "", false, "output without prefix mark")
 	streamCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	streamCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	streamCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	streamCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")
 	streamCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }

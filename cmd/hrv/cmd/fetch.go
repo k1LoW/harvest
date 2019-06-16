@@ -82,7 +82,7 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		targets, err := cfg.FilterTargets(tag, urlRegexp)
+		targets, err := cfg.FilterTargets(tag, sourceRe)
 		if err != nil {
 			l.Error("tag option error", zap.String("error", err.Error()))
 			os.Exit(1)
@@ -156,7 +156,7 @@ func init() {
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
-	fetchCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	fetchCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
