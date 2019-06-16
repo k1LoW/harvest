@@ -119,6 +119,28 @@ $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
 $ hrv cp -c config.yml
 ```
 
+### --tag filter operators
+
+The following operators can be used to filter targets
+
+`not`, `and`, `or`, `!`, `&&`, `||`
+
+``` console
+$ hrv stream -c config.yml --tag='webproxy or db' --with-timestamp --with-host --with-path
+```
+
+#### `,` is converted to ` or `
+
+``` console
+$ hrv stream -c config.yml --tag='webproxy,db'
+```
+
+is converted to
+
+``` console
+$ hrv stream -c config.yml --tag='webproxy or db'
+```
+
 ## Architecture
 
 ### `hrv fetch` and `hrv cat`
