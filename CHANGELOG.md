@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.8.0](https://github.com/k1LoW/harvest/compare/v0.7.0...v0.8.0) (2019-06-16)
+
+* Change `--url-regexp` -> `--source` [#28](https://github.com/k1LoW/harvest/pull/28) ([k1LoW](https://github.com/k1LoW))
+* Fix `hrv targets` output ( when source is `file://` ) [#27](https://github.com/k1LoW/harvest/pull/27) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.7.0](https://github.com/k1LoW/harvest/compare/v0.6.3...v0.7.0) (2019-06-16)
 
 * Add `hrv tags` [#26](https://github.com/k1LoW/harvest/pull/26) ([k1LoW](https://github.com/k1LoW))
