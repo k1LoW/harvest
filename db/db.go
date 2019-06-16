@@ -33,7 +33,35 @@ func NewDB(ctx context.Context, l *zap.Logger, dbPath string) (*DB, error) {
 		return nil, errors.WithStack(err)
 	}
 	db.MustExec(
-		`CREATE VIRTUAL TABLE log USING FTS4(host, path, tag, ts INTEGER, filled_by_prev_ts INTEGER, content);`,
+		`
+CREATE TABLE targets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  source TEXT NOT NULL,
+  description TEXT,
+  type TEXT NOT NULL,
+  regexp TEXT,
+  multi_line INTEGER,
+  time_format TEXT,
+  time_zone TEXT,
+  scheme TEXT NOT NULL,
+  host TEXT,
+  user TEXT,
+  port INTEGER,
+  path TEXT NOT NULL
+);
+CREATE TABLE tags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  UNIQUE(name)
+);
+CREATE TABLE targets_tags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  target_id INTEGER NOT NULL,
+  tag_id INTEGER NOT NULL,
+  UNIQUE(target_id, tag_id)
+);
+CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id, ts INTEGER, filled_by_prev_ts INTEGER, content);
+`,
 	)
 	l.Info("DB initialized")
 

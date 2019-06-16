@@ -2,13 +2,16 @@
 
 ## Tables
 
-| Name | Columns | Comment | Type |
-| ---- | ------- | ------- | ---- |
-| [log](log.md) | 6 | fetched log data with host/path/tag/timestamp. | virtual table |
+| Name                            | Columns | Comment | Type          |
+| ------------------------------- | ------- | ------- | ------------- |
+| [targets](targets.md)           | 13      |         | table         |
+| [tags](tags.md)                 | 2       |         | table         |
+| [targets_tags](targets_tags.md) | 3       |         | table         |
+| [logs](logs.md)                 | 6       |         | virtual table |
 
 ## Relations
 
-![er](schema.png)
+![er](schema.svg)
 
 ---
 
