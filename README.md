@@ -141,6 +141,14 @@ is converted to
 $ hrv stream -c config.yml --tag='webproxy or db'
 ```
 
+### --source filter
+
+filter targets using source regexp
+
+``` console
+$ hrv fetch -c config.yml --source='app-[0-9].example'
+```
+
 ## Architecture
 
 ### `hrv fetch` and `hrv cat`
