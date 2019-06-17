@@ -27,35 +27,36 @@ type TargetSet struct {
 
 // Target ...
 type Target struct {
-	Source           string
-	Description      string
-	Type             string
-	Regexp           string
-	MultiLine        bool
-	TimeFormat       string
-	TimeZone         string
+	Source           string `db:"source"`
+	Description      string `db:"description"`
+	Type             string `db:"type"`
+	Regexp           string `db:"regexp"`
+	MultiLine        bool   `db:"multi_line"`
+	TimeFormat       string `db:"time_format"`
+	TimeZone         string `db:"time_zone"`
 	Tags             []string
-	Scheme           string
-	Host             string
-	User             string
-	Port             int
-	Path             string
+	Scheme           string `db:"scheme"`
+	Host             string `db:"host"`
+	User             string `db:"user"`
+	Port             int    `db:"port"`
+	Path             string `db:"path"`
 	SSHKeyPassphrase []byte
+	Id               int64 `db:"id"`
 }
 
 type Tags map[string]int
 
 // Config ...
 type Config struct {
-	Targets    []Target
-	TargetSets []TargetSet `yaml:"targetSets"`
+	Targets    []*Target
+	TargetSets []*TargetSet `yaml:"targetSets"`
 }
 
 // NewConfig ...
 func NewConfig() (*Config, error) {
 	return &Config{
-		Targets:    []Target{},
-		TargetSets: []TargetSet{},
+		Targets:    []*Target{},
+		TargetSets: []*TargetSet{},
 	}, nil
 }
 
@@ -103,7 +104,7 @@ func (c *Config) LoadConfigFile(path string) error {
 				target.Host = u.Host
 				target.Port = 0
 			}
-			c.Targets = append(c.Targets, target)
+			c.Targets = append(c.Targets, &target)
 		}
 	}
 	return nil
@@ -122,9 +123,9 @@ func (c *Config) Tags() Tags {
 	return tags
 }
 
-func (c *Config) FilterTargets(tagExpr, sourceRe string) ([]Target, error) {
+func (c *Config) FilterTargets(tagExpr, sourceRe string) ([]*Target, error) {
 	allTags := c.Tags()
-	targets := []Target{}
+	targets := []*Target{}
 	tagExpr = strings.Replace(tagExpr, ",", " or ", -1)
 	for _, target := range c.Targets {
 		tags := map[string]interface{}{

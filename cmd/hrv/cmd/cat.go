@@ -24,9 +24,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/antonmedv/expr"
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
 	"github.com/k1LoW/harvest/stdout"
@@ -75,7 +77,7 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		cond, err := buildCondition()
+		cond, err := buildCondition(d)
 		if err != nil {
 			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
@@ -127,7 +129,7 @@ func colorizeTag(colorFunc func(interface{}, ...string) string, tag string) stri
 }
 
 // buildCondition ...
-func buildCondition() (string, error) {
+func buildCondition(db *db.DB) (string, error) {
 	matchCond := []string{}
 	cond := []string{}
 	if match != "" {
@@ -152,7 +154,36 @@ func buildCondition() (string, error) {
 		cond = append(cond, fmt.Sprintf("ts <= %d", t.UnixNano()))
 	}
 	if tag != "" {
-		cond = append(cond, fmt.Sprintf("( tag LIKE '%%[%s]%%' )", strings.Join(strings.Split(tag, delimiter), "]%' OR tag LIKE '%[")))
+		tagExpr := strings.Replace(tag, ",", " or ", -1)
+		allTags, err := db.GetTags()
+		if err != nil {
+			return "", err
+		}
+		tt, err := db.GetTargetIdAndTags()
+		if err != nil {
+			return "", err
+		}
+		targetIds := []string{}
+		for targetId, targetTags := range tt {
+			targetExpr := []string{"true"}
+			targetExpr = append(targetExpr, fmt.Sprintf("(%s)", tagExpr))
+			tags := map[string]interface{}{}
+			for _, tag := range allTags {
+				if contains(targetTags, tag) {
+					tags[tag] = true
+				} else {
+					tags[tag] = false
+				}
+			}
+			out, err := expr.Eval(strings.Join(targetExpr, " and "), tags)
+			if err != nil {
+				return "", err
+			}
+			if out.(bool) {
+				targetIds = append(targetIds, strconv.FormatInt(targetId, 10))
+			}
+		}
+		cond = append(cond, fmt.Sprintf("( target_id IN (%s) )", strings.Join(targetIds, ", ")))
 	}
 
 	if len(matchCond) > 0 {
@@ -189,12 +220,21 @@ func getCatStdoutLengthes(d *db.DB, withHost, withPath, withTag bool) (int, int,
 		}
 	}
 	if withTag {
-		tLen, err = d.GetColumnMaxLength("tag")
+		tLen, err = d.GetTagMaxLength()
 		if err != nil {
 			return 0, 0, err
 		}
 	}
 	return hLen, tLen, nil
+}
+
+func contains(ss []string, t string) bool {
+	for _, s := range ss {
+		if s == t {
+			return true
+		}
+	}
+	return false
 }
 
 func init() {

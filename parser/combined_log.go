@@ -1,9 +1,11 @@
 package parser
 
+import "github.com/k1LoW/harvest/config"
+
 // NewCombinedLogParser ...
-func NewCombinedLogParser() (Parser, error) {
-	r := `^[\d\.]+ - [^ ]+ \[(.+)\] .+$`
-	tf := "02/Jan/2006:15:04:05 -0700"
-	multiLine := false
-	return NewRegexpParser(r, tf, multiLine)
+func NewCombinedLogParser(t *config.Target) (Parser, error) {
+	t.Regexp = `^[\d\.]+ - [^ ]+ \[(.+)\] .+$`
+	t.TimeFormat = "02/Jan/2006:15:04:05 -0700"
+	t.MultiLine = false
+	return NewRegexpParser(t)
 }

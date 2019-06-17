@@ -128,7 +128,7 @@ func (s *Stdout) Out(logChan chan parser.Log, hosts []string) error {
 			host = fmt.Sprintf(s.hFmt, log.Path)
 		}
 		if s.withTag {
-			tag = fmt.Sprintf(s.tFmt, log.Tag)
+			tag = fmt.Sprintf(s.tFmt, fmt.Sprintf("%v", log.Target.Tags))
 		}
 
 		if s.withTimestamp || s.withTimestampNano || s.withHost || s.withPath {

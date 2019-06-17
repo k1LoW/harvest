@@ -1,9 +1,11 @@
 package parser
 
+import "github.com/k1LoW/harvest/config"
+
 // NewSyslogParser ...
-func NewSyslogParser() (Parser, error) {
-	r := `^(\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}) .+$`
-	tf := "Jan 2 15:04:05"
-	multiLine := false
-	return NewRegexpParser(r, tf, multiLine)
+func NewSyslogParser(t *config.Target) (Parser, error) {
+	t.Regexp = `^(\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}) .+$`
+	t.TimeFormat = "Jan 2 15:04:05"
+	t.MultiLine = false
+	return NewRegexpParser(t)
 }

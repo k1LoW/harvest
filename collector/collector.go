@@ -3,7 +3,6 @@ package collector
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/k1LoW/harvest/client"
@@ -64,22 +63,22 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 	// Set parser
 	switch t.Type {
 	case "syslog":
-		p, err = parser.NewSyslogParser()
+		p, err = parser.NewSyslogParser(t)
 		if err != nil {
 			return nil, err
 		}
 	case "combinedLog":
-		p, err = parser.NewCombinedLogParser()
+		p, err = parser.NewCombinedLogParser(t)
 		if err != nil {
 			return nil, err
 		}
 	case "none":
-		p, err = parser.NewNoneParser(t.MultiLine)
+		p, err = parser.NewNoneParser(t)
 		if err != nil {
 			return nil, err
 		}
 	default: // regexp
-		p, err = parser.NewRegexpParser(t.Regexp, t.TimeFormat, t.MultiLine)
+		p, err = parser.NewRegexpParser(t)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +105,7 @@ func (c *Collector) Fetch(dbChan chan parser.Log, st *time.Time, et *time.Time, 
 			waiter <- struct{}{}
 		}()
 	L:
-		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, st, et) {
+		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, st, et) {
 			dbChan <- log
 			select {
 			case <-c.ctx.Done():
@@ -139,7 +138,7 @@ func (c *Collector) Stream(logChan chan parser.Log, multiLine bool) error {
 			waiter <- struct{}{}
 		}()
 	L:
-		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, nil, nil) {
+		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, nil, nil) {
 			logChan <- log
 			select {
 			case <-c.ctx.Done():
@@ -173,16 +172,11 @@ func (c *Collector) LsLogs(logChan chan parser.Log, st *time.Time, et *time.Time
 		}()
 	L:
 		for line := range c.client.Out() {
-			var tStr string
-			if len(c.target.Tags) > 0 {
-				tStr = fmt.Sprintf("[%s]", strings.Join(c.target.Tags, "]["))
-			}
-
 			logChan <- parser.Log{
 				Host:    line.Host,
 				Path:    line.Path,
-				Tag:     tStr,
 				Content: line.Content,
+				Target:  c.target,
 			}
 			select {
 			case <-c.ctx.Done():
@@ -253,7 +247,7 @@ func (c *Collector) ConfigTest(logChan chan parser.Log, multiLine bool) error {
 			waiter <- struct{}{}
 		}()
 	L:
-		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, c.target.Tags, nil, nil) {
+		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, nil, nil) {
 			logChan <- log
 			select {
 			case <-c.ctx.Done():
