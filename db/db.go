@@ -318,7 +318,7 @@ func (d *DB) GetTagMaxLength() (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return l.Length + 2, nil // add `[` and `]`
+	return l.Length, nil
 }
 
 type resultTargetIdAndTags struct {
