@@ -13,12 +13,12 @@ const maxContentStash = 1000
 
 // Log ...
 type Log struct {
-	Host           string `db:"host"`
-	Path           string `db:"path"`
-	Timestamp      int64  `db:"ts"`
-	FilledByPrevTs bool   `db:"filled_by_prev_ts"`
-	Content        string `db:"content"`
-	Target         *config.Target
+	Host           string         `db:"host"`
+	Path           string         `db:"path"`
+	Timestamp      int64          `db:"ts"`
+	FilledByPrevTs bool           `db:"filled_by_prev_ts"`
+	Content        string         `db:"content"`
+	Target         *config.Target `db:"target"`
 }
 
 // Parser ...
