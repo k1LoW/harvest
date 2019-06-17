@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.9.0](https://github.com/k1LoW/harvest/compare/v0.8.0...v0.9.0) (2019-06-18)
+
+* [BREAKING] Update schema [#29](https://github.com/k1LoW/harvest/pull/29) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.8.0](https://github.com/k1LoW/harvest/compare/v0.7.0...v0.8.0) (2019-06-16)
 
 * Change `--url-regexp` -> `--source` [#28](https://github.com/k1LoW/harvest/pull/28) ([k1LoW](https://github.com/k1LoW))
