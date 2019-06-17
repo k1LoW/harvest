@@ -101,7 +101,7 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 ### :beetle: Stream remote/local logs
 
-#### 1. [Set config.yml](#1-set-log-urls-and-log-type-in-configyml)
+#### 1. [Set config.yml](#1-set-log-sources-and-log-type-in-configyml)
 
 #### 2. Stream target logs via SSH/exec ( `hrv stream` )
 
@@ -111,7 +111,7 @@ $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
 
 ### :beetle: Copy remote/local raw logs
 
-#### 1. [Set config.yml](#1-set-log-urls-and-log-type-in-configyml)
+#### 1. [Set config.yml](#1-set-log-sources-and-log-type-in-configyml)
 
 #### 2. Copy remote/local raw logs to local directory via SSH/exec ( `hrv cp` )
 
