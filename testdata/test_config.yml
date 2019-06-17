@@ -1,0 +1,58 @@
+---
+targetSets:
+  -
+    description: webproxy syslog
+    type: syslog
+    sources:
+      - 'ssh://webproxy.example.com/var/log/syslog*'
+    tags:
+      - webproxy
+      - syslog
+  -
+    description: webproxy NGINX access log
+    type: combinedLog
+    sources:
+      - 'ssh://webproxy.example.com/var/log/nginx/access_log*'
+    tags:
+      - webproxy
+      - nginx
+  -
+    description: app log
+    type: regexp
+    regexp: 'time:([^\t]+)'
+    timeFormat: 'Jan 02 15:04:05'
+    timeZone: '+0900'
+    sources:
+      - 'ssh://app-1.example.com/var/log/ltsv.log*'
+      - 'ssh://app-2.example.com/var/log/ltsv.log*'
+      - 'ssh://app-3.example.com/var/log/ltsv.log*'
+    tags:
+      - app
+  -
+    description: db dump log
+    type: regexp
+    regexp: '"ts":"([^"]+)"'
+    timeFormat: '2006-01-02T15:04:05.999-0700'
+    sources:
+      - 'ssh://db.example.com/var/log/tcpdp/eth0/dump*'
+    tags:
+      - db
+      - query
+  -
+    description: PostgreSQL log
+    type: regexp
+    regexp: '^\[?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \w{3})'
+    timeFormat: '2006-01-02 15:04:05 MST'
+    multiLine: true
+    sources:
+      - 'ssh://db.example.com/var/log/postgresql/postgresql*'
+    tags:
+      - db
+      - postgresql
+  -
+    description: local Apache access log
+    type: combinedLog
+    sources:
+      - 'file:///path/to/httpd/access.log'
+    tags:
+      - httpd

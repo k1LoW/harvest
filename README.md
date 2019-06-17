@@ -18,7 +18,7 @@ Harvest provides the `hrv` command with the following features.
 
 ### :beetle: Fetch and output remote/local log data
 
-#### 1. Set log URLs (and log type) in config.yml
+#### 1. Set log sources (and log type) in config.yml
 
 ``` yaml
 ---
@@ -26,7 +26,7 @@ targetSets:
   -
     description: webproxy syslog
     type: syslog
-    urls:
+    sources:
       - 'ssh://webproxy.example.com/var/log/syslog*'
     tags:
       - webproxy
@@ -34,7 +34,7 @@ targetSets:
   -
     description: webproxy NGINX access log
     type: combinedLog
-    urls:
+    sources:
       - 'ssh://webproxy.example.com/var/log/nginx/access_log*'
     tags:
       - webproxy
@@ -45,7 +45,7 @@ targetSets:
     regexp: 'time:([^\t]+)'
     timeFormat: 'Jan 02 15:04:05'
     timeZone: '+0900'
-    urls:
+    sources:
       - 'ssh://app-1.example.com/var/log/ltsv.log*'
       - 'ssh://app-2.example.com/var/log/ltsv.log*'
       - 'ssh://app-3.example.com/var/log/ltsv.log*'
@@ -56,7 +56,7 @@ targetSets:
     type: regexp
     regexp: '"ts":"([^"]+)"'
     timeFormat: '2006-01-02T15:04:05.999-0700'
-    urls:
+    sources:
       - 'ssh://db.example.com/var/log/tcpdp/eth0/dump*'
     tags:
       - db
@@ -67,7 +67,7 @@ targetSets:
     regexp: '^\[?(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \w{3})'
     timeFormat: '2006-01-02 15:04:05 MST'
     multiLine: true
-    urls:
+    sources:
       - 'ssh://db.example.com/var/log/postgresql/postgresql*'
     tags:
       - db
@@ -75,7 +75,7 @@ targetSets:
   -
     description: local Apache access log
     type: combinedLog
-    urls:
+    sources:
       - 'file:///path/to/httpd/access.log'
     tags:
       - httpd
@@ -117,6 +117,36 @@ $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
 
 ``` console
 $ hrv cp -c config.yml
+```
+
+### --tag filter operators
+
+The following operators can be used to filter targets
+
+`not`, `and`, `or`, `!`, `&&`, `||`
+
+``` console
+$ hrv stream -c config.yml --tag='webproxy or db' --with-timestamp --with-host --with-path
+```
+
+#### `,` is converted to ` or `
+
+``` console
+$ hrv stream -c config.yml --tag='webproxy,db'
+```
+
+is converted to
+
+``` console
+$ hrv stream -c config.yml --tag='webproxy or db'
+```
+
+### --source filter
+
+filter targets using source regexp
+
+``` console
+$ hrv fetch -c config.yml --source='app-[0-9].example'
 ```
 
 ## Architecture

@@ -24,12 +24,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"regexp"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/Songmu/prompter"
 	"github.com/k1LoW/harvest/collector"
 	"github.com/k1LoW/harvest/config"
 	"github.com/k1LoW/harvest/db"
@@ -85,7 +82,11 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		targets := filterTargets(cfg.Targets)
+		targets, err := cfg.FilterTargets(tag, sourceRe)
+		if err != nil {
+			l.Error("tag option error", zap.String("error", err.Error()))
+			os.Exit(1)
+		}
 		if len(targets) == 0 {
 			l.Error("No targets")
 			os.Exit(1)
@@ -149,129 +150,13 @@ var fetchCmd = &cobra.Command{
 	},
 }
 
-// filterTargets ...
-func filterTargets(cfgTargets []config.Target) []config.Target {
-	targets := []config.Target{}
-	ignoreTags := strings.Split(ignoreTag, ",")
-	if tag != "" || urlRegexp != "" {
-		tags := strings.Split(tag, ",")
-		re := regexp.MustCompile(urlRegexp)
-		for _, target := range cfgTargets {
-			if contains(target.Tags, tags) && (urlRegexp == "" || re.MatchString(target.URL)) {
-				if contains(target.Tags, ignoreTags) {
-					continue
-				}
-				targets = append(targets, target)
-			}
-		}
-	} else {
-		for _, target := range cfgTargets {
-			if contains(target.Tags, ignoreTags) {
-				continue
-			}
-			targets = append(targets, target)
-		}
-	}
-	return targets
-}
-
-type hostPassphrase struct {
-	host       string
-	passphrase []byte
-}
-
-func presetSSHKeyPassphraseToTargets(targets []config.Target) error {
-	hpMap := map[string]hostPassphrase{}
-	var defaultPassohrase []byte
-
-	yn := prompter.YN("Do you preset default passphrase for all targets?", true)
-	if yn {
-		fmt.Println("Preset default passphrase")
-		defaultPassohrase = []byte(prompter.Password("Enter default passphrase"))
-	} else {
-		fmt.Println("Preset passphrase for each target")
-	}
-
-	for i, target := range targets {
-		if target.Scheme != "ssh" {
-			continue
-		}
-		if yn {
-			targets[i].SSHKeyPassphrase = defaultPassohrase
-			continue
-		}
-		if hp, ok := hpMap[target.Host]; ok {
-			targets[i].SSHKeyPassphrase = hp.passphrase
-			continue
-		}
-		passphrase := []byte(prompter.Password(fmt.Sprintf("Enter passphrase for host '%s'", target.Host)))
-		targets[i].SSHKeyPassphrase = passphrase
-		hpMap[target.Host] = hostPassphrase{
-			host:       target.Host,
-			passphrase: passphrase,
-		}
-	}
-	return nil
-}
-
-func setStartTime(stStr string) (*time.Time, error) {
-	var st *time.Time
-	if stStr != "" {
-		loc, err := time.LoadLocation("Local")
-		if err != nil {
-			return nil, err
-		}
-		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
-		if err != nil {
-			return nil, err
-		}
-		st = &stt
-	} else {
-		stt := time.Now().Add(defaultStartTimeDuration)
-		st = &stt
-	}
-	return st, nil
-}
-
-// setEndTime ...
-func setEndTime(etStr string) (*time.Time, error) {
-	var et *time.Time
-	if etStr != "" {
-		loc, err := time.LoadLocation("Local")
-		if err != nil {
-			return nil, err
-		}
-		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
-		if err != nil {
-			return nil, err
-		}
-		et = &ett
-	} else {
-		et = nil
-	}
-	return et, nil
-}
-
-// contains ...
-func contains(ss1 []string, ss2 []string) bool {
-	for _, s1 := range ss1 {
-		for _, s2 := range ss2 {
-			if s1 == s2 {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func init() {
 	rootCmd.AddCommand(fetchCmd)
 	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "", "db path")
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
-	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	fetchCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
-	fetchCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
+	fetchCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")

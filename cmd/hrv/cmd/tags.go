@@ -30,11 +30,11 @@ import (
 	"go.uber.org/zap"
 )
 
-// lsTargetsCmd represents the targets command
-var lsTargetsCmd = &cobra.Command{
-	Use:   "ls-targets",
-	Short: "list targets",
-	Long:  `list targets.`,
+// tagsCmd represents the targets command
+var tagsCmd = &cobra.Command{
+	Use:   "tags",
+	Short: "list tags",
+	Long:  `list tags.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		l := logger.NewLogger()
 
@@ -48,21 +48,14 @@ var lsTargetsCmd = &cobra.Command{
 			l.Error("Config error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
-		targets := filterTargets(cfg.Targets)
-		if len(targets) == 0 {
-			l.Error("No targets")
-			os.Exit(1)
-		}
-		for _, t := range targets {
-			fmt.Printf("%s:%s\n", t.Host, t.Path)
+		tags := cfg.Tags()
+		for tag, count := range tags {
+			fmt.Printf("%s:%d\n", tag, count)
 		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(lsTargetsCmd)
-	lsTargetsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
-	lsTargetsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	lsTargetsCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
-	lsTargetsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
+	rootCmd.AddCommand(tagsCmd)
+	tagsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 }

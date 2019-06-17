@@ -24,9 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sync"
-	"time"
 
 	"github.com/k1LoW/harvest/collector"
 	"github.com/k1LoW/harvest/config"
@@ -36,9 +34,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// lsLogsCmd represents the lsLogs command
-var lsLogsCmd = &cobra.Command{
-	Use:   "ls-logs",
+// logsCmd represents the logs command
+var logsCmd = &cobra.Command{
+	Use:   "logs",
 	Short: "list target logs",
 	Long:  `list target logs.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -58,21 +56,11 @@ var lsLogsCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		if dstDir == "" {
-			dstDir = fmt.Sprintf("harvest-%s", time.Now().Format("20060102T150405-0700"))
-		}
-		dstDir, err = filepath.Abs(dstDir)
+		targets, err := cfg.FilterTargets(tag, sourceRe)
 		if err != nil {
-			l.Error("option error", zap.String("error", err.Error()))
+			l.Error("tag option error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
-
-		if _, err := os.Lstat(dstDir); err == nil {
-			l.Error(fmt.Sprintf("%s already exists", dstDir), zap.String("error", err.Error()))
-			os.Exit(1)
-		}
-
-		targets := filterTargets(cfg.Targets)
 		if len(targets) == 0 {
 			l.Error("No targets")
 			os.Exit(1)
@@ -96,6 +84,12 @@ var lsLogsCmd = &cobra.Command{
 		if err != nil {
 			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
+		}
+
+		if et != nil {
+			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
+		} else {
+			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
 		}
 
 		logChan := make(chan parser.Log)
@@ -138,13 +132,12 @@ var lsLogsCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(lsLogsCmd)
-	lsLogsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
-	lsLogsCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
-	lsLogsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
-	lsLogsCmd.Flags().StringVarP(&ignoreTag, "ignore-tag", "", "", "ignore targets using tag (format: foo,bar)")
-	lsLogsCmd.Flags().StringVarP(&urlRegexp, "url-regexp", "", "", "filter targets using url regexp")
-	lsLogsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
-	lsLogsCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
-	lsLogsCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
+	rootCmd.AddCommand(logsCmd)
+	logsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	logsCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
+	logsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
+	logsCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
+	logsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
+	logsCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
+	logsCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }

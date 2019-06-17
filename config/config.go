@@ -1,19 +1,21 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
 
+	"github.com/antonmedv/expr"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
 
 // TargetSet ...
 type TargetSet struct {
-	URLs        []string `yaml:"urls"`
+	Sources     []string `yaml:"sources"`
 	Description string   `yaml:"description"`
 	Type        string   `yaml:"type"`
 	Regexp      string   `yaml:"regexp"`
@@ -25,7 +27,7 @@ type TargetSet struct {
 
 // Target ...
 type Target struct {
-	URL              string
+	Source           string
 	Description      string
 	Type             string
 	Regexp           string
@@ -40,6 +42,8 @@ type Target struct {
 	Path             string
 	SSHKeyPassphrase []byte
 }
+
+type Tags map[string]int
 
 // Config ...
 type Config struct {
@@ -73,9 +77,9 @@ func (c *Config) LoadConfigFile(path string) error {
 		return errors.Wrap(errors.WithStack(err), "failed to load config file")
 	}
 	for _, t := range c.TargetSets {
-		for _, URL := range t.URLs {
+		for _, src := range t.Sources {
 			target := Target{}
-			target.URL = URL
+			target.Source = src
 			target.Description = t.Description
 			target.Type = t.Type
 			target.Regexp = t.Regexp
@@ -84,7 +88,7 @@ func (c *Config) LoadConfigFile(path string) error {
 			target.TimeZone = t.TimeZone
 			target.Tags = t.Tags
 
-			u, err := url.Parse(URL)
+			u, err := url.Parse(src)
 			if err != nil {
 				return err
 			}
@@ -103,4 +107,59 @@ func (c *Config) LoadConfigFile(path string) error {
 		}
 	}
 	return nil
+}
+
+func (c *Config) Tags() Tags {
+	tags := map[string]int{}
+	for _, t := range c.TargetSets {
+		for _, tag := range t.Tags {
+			if _, ok := tags[tag]; !ok {
+				tags[tag] = 0
+			}
+			tags[tag] = tags[tag] + 1
+		}
+	}
+	return tags
+}
+
+func (c *Config) FilterTargets(tagExpr, sourceRe string) ([]Target, error) {
+	allTags := c.Tags()
+	targets := []Target{}
+	tagExpr = strings.Replace(tagExpr, ",", " or ", -1)
+	for _, target := range c.Targets {
+		tags := map[string]interface{}{
+			"hrv_source": target.Source,
+		}
+		for tag, _ := range allTags {
+			if contains(target.Tags, tag) {
+				tags[tag] = true
+			} else {
+				tags[tag] = false
+			}
+		}
+		targetExpr := []string{"true"}
+		if tagExpr != "" {
+			targetExpr = append(targetExpr, fmt.Sprintf("(%s)", tagExpr))
+		}
+		if sourceRe != "" {
+			targetExpr = append(targetExpr, fmt.Sprintf(`(hrv_source matches "%s")`, sourceRe))
+		}
+		out, err := expr.Eval(strings.Join(targetExpr, " and "), tags)
+		if err != nil {
+			return targets, err
+		}
+		if out.(bool) {
+			targets = append(targets, target)
+		}
+	}
+	return targets, nil
+}
+
+func contains(ss []string, t string) bool {
+	for _, s := range ss {
+		if s == t {
+			return true
+		}
+	}
+	return false
 }
