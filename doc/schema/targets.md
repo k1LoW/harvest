@@ -27,21 +27,21 @@ CREATE TABLE targets (
 
 ## Columns
 
-| Name        | Type    | Default | Nullable | Children | Parents | Comment |
-| ----------- | ------- | ------- | -------- | -------- | ------- | ------- |
-| id          | INTEGER |         | true     |          |         |         |
-| source      | TEXT    |         | false    |          |         |         |
-| description | TEXT    |         | true     |          |         |         |
-| type        | TEXT    |         | false    |          |         |         |
-| regexp      | TEXT    |         | true     |          |         |         |
-| multi_line  | INTEGER |         | true     |          |         |         |
-| time_format | TEXT    |         | true     |          |         |         |
-| time_zone   | TEXT    |         | true     |          |         |         |
-| scheme      | TEXT    |         | false    |          |         |         |
-| host        | TEXT    |         | true     |          |         |         |
-| user        | TEXT    |         | true     |          |         |         |
-| port        | INTEGER |         | true     |          |         |         |
-| path        | TEXT    |         | false    |          |         |         |
+| Name        | Type    | Default | Nullable | Children                                        | Parents | Comment |
+| ----------- | ------- | ------- | -------- | ----------------------------------------------- | ------- | ------- |
+| id          | INTEGER |         | true     | [logs](logs.md) [targets_tags](targets_tags.md) |         |         |
+| source      | TEXT    |         | false    |                                                 |         |         |
+| description | TEXT    |         | true     |                                                 |         |         |
+| type        | TEXT    |         | false    |                                                 |         |         |
+| regexp      | TEXT    |         | true     |                                                 |         |         |
+| multi_line  | INTEGER |         | true     |                                                 |         |         |
+| time_format | TEXT    |         | true     |                                                 |         |         |
+| time_zone   | TEXT    |         | true     |                                                 |         |         |
+| scheme      | TEXT    |         | false    |                                                 |         |         |
+| host        | TEXT    |         | true     |                                                 |         |         |
+| user        | TEXT    |         | true     |                                                 |         |         |
+| port        | INTEGER |         | true     |                                                 |         |         |
+| path        | TEXT    |         | false    |                                                 |         |         |
 
 ## Constraints
 

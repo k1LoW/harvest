@@ -17,10 +17,10 @@ CREATE TABLE tags (
 
 ## Columns
 
-| Name | Type    | Default | Nullable | Children | Parents | Comment |
-| ---- | ------- | ------- | -------- | -------- | ------- | ------- |
-| id   | INTEGER |         | true     |          |         |         |
-| name | TEXT    |         | false    |          |         |         |
+| Name | Type    | Default | Nullable | Children                        | Parents | Comment |
+| ---- | ------- | ------- | -------- | ------------------------------- | ------- | ------- |
+| id   | INTEGER |         | true     | [targets_tags](targets_tags.md) |         |         |
+| name | TEXT    |         | false    |                                 |         |         |
 
 ## Constraints
 

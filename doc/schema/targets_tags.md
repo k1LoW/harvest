@@ -18,11 +18,11 @@ CREATE TABLE targets_tags (
 
 ## Columns
 
-| Name      | Type    | Default | Nullable | Children | Parents | Comment |
-| --------- | ------- | ------- | -------- | -------- | ------- | ------- |
-| id        | INTEGER |         | true     |          |         |         |
-| target_id | INTEGER |         | false    |          |         |         |
-| tag_id    | INTEGER |         | false    |          |         |         |
+| Name      | Type    | Default | Nullable | Children | Parents               | Comment |
+| --------- | ------- | ------- | -------- | -------- | --------------------- | ------- |
+| id        | INTEGER |         | true     |          |                       |         |
+| target_id | INTEGER |         | false    |          | [targets](targets.md) |         |
+| tag_id    | INTEGER |         | false    |          | [tags](tags.md)       |         |
 
 ## Constraints
 

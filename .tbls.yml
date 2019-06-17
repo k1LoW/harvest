@@ -5,3 +5,28 @@ format:
   adjust: true
 er:
   format: svg
+relations:
+  -
+    table: logs
+    columns:
+      - target_id
+    parentTable: targets
+    parentColumns:
+      - id
+    def: logs -> targets
+  -
+    table: targets_tags
+    columns:
+      - target_id
+    parentTable: targets
+    parentColumns:
+      - id
+    def: targets_tags -> targets
+  -
+    table: targets_tags
+    columns:
+      - tag_id
+    parentTable: tags
+    parentColumns:
+      - id
+    def: targets_tags -> tags
