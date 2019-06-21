@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"regexp"
 	"strings"
 	"time"
@@ -55,7 +56,9 @@ func NewK8sClient(l *zap.Logger, host, path string) (Client, error) {
 
 // Read ...
 func (c *K8sClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
-	return nil
+	var sinceSeconds int64
+	sinceSeconds = time.Now().Unix() - st.Unix()
+	return c.Stream(ctx, false, &sinceSeconds)
 }
 
 // Tailf ...
@@ -144,10 +147,31 @@ func (c *K8sClient) Stream(ctx context.Context, follow bool, sinceSeconds *int64
 		for tc := range removed {
 			id := tc.getID()
 			if tails[id] == nil {
+				delete(tails, id)
 				continue
 			}
 			tails[id].Close()
 			delete(tails, id)
+		}
+	}()
+
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+	L:
+		for {
+			select {
+			case <-ticker.C:
+				for id, t := range tails {
+					if t.Closed {
+						delete(tails, id)
+					}
+				}
+				if len(tails) == 0 {
+					cancel()
+				}
+			case <-innerCtx.Done():
+				break L
+			}
 		}
 	}()
 
@@ -223,6 +247,7 @@ type Tail struct {
 	Namespace     string
 	PodName       string
 	ContainerName string
+	Closed        bool
 	lineChan      chan Line
 	req           *rest.Request
 	closed        chan struct{}
@@ -271,7 +296,10 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 		for {
 			line, err := reader.ReadBytes('\n')
 			if err != nil {
-				return
+				if err != io.EOF {
+					t.logger.Error(fmt.Sprintf("%s", err))
+				}
+				break L
 			}
 
 			t.lineChan <- Line{
@@ -287,16 +315,13 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 			default:
 			}
 		}
-	}()
-
-	go func() {
-		<-ctx.Done()
-		close(t.closed)
+		t.Close()
 	}()
 }
 
 // Close stops tailing
 func (t *Tail) Close() {
 	t.logger.Info(fmt.Sprintf("Close stream to /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
+	t.Closed = true
 	close(t.closed)
 }
