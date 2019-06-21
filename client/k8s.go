@@ -70,6 +70,24 @@ func (c *K8sClient) Tailf(ctx context.Context) error {
 
 // Ls ...
 func (c *K8sClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error {
+	tz := "+0000"
+	defer close(c.lineChan)
+	list, err := c.clientset.CoreV1().Pods(c.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	for _, i := range list.Items {
+		for _, container := range i.Spec.Containers {
+			l := strings.Join([]string{"", i.GetNamespace(), i.GetName(), container.Name}, "/")
+			c.lineChan <- Line{
+				Host:     c.contextName,
+				Path:     l,
+				Content:  fmt.Sprintf("%s STDOUT/STDERR", l),
+				TimeZone: tz,
+			}
+
+		}
+	}
 	return nil
 }
 
