@@ -23,6 +23,16 @@ Harvest provides the `hrv` command with the following features.
 ``` yaml
 ---
 targetSets:
+-
+    description: api
+    type: regexp
+    regexp: '"time":"([^"]+)"'
+    timeFormat: 'Jan 02 15:04:05'
+    timeZone: '+0000'
+    sources:
+      - 'k8s://k8s.context/namespace/pod-name*'
+    tags:
+      - api
   -
     description: webproxy syslog
     type: syslog
@@ -209,3 +219,5 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 - [Hayabusa](https://github.com/hirolovesbeer/hayabusa): A Simple and Fast Full-Text Search Engine for Massive System Log Data
     - Make simple with a combination of commands.
     - Full-Text Search Engine using SQLite FTS.
+- [stern](https://github.com/wercker/stern): ⎈ Multi pod and container log tailing for Kubernetes
+    - Multiple Kubernetes log streaming architecture.

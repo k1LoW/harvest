@@ -9,8 +9,10 @@ import (
 	"strings"
 
 	"github.com/antonmedv/expr"
+	"github.com/k1LoW/harvest/client/k8s"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // TargetSet ...
@@ -42,6 +44,37 @@ type Target struct {
 	Path             string `db:"path"`
 	SSHKeyPassphrase []byte
 	Id               int64 `db:"id"`
+}
+
+func (t *Target) GetHostLength() int {
+	return len(t.Host)
+}
+
+func (t *Target) GetPathLength() (int, error) {
+	if t.Scheme == "k8s" {
+		contextName := t.Host
+		clientset, err := k8s.NewKubeClientSet(contextName)
+		if err != nil {
+			return 0, err
+		}
+		length := 0
+		splited := strings.Split(t.Path, "/")
+		ns := splited[1]
+		list, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{})
+		if err != nil {
+			return 0, err
+		}
+		for _, i := range list.Items {
+			for _, c := range i.Spec.Containers {
+				l := len(strings.Join([]string{"", i.GetNamespace(), i.GetName(), c.Name}, "/"))
+				if length < l {
+					length = l
+				}
+			}
+		}
+		return length, nil
+	}
+	return len(t.Path), nil
 }
 
 type Tags map[string]int

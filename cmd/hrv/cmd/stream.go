@@ -139,31 +139,54 @@ func getStreamStdoutLengthes(targets []*config.Target, withHost, withPath, withT
 	var (
 		hLen int
 		tLen int
+		err  error
 	)
 	if withHost && withPath {
-		hLen = getMaxLength(targets, "hostpath")
+		hLen, err = getMaxLength(targets, "hostpath")
+		if err != nil {
+			return 0, 0, err
+		}
 	} else if withHost {
-		hLen = getMaxLength(targets, "host")
+		hLen, err = getMaxLength(targets, "host")
+		if err != nil {
+			return 0, 0, err
+		}
 	} else if withPath {
-		hLen = getMaxLength(targets, "path")
+		hLen, err = getMaxLength(targets, "path")
+		if err != nil {
+			return 0, 0, err
+		}
 	}
 	if withTag {
-		tLen = getMaxLength(targets, "tags")
+		tLen, err = getMaxLength(targets, "tags")
+		if err != nil {
+			return 0, 0, err
+		}
 	}
 	return hLen, tLen, nil
 }
 
-func getMaxLength(targets []*config.Target, key string) int {
-	var length int
+func getMaxLength(targets []*config.Target, key string) (int, error) {
+	var (
+		length int
+		err    error
+	)
 	for _, target := range targets {
 		var c int
 		switch key {
 		case "host":
-			c = len(target.Host)
+			c = target.GetHostLength()
 		case "path":
-			c = len(target.Path)
+			c, err = target.GetPathLength()
+			if err != nil {
+				return 0, err
+			}
 		case "hostpath":
-			c = len(target.Host) + len(target.Path)
+			pLen, err := target.GetPathLength()
+			if err != nil {
+				return 0, err
+			}
+			c = target.GetHostLength() + pLen
 		case "tags":
 			c = len(fmt.Sprintf("[%s]", strings.Join(target.Tags, "][")))
 		}
@@ -171,7 +194,7 @@ func getMaxLength(targets []*config.Target, key string) int {
 			length = c
 		}
 	}
-	return length
+	return length, nil
 }
 
 func init() {
