@@ -85,7 +85,6 @@ func (c *K8sClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error 
 				Content:  fmt.Sprintf("%s STDOUT/STDERR", l),
 				TimeZone: tz,
 			}
-
 		}
 	}
 	return nil

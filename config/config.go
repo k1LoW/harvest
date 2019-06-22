@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/k1LoW/harvest/client/k8s"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // TargetSet ...
@@ -53,23 +53,17 @@ func (t *Target) GetHostLength() int {
 func (t *Target) GetPathLength() (int, error) {
 	if t.Scheme == "k8s" {
 		contextName := t.Host
-		clientset, err := k8s.NewKubeClientSet(contextName)
+		splited := strings.Split(t.Path, "/")
+		namespace := splited[1]
+		podFilter := regexp.MustCompile(strings.Replace(strings.Replace(splited[2], ".*", "*", -1), "*", ".*", -1))
+		containers, err := k8s.GetContainers(contextName, namespace, podFilter)
 		if err != nil {
 			return 0, err
 		}
 		length := 0
-		splited := strings.Split(t.Path, "/")
-		ns := splited[1]
-		list, err := clientset.CoreV1().Pods(ns).List(metav1.ListOptions{})
-		if err != nil {
-			return 0, err
-		}
-		for _, i := range list.Items {
-			for _, c := range i.Spec.Containers {
-				l := len(strings.Join([]string{"", i.GetNamespace(), i.GetName(), c.Name}, "/"))
-				if length < l {
-					length = l
-				}
+		for _, c := range containers {
+			if length < len(c) {
+				length = len(c)
 			}
 		}
 		return length, nil

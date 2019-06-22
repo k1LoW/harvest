@@ -23,16 +23,6 @@ Harvest provides the `hrv` command with the following features.
 ``` yaml
 ---
 targetSets:
--
-    description: api
-    type: regexp
-    regexp: '"time":"([^"]+)"'
-    timeFormat: 'Jan 02 15:04:05'
-    timeZone: '+0000'
-    sources:
-      - 'k8s://k8s.context/namespace/pod-name*'
-    tags:
-      - api
   -
     description: webproxy syslog
     type: syslog
@@ -89,6 +79,17 @@ targetSets:
       - 'file:///path/to/httpd/access.log'
     tags:
       - httpd
+-
+    description: api on Kubernetes
+    type: regexp
+    regexp: '"time":"([^"]+)"'
+    timeFormat: 'Jan 02 15:04:05'
+    timeZone: '+0000'
+    sources:
+      - 'k8s://context-name/namespace/pod-name*'
+    tags:
+      - api
+      - k8s
 ```
 
 You can use `hrv configtest` for config test.
