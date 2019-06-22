@@ -92,6 +92,7 @@ func (c *K8sClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error 
 
 // Copy ...
 func (c *K8sClient) Copy(ctx context.Context, filePath string, dstDir string) error {
+	c.logger.Error("not implemented: cp k8s streams")
 	return nil
 }
 
