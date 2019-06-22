@@ -78,7 +78,7 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 		if err != nil {
 			return nil, err
 		}
-	case "none":
+	case "none", "k8s":
 		p, err = parser.NewNoneParser(t)
 		if err != nil {
 			return nil, err

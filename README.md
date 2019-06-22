@@ -81,10 +81,7 @@ targetSets:
       - httpd
 -
     description: api on Kubernetes
-    type: regexp
-    regexp: '"time":"([^"]+)"'
-    timeFormat: 'Jan 02 15:04:05'
-    timeZone: '+0000'
+    type: k8s
     sources:
       - 'k8s://context-name/namespace/pod-name*'
     tags:
