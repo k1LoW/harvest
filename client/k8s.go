@@ -58,14 +58,14 @@ func NewK8sClient(l *zap.Logger, host, path string) (Client, error) {
 func (c *K8sClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
 	var sinceSeconds int64
 	sinceSeconds = time.Now().Unix() - st.Unix()
-	return c.Stream(ctx, false, &sinceSeconds)
+	return c.Stream(ctx, false, &sinceSeconds, nil)
 }
 
 // Tailf ...
 func (c *K8sClient) Tailf(ctx context.Context) error {
 	var sinceSeconds int64
 	sinceSeconds = 1
-	return c.Stream(ctx, true, &sinceSeconds)
+	return c.Stream(ctx, true, &sinceSeconds, nil)
 }
 
 // Ls ...
@@ -97,7 +97,9 @@ func (c *K8sClient) Copy(ctx context.Context, filePath string, dstDir string) er
 
 // RandomOne ...
 func (c *K8sClient) RandomOne(ctx context.Context) error {
-	return nil
+	var tailLines int64
+	tailLines = 1
+	return c.Stream(ctx, false, nil, &tailLines)
 }
 
 // Out ...
@@ -135,7 +137,7 @@ func (tc *targetContainer) getID() string {
 }
 
 // Stream ...
-func (c *K8sClient) Stream(ctx context.Context, follow bool, sinceSeconds *int64) error {
+func (c *K8sClient) Stream(ctx context.Context, follow bool, sinceSeconds, tailLines *int64) error {
 	defer close(c.lineChan)
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -156,7 +158,7 @@ func (c *K8sClient) Stream(ctx context.Context, follow bool, sinceSeconds *int64
 			tail := NewTail(c.logger, c.lineChan, c.contextName, tc.namespace, tc.pod, tc.container)
 			tails[id] = tail
 
-			tail.Start(innerCtx, c.clientset.CoreV1().Pods(tc.namespace), follow, sinceSeconds)
+			tail.Start(innerCtx, c.clientset.CoreV1().Pods(tc.namespace), follow, sinceSeconds, tailLines)
 		}
 	}()
 
@@ -285,7 +287,7 @@ func NewTail(l *zap.Logger, lineChan chan Line, contextName, namespace, podName,
 }
 
 // Start starts tailing
-func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceSeconds *int64) {
+func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceSeconds, tailLines *int64) {
 	tz := "+0000"
 	go func() {
 		t.logger.Info(fmt.Sprintf("Open stream: /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
@@ -294,6 +296,7 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 			Timestamps:   false,
 			Container:    t.ContainerName,
 			SinceSeconds: sinceSeconds,
+			TailLines:    tailLines,
 		})
 
 		stream, err := req.Stream()
