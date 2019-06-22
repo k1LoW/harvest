@@ -29,10 +29,11 @@ type Client interface {
 
 // Line ...
 type Line struct {
-	Host     string
-	Path     string
-	Content  string
-	TimeZone string
+	Host               string
+	Path               string
+	Content            string
+	TimeZone           string
+	TimestampViaClient *time.Time
 }
 
 // buildReadCommand ...

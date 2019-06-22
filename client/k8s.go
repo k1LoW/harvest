@@ -294,7 +294,7 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 		t.logger.Info(fmt.Sprintf("Open stream: /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
 		req := i.GetLogs(t.PodName, &corev1.PodLogOptions{
 			Follow:       follow,
-			Timestamps:   false,
+			Timestamps:   true,
 			Container:    t.ContainerName,
 			SinceSeconds: sinceSeconds,
 			TailLines:    tailLines,
@@ -323,11 +323,18 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 				break L
 			}
 
+			lineWithTs := strings.TrimSuffix(string(line), "\n")
+			splitted := strings.Split(lineWithTs, " ")
+			ts, err := time.Parse(time.RFC3339Nano, splitted[0])
+			if err != nil {
+				t.logger.Error(fmt.Sprintf("%s", err))
+			}
 			t.lineChan <- Line{
-				Host:     t.ContextName,
-				Path:     strings.Join([]string{"", t.Namespace, t.PodName, t.ContainerName}, "/"),
-				Content:  strings.TrimSuffix(string(line), "\n"),
-				TimeZone: tz,
+				Host:               t.ContextName,
+				Path:               strings.Join([]string{"", t.Namespace, t.PodName, t.ContainerName}, "/"),
+				Content:            strings.Join(splitted[1:], " "),
+				TimeZone:           tz,
+				TimestampViaClient: &ts,
 			}
 
 			select {
