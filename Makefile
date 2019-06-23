@@ -42,7 +42,6 @@ dbdoc: build
 
 prerelease:
 	ghch -w -N ${VER}
-	gocredits . > CREDITS
 	git add CHANGELOG.md
 	git commit -m'Bump up version number'
 	git tag ${VER}
