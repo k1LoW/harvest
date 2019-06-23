@@ -9,9 +9,9 @@ Harvest provides the `hrv` command with the following features.
 - Agentless.
 - Portable.
 - Only 1 config file.
-- Fetch various remote/local log data via SSH/exec. ( `hrv fetch` )
+- Fetch various remote/local log data via SSH/exec/Kubernetes API. ( `hrv fetch` )
 - Output all fetched logs in the order of timestamp. ( `hrv cat` )
-- Stream various remote/local logs via SSH/exec. ( `hrv stream` )
+- Stream various remote/local logs via SSH/exec/Kubernetes API. ( `hrv stream` )
 - Copy remote/local raw logs via SSH/exec. ( `hrv cp` )
 
 ## Usage
