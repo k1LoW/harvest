@@ -70,7 +70,6 @@ func (c *K8sClient) Tailf(ctx context.Context) error {
 
 // Ls ...
 func (c *K8sClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error {
-	tz := "+0000"
 	defer close(c.lineChan)
 	list, err := c.clientset.CoreV1().Pods(c.namespace).List(metav1.ListOptions{})
 	if err != nil {
@@ -83,7 +82,7 @@ func (c *K8sClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error 
 				Host:     c.contextName,
 				Path:     l,
 				Content:  fmt.Sprintf("%s STDOUT/STDERR", l),
-				TimeZone: tz,
+				TimeZone: "",
 			}
 		}
 	}
@@ -92,7 +91,7 @@ func (c *K8sClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error 
 
 // Copy ...
 func (c *K8sClient) Copy(ctx context.Context, filePath string, dstDir string) error {
-	c.logger.Error("not implemented: cp k8s streams")
+	c.logger.Error("not implemented: cp k8s sources")
 	return nil
 }
 
@@ -289,7 +288,6 @@ func NewTail(l *zap.Logger, lineChan chan Line, contextName, namespace, podName,
 
 // Start starts tailing
 func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceSeconds, tailLines *int64) {
-	tz := "+0000"
 	go func() {
 		t.logger.Info(fmt.Sprintf("Open stream: /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
 		req := i.GetLogs(t.PodName, &corev1.PodLogOptions{
@@ -333,7 +331,7 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 				Host:               t.ContextName,
 				Path:               strings.Join([]string{"", t.Namespace, t.PodName, t.ContainerName}, "/"),
 				Content:            strings.Join(splitted[1:], " "),
-				TimeZone:           tz,
+				TimeZone:           "",
 				TimestampViaClient: &ts,
 			}
 
