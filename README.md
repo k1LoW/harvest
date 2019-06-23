@@ -9,9 +9,9 @@ Harvest provides the `hrv` command with the following features.
 - Agentless.
 - Portable.
 - Only 1 config file.
-- Fetch various remote/local log data via SSH/exec. ( `hrv fetch` )
+- Fetch various remote/local log data via SSH/exec/Kubernetes API. ( `hrv fetch` )
 - Output all fetched logs in the order of timestamp. ( `hrv cat` )
-- Stream various remote/local logs via SSH/exec. ( `hrv stream` )
+- Stream various remote/local logs via SSH/exec/Kubernetes API. ( `hrv stream` )
 - Copy remote/local raw logs via SSH/exec. ( `hrv cp` )
 
 ## Usage
@@ -79,6 +79,14 @@ targetSets:
       - 'file:///path/to/httpd/access.log'
     tags:
       - httpd
+-
+    description: api on Kubernetes
+    type: k8s
+    sources:
+      - 'k8s://context-name/namespace/pod-name*'
+    tags:
+      - api
+      - k8s
 ```
 
 You can use `hrv configtest` for config test.
@@ -209,3 +217,5 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 - [Hayabusa](https://github.com/hirolovesbeer/hayabusa): A Simple and Fast Full-Text Search Engine for Massive System Log Data
     - Make simple with a combination of commands.
     - Full-Text Search Engine using SQLite FTS.
+- [stern](https://github.com/wercker/stern): ⎈ Multi pod and container log tailing for Kubernetes
+    - Multiple Kubernetes log streaming architecture.

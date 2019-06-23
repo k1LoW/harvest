@@ -56,6 +56,12 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 			return nil, err
 		}
 		c = filec
+	case "k8s":
+		k8sc, err := client.NewK8sClient(l, host, t.Path)
+		if err != nil {
+			return nil, err
+		}
+		c = k8sc
 	default:
 		return nil, fmt.Errorf("unsupport scheme: %s", t.Scheme)
 	}
@@ -72,7 +78,7 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 		if err != nil {
 			return nil, err
 		}
-	case "none":
+	case "none", "k8s":
 		p, err = parser.NewNoneParser(t)
 		if err != nil {
 			return nil, err

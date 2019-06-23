@@ -100,6 +100,9 @@ var configtestCmd = &cobra.Command{
 				fmt.Printf("%s: ", t.Source)
 				logRead := false
 				for log := range logChan {
+					if logRead {
+						continue
+					}
 					if log.Timestamp > 0 {
 						fmt.Printf("%s\n", color.Green("OK", color.B))
 					} else if t.Type == "none" {

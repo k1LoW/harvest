@@ -5,10 +5,12 @@ import (
 	"io/ioutil"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/antonmedv/expr"
+	"github.com/k1LoW/harvest/client/k8s"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -42,6 +44,31 @@ type Target struct {
 	Path             string `db:"path"`
 	SSHKeyPassphrase []byte
 	Id               int64 `db:"id"`
+}
+
+func (t *Target) GetHostLength() int {
+	return len(t.Host)
+}
+
+func (t *Target) GetPathLength() (int, error) {
+	if t.Scheme == "k8s" {
+		contextName := t.Host
+		splited := strings.Split(t.Path, "/")
+		namespace := splited[1]
+		podFilter := regexp.MustCompile(strings.Replace(strings.Replace(splited[2], ".*", "*", -1), "*", ".*", -1))
+		containers, err := k8s.GetContainers(contextName, namespace, podFilter)
+		if err != nil {
+			return 0, err
+		}
+		length := 0
+		for _, c := range containers {
+			if length < len(c) {
+				length = len(c)
+			}
+		}
+		return length, nil
+	}
+	return len(t.Path), nil
 }
 
 type Tags map[string]int

@@ -65,6 +65,13 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 						}
 						prevTs = ts
 					}
+				}
+			}
+			if ts == 0 {
+				if line.TimestampViaClient != nil {
+					tsC := line.TimestampViaClient
+					ts = tsC.UnixNano()
+					prevTs = ts
 				} else {
 					ts = prevTs
 					filledByPrevTs = true
