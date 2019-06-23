@@ -32,6 +32,7 @@ depsdev:
 	go get golang.org/x/lint/golint
 	go get github.com/linyows/git-semv/cmd/git-semv
 	go get github.com/Songmu/ghch/cmd/ghch
+	go get github.com/Songmu/gocredits/cmd/gocredits
 
 dbdoc: build
 	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml
@@ -41,6 +42,7 @@ dbdoc: build
 
 prerelease:
 	ghch -w -N ${VER}
+	gocredits . > CREDITS
 	git add CHANGELOG.md
 	git commit -m'Bump up version number'
 	git tag ${VER}
