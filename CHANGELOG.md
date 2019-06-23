@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.10.0](https://github.com/k1LoW/harvest/compare/v0.9.0...v0.10.0) (2019-06-23)
+
+* Support Kubernetes logs [#30](https://github.com/k1LoW/harvest/pull/30) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.9.0](https://github.com/k1LoW/harvest/compare/v0.8.0...v0.9.0) (2019-06-18)
 
 * [BREAKING] Update schema [#29](https://github.com/k1LoW/harvest/pull/29) ([k1LoW](https://github.com/k1LoW))
