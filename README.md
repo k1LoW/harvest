@@ -14,6 +14,13 @@ Harvest provides the `hrv` command with the following features.
 - Stream various remote/local logs via SSH/exec/Kubernetes API. ( `hrv stream` )
 - Copy remote/local raw logs via SSH/exec. ( `hrv cp` )
 
+## Quick Start ( for Kubernetes )
+
+``` console
+$ hrv generate-k8s-config > cluster.yml
+$ hrv stream -c cluster.yml --tag='kube_apiserver or coredns' --with-path --with-timestamp
+```
+
 ## Usage
 
 ### :beetle: Fetch and output remote/local log data
