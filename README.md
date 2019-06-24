@@ -102,7 +102,7 @@ You can use `hrv configtest` for config test.
 $ hrv configtest -c config.yml
 ```
 
-#### 2. Fetch target log data via SSH/exec ( `hrv fecth` )
+#### 2. Fetch target log data via SSH/exec/Kubernetes API ( `hrv fecth` )
 
 ``` console
 $ hrv fetch -c config.yml --tag=webproxy,db
@@ -118,7 +118,7 @@ $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path 
 
 #### 1. [Set config.yml](#1-set-log-sources-and-log-type-in-configyml)
 
-#### 2. Stream target logs via SSH/exec ( `hrv stream` )
+#### 2. Stream target logs via SSH/exec/Kubernetes API ( `hrv stream` )
 
 ``` console
 $ hrv stream -c config.yml --with-timestamp --with-host --with-path --with-tag
