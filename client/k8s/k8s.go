@@ -34,6 +34,20 @@ func NewKubeClientSet(contextName string) (*kubernetes.Clientset, error) {
 	return clientset, err
 }
 
+// GetCurrentContext ...
+func GetCurrentContext() (string, error) {
+	kubeconfig, err := getKubeConfig()
+	if err != nil {
+		return "", err
+	}
+	clientConfig := newClientConfig(kubeconfig, "")
+	rc, err := clientConfig.RawConfig()
+	if err != nil {
+		return "", err
+	}
+	return rc.CurrentContext, nil
+}
+
 func GetContainers(contextName string, namespace string, podFilter *regexp.Regexp) ([]string, error) {
 	clientset, err := NewKubeClientSet(contextName)
 	if err != nil {

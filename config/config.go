@@ -18,12 +18,12 @@ import (
 // TargetSet ...
 type TargetSet struct {
 	Sources     []string `yaml:"sources"`
-	Description string   `yaml:"description"`
+	Description string   `yaml:"description,omitempty"`
 	Type        string   `yaml:"type"`
-	Regexp      string   `yaml:"regexp"`
-	MultiLine   bool     `yaml:"multiLine"`
-	TimeFormat  string   `yaml:"timeFormat"`
-	TimeZone    string   `yaml:"timeZone"`
+	Regexp      string   `yaml:"regexp,omitempty"`
+	MultiLine   bool     `yaml:"multiLine,omitempty"`
+	TimeFormat  string   `yaml:"timeFormat,omitempty"`
+	TimeZone    string   `yaml:"timeZone,omitempty"`
 	Tags        []string `yaml:"tags"`
 }
 
@@ -75,7 +75,7 @@ type Tags map[string]int
 
 // Config ...
 type Config struct {
-	Targets    []*Target
+	Targets    []*Target    `yaml:"-"`
 	TargetSets []*TargetSet `yaml:"targetSets"`
 }
 
