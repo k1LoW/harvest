@@ -210,4 +210,5 @@ func init() {
 	streamCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	streamCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")
 	streamCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
+	streamCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }

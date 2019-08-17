@@ -149,4 +149,5 @@ func init() {
 	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	configtestCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	configtestCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
+	configtestCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }
