@@ -36,7 +36,7 @@ var targetsCmd = &cobra.Command{
 	Short: "list targets",
 	Long:  `list targets.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {

@@ -47,7 +47,7 @@ var cpCmd = &cobra.Command{
 	Short: "copy raw logs from targets",
 	Long:  `copy raw logs from targets.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {
@@ -148,7 +148,7 @@ var cpCmd = &cobra.Command{
 			go func(t *config.Target) {
 				cChan <- struct{}{}
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, t, false)
+				c, err := collector.NewCollector(ctx, t, l)
 				if err != nil {
 					l.Error("Copy error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}

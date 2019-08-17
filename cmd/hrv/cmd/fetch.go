@@ -53,7 +53,7 @@ var fetchCmd = &cobra.Command{
 	Short: "fetch from targets",
 	Long:  `fetch from targets.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {
@@ -132,7 +132,7 @@ var fetchCmd = &cobra.Command{
 			go func(t *config.Target) {
 				cChan <- struct{}{}
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, t, false)
+				c, err := collector.NewCollector(ctx, t, l)
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}

@@ -7,7 +7,6 @@ import (
 
 	"github.com/k1LoW/harvest/client"
 	"github.com/k1LoW/harvest/config"
-	"github.com/k1LoW/harvest/logger"
 	"github.com/k1LoW/harvest/parser"
 	"go.uber.org/zap"
 )
@@ -22,7 +21,7 @@ type Collector struct {
 }
 
 // NewCollector ...
-func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Collector, error) {
+func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collector, error) {
 	var (
 		host string
 		err  error
@@ -35,12 +34,7 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 		host = "localhost"
 	}
 
-	var l *zap.Logger
-	if logSilent {
-		l = logger.NewSilentLogger().With(zap.String("host", host), zap.String("path", t.Path))
-	} else {
-		l = logger.NewLogger().With(zap.String("host", host), zap.String("path", t.Path))
-	}
+	l = l.With(zap.String("host", host), zap.String("path", t.Path))
 
 	// Set client
 	switch t.Scheme {

@@ -40,7 +40,7 @@ var logsCmd = &cobra.Command{
 	Short: "list target logs",
 	Long:  `list target logs.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {
@@ -113,7 +113,7 @@ var logsCmd = &cobra.Command{
 			go func(t *config.Target) {
 				cChan <- struct{}{}
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, t, true)
+				c, err := collector.NewCollector(ctx, t, l)
 				if err != nil {
 					l.Error("Ls error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}

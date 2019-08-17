@@ -60,7 +60,7 @@ var catCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 		dbPath := args[0]
 
 		if _, err := os.Lstat(dbPath); err != nil {

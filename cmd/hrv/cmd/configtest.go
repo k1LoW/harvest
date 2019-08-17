@@ -41,7 +41,7 @@ var configtestCmd = &cobra.Command{
 	Short: "configtest",
 	Long:  `configtest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {
@@ -86,7 +86,7 @@ var configtestCmd = &cobra.Command{
 		for _, t := range targets {
 			wg.Add(1)
 			cChan <- struct{}{}
-			c, err := collector.NewCollector(ctx, t, true)
+			c, err := collector.NewCollector(ctx, t, l)
 			if err != nil {
 				failure++
 				<-cChan
