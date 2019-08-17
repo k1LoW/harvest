@@ -25,9 +25,9 @@ func NewLogger(verbose bool) *zap.Logger {
 	var logLevel zapcore.Level
 
 	if verbose {
-		logLevel = zapcore.InfoLevel
+		logLevel = zapcore.DebugLevel
 	} else {
-		logLevel = zapcore.ErrorLevel
+		logLevel = zapcore.InfoLevel
 	}
 
 	stdoutCore := zapcore.NewCore(

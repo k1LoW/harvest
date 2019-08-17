@@ -110,14 +110,14 @@ var cpCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
+		l.Debug(fmt.Sprintf("Client concurrency: %d", concurrency))
 		if et != nil {
 			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
 		} else {
 			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
 		}
 
-		l.Info("Start copying logs from targets")
+		l.Debug("Start copying logs from targets")
 
 		sout, err := stdout.NewStdout(
 			false,
@@ -162,7 +162,7 @@ var cpCmd = &cobra.Command{
 
 		wg.Wait()
 
-		l.Info("Copy finished")
+		l.Debug("Copy finished")
 	},
 }
 

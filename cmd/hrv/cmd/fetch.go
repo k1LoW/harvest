@@ -113,14 +113,14 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
+		l.Debug(fmt.Sprintf("Client concurrency: %d", concurrency))
 		if et != nil {
 			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
 		} else {
 			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
 		}
 
-		l.Info("Start fetching from targets")
+		l.Debug("Start fetching from targets")
 
 		go d.StartInsert()
 
@@ -146,7 +146,7 @@ var fetchCmd = &cobra.Command{
 
 		wg.Wait()
 
-		l.Info("Fetch finished")
+		l.Debug("Fetch finished")
 	},
 }
 
