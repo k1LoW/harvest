@@ -30,13 +30,13 @@ func NewLogger(verbose bool) *zap.Logger {
 		logLevel = zapcore.InfoLevel
 	}
 
-	stdoutCore := zapcore.NewCore(
+	stderrCore := zapcore.NewCore(
 		zapcore.NewConsoleEncoder(encoderConfig),
-		zapcore.AddSync(os.Stdout),
+		zapcore.AddSync(os.Stderr),
 		logLevel,
 	)
 
-	logger := zap.New(stdoutCore)
+	logger := zap.New(stderrCore)
 
 	return logger
 }
