@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.12.0](https://github.com/k1LoW/harvest/compare/v0.11.0...v0.12.0) (2019-08-19)
+
+* Use STDERR instead of STDOUT [#34](https://github.com/k1LoW/harvest/pull/34) ([k1LoW](https://github.com/k1LoW))
+* Add gosec [#33](https://github.com/k1LoW/harvest/pull/33) ([k1LoW](https://github.com/k1LoW))
+* Add --verbose option [#32](https://github.com/k1LoW/harvest/pull/32) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.11.0](https://github.com/k1LoW/harvest/compare/v0.10.0...v0.11.0) (2019-06-24)
 
 * Add `hrv generate-k8s-config` [#31](https://github.com/k1LoW/harvest/pull/31) ([k1LoW](https://github.com/k1LoW))
