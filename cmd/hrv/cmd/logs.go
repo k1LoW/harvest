@@ -40,7 +40,7 @@ var logsCmd = &cobra.Command{
 	Short: "list target logs",
 	Long:  `list target logs.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {
@@ -113,7 +113,7 @@ var logsCmd = &cobra.Command{
 			go func(t *config.Target) {
 				cChan <- struct{}{}
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, t, true)
+				c, err := collector.NewCollector(ctx, t, l)
 				if err != nil {
 					l.Error("Ls error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
@@ -140,4 +140,5 @@ func init() {
 	logsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	logsCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 	logsCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
+	logsCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }

@@ -47,7 +47,7 @@ var cpCmd = &cobra.Command{
 	Short: "copy raw logs from targets",
 	Long:  `copy raw logs from targets.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {
@@ -110,14 +110,14 @@ var cpCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		l.Info(fmt.Sprintf("Client concurrency: %d", concurrency))
+		l.Debug(fmt.Sprintf("Client concurrency: %d", concurrency))
 		if et != nil {
 			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
 		} else {
 			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
 		}
 
-		l.Info("Start copying logs from targets")
+		l.Debug("Start copying logs from targets")
 
 		sout, err := stdout.NewStdout(
 			false,
@@ -148,7 +148,7 @@ var cpCmd = &cobra.Command{
 			go func(t *config.Target) {
 				cChan <- struct{}{}
 				defer wg.Done()
-				c, err := collector.NewCollector(ctx, t, false)
+				c, err := collector.NewCollector(ctx, t, l)
 				if err != nil {
 					l.Error("Copy error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
 				}
@@ -162,7 +162,7 @@ var cpCmd = &cobra.Command{
 
 		wg.Wait()
 
-		l.Info("Copy finished")
+		l.Debug("Copy finished")
 	},
 }
 
@@ -176,4 +176,5 @@ func init() {
 	cpCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
 	cpCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
 	cpCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
+	cpCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }

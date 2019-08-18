@@ -60,7 +60,7 @@ var catCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 		dbPath := args[0]
 
 		if _, err := os.Lstat(dbPath); err != nil {
@@ -249,5 +249,6 @@ func init() {
 	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag")
 	catCmd.Flags().StringVarP(&st, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
 	catCmd.Flags().StringVarP(&et, "end-time", "", "", "log end time (format: 2006-01-02 15:04:05)")
+	catCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 	catCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")
 }

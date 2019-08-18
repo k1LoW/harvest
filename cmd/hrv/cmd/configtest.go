@@ -41,7 +41,7 @@ var configtestCmd = &cobra.Command{
 	Short: "configtest",
 	Long:  `configtest.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {
@@ -86,7 +86,7 @@ var configtestCmd = &cobra.Command{
 		for _, t := range targets {
 			wg.Add(1)
 			cChan <- struct{}{}
-			c, err := collector.NewCollector(ctx, t, true)
+			c, err := collector.NewCollector(ctx, t, l)
 			if err != nil {
 				failure++
 				<-cChan
@@ -149,4 +149,5 @@ func init() {
 	configtestCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	configtestCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	configtestCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
+	configtestCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }

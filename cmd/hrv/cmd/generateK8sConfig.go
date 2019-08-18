@@ -47,7 +47,7 @@ var generateK8sConfigCmd = &cobra.Command{
 	Short: "generate harvest config.yml via Kubernetes cluster",
 	Long:  `generate harvest config.yml via Kubernetes cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		if contextName == "" {
 			cc, err := k8s.GetCurrentContext()

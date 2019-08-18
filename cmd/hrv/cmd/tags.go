@@ -36,7 +36,7 @@ var tagsCmd = &cobra.Command{
 	Short: "list tags",
 	Long:  `list tags.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		l := logger.NewLogger()
+		l := logger.NewLogger(verbose)
 
 		cfg, err := config.NewConfig()
 		if err != nil {

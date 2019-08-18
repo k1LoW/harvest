@@ -8,7 +8,7 @@ import (
 )
 
 // NewLogger ...
-func NewLogger() *zap.Logger {
+func NewLogger(verbose bool) *zap.Logger {
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "ts",
 		LevelKey:       "level",
@@ -22,36 +22,18 @@ func NewLogger() *zap.Logger {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	stdoutCore := zapcore.NewCore(
-		zapcore.NewConsoleEncoder(encoderConfig),
-		zapcore.AddSync(os.Stdout),
-		zapcore.InfoLevel,
-	)
+	var logLevel zapcore.Level
 
-	logger := zap.New(stdoutCore)
-
-	return logger
-}
-
-// NewSilentLogger ...
-func NewSilentLogger() *zap.Logger {
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "ts",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
-		EncodeLevel:    zapcore.CapitalLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.StringDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
+	if verbose {
+		logLevel = zapcore.DebugLevel
+	} else {
+		logLevel = zapcore.InfoLevel
 	}
 
 	stdoutCore := zapcore.NewCore(
 		zapcore.NewConsoleEncoder(encoderConfig),
 		zapcore.AddSync(os.Stdout),
-		zapcore.ErrorLevel,
+		logLevel,
 	)
 
 	logger := zap.New(stdoutCore)

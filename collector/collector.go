@@ -7,7 +7,6 @@ import (
 
 	"github.com/k1LoW/harvest/client"
 	"github.com/k1LoW/harvest/config"
-	"github.com/k1LoW/harvest/logger"
 	"github.com/k1LoW/harvest/parser"
 	"go.uber.org/zap"
 )
@@ -22,7 +21,7 @@ type Collector struct {
 }
 
 // NewCollector ...
-func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Collector, error) {
+func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collector, error) {
 	var (
 		host string
 		err  error
@@ -35,12 +34,7 @@ func NewCollector(ctx context.Context, t *config.Target, logSilent bool) (*Colle
 		host = "localhost"
 	}
 
-	var l *zap.Logger
-	if logSilent {
-		l = logger.NewSilentLogger().With(zap.String("host", host), zap.String("path", t.Path))
-	} else {
-		l = logger.NewLogger().With(zap.String("host", host), zap.String("path", t.Path))
-	}
+	l = l.With(zap.String("host", host), zap.String("path", t.Path))
 
 	// Set client
 	switch t.Scheme {
@@ -221,12 +215,12 @@ func (c *Collector) Copy(logChan chan parser.Log, st *time.Time, et *time.Time, 
 		}
 		for _, file := range files {
 			filePath := file.Content
-			c.logger.Info(fmt.Sprintf("Start copying %s", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
+			c.logger.Debug(fmt.Sprintf("Start copying %s", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
 			err := c.client.Copy(innerCtx, filePath, dstDir)
 			if err != nil {
 				c.logger.Error("Copy error", zap.String("host", c.target.Host), zap.String("path", c.target.Path), zap.String("error", err.Error()))
 			} else {
-				c.logger.Info(fmt.Sprintf("Copy %s finished", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
+				c.logger.Debug(fmt.Sprintf("Copy %s finished", filePath), zap.String("host", c.target.Host), zap.String("path", c.target.Path))
 			}
 		}
 	}()
