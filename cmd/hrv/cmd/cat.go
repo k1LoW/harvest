@@ -194,7 +194,7 @@ func buildCondition(db *db.DB) (string, error) {
 		return "", nil
 	}
 
-	return fmt.Sprintf(" WHERE %s", strings.Join(cond, " AND ")), nil
+	return fmt.Sprintf(" WHERE %s", strings.Join(cond, " AND ")), nil // #nosec
 }
 
 func getCatStdoutLengthes(d *db.DB, withHost, withPath, withTag bool) (int, int, error) {

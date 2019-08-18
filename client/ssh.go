@@ -69,12 +69,12 @@ func (c *SSHClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error 
 func (c *SSHClient) Copy(ctx context.Context, filePath string, dstDir string) error {
 	dstLogFilePath := filepath.Join(dstDir, c.host, filePath)
 	dstLogDir := filepath.Dir(dstLogFilePath)
-	err := os.MkdirAll(dstLogDir, 0755)
+	err := os.MkdirAll(dstLogDir, 0755) // #nosec
 	if err != nil {
 		return err
 	}
 	catCmd := fmt.Sprintf("ssh %s sudo cat %s > %s", c.host, filePath, dstLogFilePath)
-	cmd := exec.CommandContext(ctx, "sh", "-c", catCmd)
+	cmd := exec.CommandContext(ctx, "sh", "-c", catCmd) // #nosec
 	err = cmd.Run()
 	if err != nil {
 		return err
@@ -139,7 +139,11 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 
 	go func() {
 		<-innerCtx.Done()
-		session.Close()
+		err := session.Close()
+		if err != nil {
+			c.logger.Error(fmt.Sprintf("%v", err))
+			return
+		}
 		c.logger.Info("Close SSH session")
 	}()
 
