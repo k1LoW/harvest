@@ -307,7 +307,12 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 
 		go func() {
 			<-t.closed
-			stream.Close()
+			err := stream.Close()
+			if err != nil {
+				t.logger.Error(fmt.Sprintf("%v", err))
+				return
+			}
+			t.logger.Info(fmt.Sprintf("Close stream: /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
 		}()
 
 		reader := bufio.NewReader(stream)

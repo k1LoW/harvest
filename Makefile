@@ -13,10 +13,13 @@ BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 
 default: test
 
-ci: test build integration
+ci: test build integration sec
 
 test:
 	go test ./... -coverprofile=coverage.txt -covermode=count
+
+sec:
+	gosec ./...
 
 integration:
 	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml
@@ -33,6 +36,7 @@ depsdev:
 	go get github.com/linyows/git-semv/cmd/git-semv
 	go get github.com/Songmu/ghch/cmd/ghch
 	go get github.com/Songmu/gocredits/cmd/gocredits
+	go get github.com/securego/gosec/cmd/gosec
 
 dbdoc: build
 	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml

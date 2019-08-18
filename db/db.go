@@ -215,6 +215,7 @@ func (d *DB) Cat(cond string) chan parser.Log {
 	go func() {
 		defer close(d.logChan)
 		log := parser.Log{}
+		/* #nosec */
 		rows, err := d.db.Queryx(fmt.Sprintf(`
 SELECT
   logs.host,
@@ -302,7 +303,7 @@ type resultLength struct {
 
 // GetColumnMaxLength ...
 func (d *DB) GetColumnMaxLength(colName ...string) (int, error) {
-	query := fmt.Sprintf("SELECT (length(%s)) AS length from logs GROUP BY %s ORDER by length DESC LIMIT 1;", strings.Join(colName, ")+length("), strings.Join(colName, ","))
+	query := fmt.Sprintf("SELECT (length(%s)) AS length from logs GROUP BY %s ORDER by length DESC LIMIT 1;", strings.Join(colName, ")+length("), strings.Join(colName, ",")) // #nosec
 	l := resultLength{}
 	err := d.db.Get(&l, query)
 	if err != nil {
