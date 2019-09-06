@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -140,7 +141,7 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	go func() {
 		<-innerCtx.Done()
 		err := session.Close()
-		if err != nil {
+		if err != nil && err != io.EOF {
 			c.logger.Error(fmt.Sprintf("%v", err))
 			return
 		}
