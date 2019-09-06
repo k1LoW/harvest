@@ -103,7 +103,7 @@ var configtestCmd = &cobra.Command{
 					if logRead {
 						continue
 					}
-					if log.Timestamp > 0 {
+					if log.Timestamp != nil {
 						fmt.Printf("%s\n", color.Green("OK", color.B))
 					} else if t.Type == "none" {
 						fmt.Printf("%s\n", color.Yellow("Skip (because type=none)", color.B))

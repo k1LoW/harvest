@@ -174,6 +174,11 @@ func (d *DB) StartInsert() {
 
 L:
 	for log := range d.logChan {
+		ts := log.Timestamp
+		if ts == nil {
+			ts = &time.Time{}
+		}
+
 		_, err := d.db.Exec(`
 INSERT INTO logs (
   host,
@@ -185,7 +190,7 @@ INSERT INTO logs (
 ) VALUES ($1, $2, $3, $4, $5, $6);`,
 			log.Host,
 			log.Path,
-			log.Timestamp,
+			ts.UnixNano(),
 			log.Target.Id,
 			log.FilledByPrevTs,
 			log.Content,
@@ -245,6 +250,12 @@ ORDER BY logs.ts, logs.rowid ASC;`, cond))
 		}
 		for rows.Next() {
 			err := rows.StructScan(&log)
+			if log.TimestampUnixNano < 0 {
+				log.Timestamp = nil
+			} else {
+				ts := time.Unix(0, log.TimestampUnixNano)
+				log.Timestamp = &ts
+			}
 			if err != nil {
 				d.logger.Error("DB error", zap.String("error", err.Error()))
 				break

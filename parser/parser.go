@@ -13,12 +13,13 @@ const maxContentStash = 1000
 
 // Log ...
 type Log struct {
-	Host           string         `db:"host"`
-	Path           string         `db:"path"`
-	Timestamp      int64          `db:"ts"`
-	FilledByPrevTs bool           `db:"filled_by_prev_ts"`
-	Content        string         `db:"content"`
-	Target         *config.Target `db:"target"`
+	Host              string `db:"host"`
+	Path              string `db:"path"`
+	Timestamp         *time.Time
+	TimestampUnixNano int64          `db:"ts"`
+	FilledByPrevTs    bool           `db:"filled_by_prev_ts"`
+	Content           string         `db:"content"`
+	Target            *config.Target `db:"target"`
 }
 
 // Parser ...
@@ -27,9 +28,11 @@ type Parser interface {
 }
 
 // parseTime ...
-func parseTime(tf string, tz string, content string) (time.Time, error) {
+func parseTime(tf string, tz string, content string) (*time.Time, error) {
 	if tz == "" {
-		return time.Parse(fmt.Sprintf("2006-01-02 %s", tf), fmt.Sprintf("%s %s", time.Now().Format("2006-01-02"), content))
+		t, err := time.Parse(fmt.Sprintf("2006-01-02 %s", tf), fmt.Sprintf("%s %s", time.Now().Format("2006-01-02"), content))
+		return &t, err
 	}
-	return time.Parse(fmt.Sprintf("2006-01-02 -0700 %s", tf), fmt.Sprintf("%s %s %s", time.Now().Format("2006-01-02"), tz, content))
+	t, err := time.Parse(fmt.Sprintf("2006-01-02 -0700 %s", tf), fmt.Sprintf("%s %s %s", time.Now().Format("2006-01-02"), tz, content))
+	return &t, err
 }
