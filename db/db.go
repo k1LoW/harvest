@@ -66,12 +66,15 @@ CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id INTEGER, ts INTEGER, 
 	)
 
 	tags := map[string]int64{}
-	for tag, _ := range c.Tags() {
+	for tag := range c.Tags() {
 		res, err := db.Exec(`INSERT INTO tags (name) VALUES ($1);`, tag)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
 		id, err := res.LastInsertId()
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 		tags[tag] = id
 	}
 
