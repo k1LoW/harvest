@@ -61,7 +61,20 @@ CREATE TABLE targets_tags (
   tag_id INTEGER NOT NULL,
   UNIQUE(target_id, tag_id)
 );
-CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id INTEGER, ts INTEGER, filled_by_prev_ts INTEGER, content);
+CREATE VIRTUAL TABLE logs USING FTS4(
+  host,
+  path,
+  target_id INTEGER,
+  ts INTEGER,
+  year INTEGER,
+  month INTEGER,
+  day INTEGER,
+  hour INTEGER,
+  minute INTEGER,
+  second INTEGER,
+  filled_by_prev_ts INTEGER,
+  content
+);
 `,
 	)
 
