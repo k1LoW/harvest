@@ -63,22 +63,22 @@ func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collec
 	// Set parser
 	switch t.Type {
 	case "syslog":
-		p, err = parser.NewSyslogParser(t)
+		p, err = parser.NewSyslogParser(t, l)
 		if err != nil {
 			return nil, err
 		}
 	case "combinedLog":
-		p, err = parser.NewCombinedLogParser(t)
+		p, err = parser.NewCombinedLogParser(t, l)
 		if err != nil {
 			return nil, err
 		}
 	case "none", "k8s":
-		p, err = parser.NewNoneParser(t)
+		p, err = parser.NewNoneParser(t, l)
 		if err != nil {
 			return nil, err
 		}
 	default: // regexp
-		p, err = parser.NewRegexpParser(t)
+		p, err = parser.NewRegexpParser(t, l)
 		if err != nil {
 			return nil, err
 		}
