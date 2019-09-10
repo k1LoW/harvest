@@ -23,23 +23,17 @@ type Collector struct {
 // NewCollector ...
 func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collector, error) {
 	var (
-		host string
-		err  error
-		c    client.Client
-		p    parser.Parser
+		err error
+		c   client.Client
+		p   parser.Parser
 	)
 
-	host = t.Host
-	if host == "" {
-		host = "localhost"
-	}
-
-	l = l.With(zap.String("host", host), zap.String("path", t.Path))
+	l = l.With(zap.String("host", t.Host), zap.String("path", t.Path))
 
 	// Set client
 	switch t.Scheme {
 	case "ssh":
-		sshc, err := client.NewSSHClient(l, host, t.User, t.Port, t.Path, t.SSHKeyPassphrase)
+		sshc, err := client.NewSSHClient(l, t.Host, t.User, t.Port, t.Path, t.SSHKeyPassphrase)
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +45,7 @@ func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collec
 		}
 		c = filec
 	case "k8s":
-		k8sc, err := client.NewK8sClient(l, host, t.Path)
+		k8sc, err := client.NewK8sClient(l, t.Host, t.Path)
 		if err != nil {
 			return nil, err
 		}
