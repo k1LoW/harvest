@@ -39,10 +39,7 @@ func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelF
 		defer close(logChan)
 	L:
 		for line := range lineChan {
-			var (
-				ts int64
-			)
-			ts = 0
+			ts := int64(0)
 			if line.TimestampViaClient != nil {
 				tsC := line.TimestampViaClient
 				ts = tsC.UnixNano()
@@ -97,8 +94,7 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 		for line := range lineChan {
 			hostStash = line.Host
 			pathStash = line.Path
-			var ts int64
-			ts = 0
+			ts := int64(0)
 
 			if line.TimestampViaClient != nil {
 				tsC := line.TimestampViaClient
