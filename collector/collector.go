@@ -23,23 +23,17 @@ type Collector struct {
 // NewCollector ...
 func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collector, error) {
 	var (
-		host string
-		err  error
-		c    client.Client
-		p    parser.Parser
+		err error
+		c   client.Client
+		p   parser.Parser
 	)
 
-	host = t.Host
-	if host == "" {
-		host = "localhost"
-	}
-
-	l = l.With(zap.String("host", host), zap.String("path", t.Path))
+	l = l.With(zap.String("host", t.Host), zap.String("path", t.Path))
 
 	// Set client
 	switch t.Scheme {
 	case "ssh":
-		sshc, err := client.NewSSHClient(l, host, t.User, t.Port, t.Path, t.SSHKeyPassphrase)
+		sshc, err := client.NewSSHClient(l, t.Host, t.User, t.Port, t.Path, t.SSHKeyPassphrase)
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +45,7 @@ func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collec
 		}
 		c = filec
 	case "k8s":
-		k8sc, err := client.NewK8sClient(l, host, t.Path)
+		k8sc, err := client.NewK8sClient(l, t.Host, t.Path)
 		if err != nil {
 			return nil, err
 		}
@@ -63,22 +57,22 @@ func NewCollector(ctx context.Context, t *config.Target, l *zap.Logger) (*Collec
 	// Set parser
 	switch t.Type {
 	case "syslog":
-		p, err = parser.NewSyslogParser(t)
+		p, err = parser.NewSyslogParser(t, l)
 		if err != nil {
 			return nil, err
 		}
 	case "combinedLog":
-		p, err = parser.NewCombinedLogParser(t)
+		p, err = parser.NewCombinedLogParser(t, l)
 		if err != nil {
 			return nil, err
 		}
 	case "none", "k8s":
-		p, err = parser.NewNoneParser(t)
+		p, err = parser.NewNoneParser(t, l)
 		if err != nil {
 			return nil, err
 		}
 	default: // regexp
-		p, err = parser.NewRegexpParser(t)
+		p, err = parser.NewRegexpParser(t, l)
 		if err != nil {
 			return nil, err
 		}
@@ -104,16 +98,8 @@ func (c *Collector) Fetch(dbChan chan parser.Log, st *time.Time, et *time.Time, 
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, st, et) {
 			dbChan <- log
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 
@@ -137,16 +123,8 @@ func (c *Collector) Stream(logChan chan parser.Log, multiLine bool) error {
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, nil, nil) {
 			logChan <- log
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 
@@ -170,20 +148,12 @@ func (c *Collector) LsLogs(logChan chan parser.Log, st *time.Time, et *time.Time
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for line := range c.client.Out() {
 			logChan <- parser.Log{
 				Host:    line.Host,
 				Path:    line.Path,
 				Content: line.Content,
 				Target:  c.target,
-			}
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
 			}
 		}
 	}()
@@ -246,16 +216,8 @@ func (c *Collector) ConfigTest(logChan chan parser.Log, multiLine bool) error {
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, nil, nil) {
 			logChan <- log
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 

@@ -92,7 +92,10 @@ func (c *SSHClient) RandomOne(ctx context.Context) error {
 
 // Exec ...
 func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
-	defer close(c.lineChan)
+	defer func() {
+		c.logger.Debug("Close chan client.Line")
+		close(c.lineChan)
+	}()
 	session, err := c.client.NewSession()
 	if err != nil {
 		return err
@@ -138,22 +141,18 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 		return err
 	}
 
-	go func() {
-		<-innerCtx.Done()
-		err := session.Close()
-		if err != nil && err != io.EOF {
-			c.logger.Error(fmt.Sprintf("%v", err))
-			return
-		}
-		c.logger.Info("Close SSH session")
-	}()
-
 	err = session.Wait()
 	if err != nil {
 		return err
 	}
 
 	<-innerCtx.Done()
+
+	err = session.Close()
+	if err != nil && err != io.EOF {
+		return err
+	}
+	c.logger.Info("Close SSH session")
 
 	return nil
 }

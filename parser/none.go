@@ -7,23 +7,26 @@ import (
 
 	"github.com/k1LoW/harvest/client"
 	"github.com/k1LoW/harvest/config"
+	"go.uber.org/zap"
 )
 
 // NoneParser ...
 type NoneParser struct {
-	t *config.Target
+	target *config.Target
+	logger *zap.Logger
 }
 
 // NewNoneParser ...
-func NewNoneParser(t *config.Target) (Parser, error) {
+func NewNoneParser(t *config.Target, l *zap.Logger) (Parser, error) {
 	return &NoneParser{
-		t: t,
+		target: t,
+		logger: l,
 	}, nil
 }
 
 // Parse ...
 func (p *NoneParser) Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log {
-	if p.t.MultiLine {
+	if p.target.MultiLine {
 		return p.parseMultipleLine(ctx, cancel, lineChan, tz)
 	}
 	return p.parseSingleLine(ctx, cancel, lineChan, tz)
@@ -39,10 +42,7 @@ func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelF
 		defer close(logChan)
 	L:
 		for line := range lineChan {
-			var (
-				ts int64
-			)
-			ts = 0
+			ts := int64(0)
 			if line.TimestampViaClient != nil {
 				tsC := line.TimestampViaClient
 				ts = tsC.UnixNano()
@@ -57,7 +57,7 @@ func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelF
 				Timestamp:      ts,
 				FilledByPrevTs: false,
 				Content:        line.Content,
-				Target:         p.t,
+				Target:         p.target,
 			}
 
 			select {
@@ -89,7 +89,7 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 				Timestamp:      prevTs,
 				FilledByPrevTs: false,
 				Content:        strings.Join(contentStash, "\n"),
-				Target:         p.t,
+				Target:         p.target,
 			}
 			close(logChan)
 		}()
@@ -97,8 +97,7 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 		for line := range lineChan {
 			hostStash = line.Host
 			pathStash = line.Path
-			var ts int64
-			ts = 0
+			ts := int64(0)
 
 			if line.TimestampViaClient != nil {
 				tsC := line.TimestampViaClient
@@ -115,7 +114,7 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 						Timestamp:      ts,
 						FilledByPrevTs: false,
 						Content:        strings.Join(contentStash, "\n"),
-						Target:         p.t,
+						Target:         p.target,
 					}
 					logChan <- Log{
 						Host:           line.Host,
@@ -123,7 +122,7 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 						Timestamp:      ts,
 						FilledByPrevTs: false,
 						Content:        "Harvest parse error: too many rows",
-						Target:         p.t,
+						Target:         p.target,
 					}
 					contentStash = nil
 				}
@@ -137,7 +136,7 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 					Timestamp:      ts,
 					FilledByPrevTs: false,
 					Content:        strings.Join(contentStash, "\n"),
-					Target:         p.t,
+					Target:         p.target,
 				}
 			}
 
