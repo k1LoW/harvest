@@ -131,6 +131,10 @@ func (c *Config) LoadConfigFile(path string) error {
 				target.Host = u.Host
 				target.Port = 0
 			}
+			if target.Host == "" {
+				target.Host = "localhost"
+			}
+
 			c.Targets = append(c.Targets, &target)
 		}
 	}
