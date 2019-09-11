@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	maxScanTokenSize = 128 * 1024
-	startBufSize     = 4096
+	initialScanTokenSize = 4096
+	maxScanTokenSize     = 1024 * 1024
 )
 
 // Client ...
@@ -86,7 +86,7 @@ func bindReaderAndChan(ctx context.Context, cancel context.CancelFunc, l *zap.Lo
 	defer cancel()
 
 	scanner := bufio.NewScanner(*r)
-	buf := make([]byte, startBufSize)
+	buf := make([]byte, initialScanTokenSize)
 	scanner.Buffer(buf, maxScanTokenSize)
 L:
 	for scanner.Scan() {
