@@ -98,16 +98,8 @@ func (c *Collector) Fetch(dbChan chan parser.Log, st *time.Time, et *time.Time, 
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, st, et) {
 			dbChan <- log
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 
@@ -131,16 +123,8 @@ func (c *Collector) Stream(logChan chan parser.Log, multiLine bool) error {
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, nil, nil) {
 			logChan <- log
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 
@@ -164,20 +148,12 @@ func (c *Collector) LsLogs(logChan chan parser.Log, st *time.Time, et *time.Time
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for line := range c.client.Out() {
 			logChan <- parser.Log{
 				Host:    line.Host,
 				Path:    line.Path,
 				Content: line.Content,
 				Target:  c.target,
-			}
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
 			}
 		}
 	}()
@@ -240,16 +216,8 @@ func (c *Collector) ConfigTest(logChan chan parser.Log, multiLine bool) error {
 			cancel()
 			waiter <- struct{}{}
 		}()
-	L:
 		for log := range c.parser.Parse(innerCtx, cancel, c.client.Out(), c.target.TimeZone, nil, nil) {
 			logChan <- log
-			select {
-			case <-c.ctx.Done():
-				break L
-			case <-innerCtx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 

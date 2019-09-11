@@ -70,7 +70,10 @@ func (c *K8sClient) Tailf(ctx context.Context) error {
 
 // Ls ...
 func (c *K8sClient) Ls(ctx context.Context, st *time.Time, et *time.Time) error {
-	defer close(c.lineChan)
+	defer func() {
+		c.logger.Debug("Close chan client.Line")
+		close(c.lineChan)
+	}()
 	list, err := c.clientset.CoreV1().Pods(c.namespace).List(metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -138,7 +141,10 @@ func (tc *targetContainer) getID() string {
 
 // Stream ...
 func (c *K8sClient) Stream(ctx context.Context, follow bool, sinceSeconds, tailLines *int64) error {
-	defer close(c.lineChan)
+	defer func() {
+		c.logger.Debug("Close chan client.Line")
+		close(c.lineChan)
+	}()
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	added, removed, err := watchContainers(innerCtx, c.clientset.CoreV1().Pods(c.namespace), c.podFilter)
@@ -303,17 +309,6 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 			t.logger.Error(fmt.Sprintf("Error opening stream to /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
 			return
 		}
-		defer stream.Close()
-
-		go func() {
-			<-t.closed
-			err := stream.Close()
-			if err != nil {
-				t.logger.Error(fmt.Sprintf("%v", err))
-				return
-			}
-			t.logger.Info(fmt.Sprintf("Close stream: /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
-		}()
 
 		reader := bufio.NewReader(stream)
 	L:

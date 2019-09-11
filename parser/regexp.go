@@ -45,9 +45,11 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 	}
 
 	go func() {
-		defer close(logChan)
+		defer func() {
+			p.logger.Debug("Close chan parser.Log")
+			close(logChan)
+		}()
 		lineTZ := tz
-	L:
 		for line := range lineChan {
 			var (
 				ts             int64
@@ -98,12 +100,6 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 				Content:        line.Content,
 				Target:         p.target,
 			}
-
-			select {
-			case <-ctx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 
@@ -135,11 +131,11 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 				Content:        strings.Join(contentStash, "\n"),
 				Target:         p.target,
 			}
+			p.logger.Debug("Close chan parser.Log")
 			close(logChan)
 		}()
 
 		lineTZ := tz
-	L:
 		for line := range lineChan {
 			var (
 				ts int64
@@ -212,12 +208,6 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			contentStash = nil
 			contentStash = append(contentStash, line.Content)
 			prevTs = ts
-
-			select {
-			case <-ctx.Done():
-				break L
-			default:
-			}
 		}
 	}()
 
