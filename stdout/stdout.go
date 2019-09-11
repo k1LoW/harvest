@@ -3,7 +3,6 @@ package stdout
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/k1LoW/harvest/parser"
 	"github.com/labstack/gommon/color"
@@ -99,17 +98,17 @@ func (s *Stdout) Out(logChan chan parser.Log, hosts []string) error {
 		}
 
 		if s.withTimestamp {
-			if log.Timestamp == 0 {
+			if log.Timestamp == nil {
 				ts = fmt.Sprintf(fmt.Sprintf("%%-%ds", len(tsParseFmt)), "-")
 			} else {
-				ts = time.Unix(0, log.Timestamp).Format(tsParseFmt)
+				ts = log.Timestamp.Format(tsParseFmt)
 			}
 		}
 		if s.withTimestampNano {
-			if log.Timestamp == 0 {
+			if log.Timestamp == nil {
 				ts = fmt.Sprintf(fmt.Sprintf("%%-%ds", len(tsNanoParseFmt)), "-")
 			} else {
-				ts = time.Unix(0, log.Timestamp).Format(tsNanoParseFmt)
+				ts = log.Timestamp.Format(tsNanoParseFmt)
 			}
 		}
 		if s.withTimestamp || s.withTimestampNano {

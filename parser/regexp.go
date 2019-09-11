@@ -38,7 +38,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 	logStarted := false
 	re := regexp.MustCompile(p.target.Regexp)
 
-	var prevTs int64
+	var prevTs *time.Time
 
 	if st == nil {
 		logStarted = true
@@ -52,30 +52,27 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 		lineTZ := tz
 		for line := range lineChan {
 			var (
-				ts             int64
+				ts             *time.Time
 				filledByPrevTs bool
 			)
-			ts = 0
 			if tz == "" {
 				lineTZ = line.TimeZone
 			}
 			if p.target.TimeFormat != "" {
 				m := re.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
-					t, err := parseTime(p.target.TimeFormat, lineTZ, m[1])
+					ts, err := parseTime(p.target.TimeFormat, lineTZ, m[1])
 					if err == nil {
-						ts = t.UnixNano()
-						if !logStarted && (st == nil || ts > st.UnixNano()) {
+						if !logStarted && (st == nil || ts.UnixNano() > st.UnixNano()) {
 							logStarted = true
 						}
 						prevTs = ts
 					}
 				}
 			}
-			if ts == 0 {
+			if ts == nil {
 				if line.TimestampViaClient != nil {
-					tsC := line.TimestampViaClient
-					ts = tsC.UnixNano()
+					ts = line.TimestampViaClient
 					prevTs = ts
 				} else {
 					ts = prevTs
@@ -87,7 +84,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 				continue
 			}
 
-			if et != nil && ts > et.UnixNano() {
+			if et != nil && ts.UnixNano() > et.UnixNano() {
 				cancel()
 				continue
 			}
@@ -112,7 +109,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 	re := regexp.MustCompile(p.target.Regexp)
 	contentStash := []string{}
 	var (
-		prevTs    int64
+		prevTs    *time.Time
 		hostStash string
 		pathStash string
 	)
@@ -138,13 +135,12 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 		lineTZ := tz
 		for line := range lineChan {
 			var (
-				ts int64
+				ts *time.Time
 			)
 
 			hostStash = line.Host
 			pathStash = line.Path
 
-			ts = 0
 			if tz == "" {
 				lineTZ = line.TimeZone
 			}
@@ -153,8 +149,8 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 				if len(m) > 1 {
 					t, err := parseTime(p.target.TimeFormat, lineTZ, m[1])
 					if err == nil {
-						ts = t.UnixNano()
-						if !logStarted && (st == nil || ts > st.UnixNano()) {
+						ts = t
+						if !logStarted && (st == nil || ts.UnixNano() > st.UnixNano()) {
 							logStarted = true
 						}
 					}
@@ -164,12 +160,12 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			if !logStarted {
 				continue
 			}
-			if et != nil && ts > et.UnixNano() {
+			if et != nil && ts.UnixNano() > et.UnixNano() {
 				cancel()
 				continue
 			}
 
-			if ts == 0 {
+			if ts == nil {
 				contentStash = append(contentStash, line.Content)
 				if len(contentStash) > maxContentStash {
 					logChan <- Log{
@@ -183,7 +179,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 					logChan <- Log{
 						Host:           line.Host,
 						Path:           line.Path,
-						Timestamp:      0,
+						Timestamp:      ts,
 						FilledByPrevTs: false,
 						Content:        "Harvest parse error: too many rows",
 						Target:         p.target,

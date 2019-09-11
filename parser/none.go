@@ -35,17 +35,16 @@ func (p *NoneParser) Parse(ctx context.Context, cancel context.CancelFunc, lineC
 func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string) <-chan Log {
 	logChan := make(chan Log)
 	var (
-		prevTs int64
+		prevTs *time.Time
 	)
 
 	go func() {
 		defer close(logChan)
 	L:
 		for line := range lineChan {
-			ts := int64(0)
+			var ts *time.Time
 			if line.TimestampViaClient != nil {
-				tsC := line.TimestampViaClient
-				ts = tsC.UnixNano()
+				ts := line.TimestampViaClient
 				prevTs = ts
 			} else {
 				ts = prevTs
@@ -78,7 +77,7 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 	var (
 		hostStash string
 		pathStash string
-		prevTs    int64
+		prevTs    *time.Time
 	)
 
 	go func() {
@@ -97,11 +96,10 @@ func (p *NoneParser) parseMultipleLine(ctx context.Context, cancel context.Cance
 		for line := range lineChan {
 			hostStash = line.Host
 			pathStash = line.Path
-			ts := int64(0)
+			var ts *time.Time
 
 			if line.TimestampViaClient != nil {
-				tsC := line.TimestampViaClient
-				ts = tsC.UnixNano()
+				ts := line.TimestampViaClient
 				prevTs = ts
 			}
 

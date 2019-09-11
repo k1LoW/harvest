@@ -61,17 +61,33 @@ CREATE TABLE targets_tags (
   tag_id INTEGER NOT NULL,
   UNIQUE(target_id, tag_id)
 );
-CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id INTEGER, ts INTEGER, filled_by_prev_ts INTEGER, content);
+CREATE VIRTUAL TABLE logs USING FTS4(
+  host,
+  path,
+  target_id INTEGER,
+  ts INTEGER,
+  year INTEGER,
+  month INTEGER,
+  day INTEGER,
+  hour INTEGER,
+  minute INTEGER,
+  second INTEGER,
+  filled_by_prev_ts INTEGER,
+  content
+);
 `,
 	)
 
 	tags := map[string]int64{}
-	for tag, _ := range c.Tags() {
+	for tag := range c.Tags() {
 		res, err := db.Exec(`INSERT INTO tags (name) VALUES ($1);`, tag)
 		if err != nil {
 			return nil, errors.WithStack(err)
 		}
 		id, err := res.LastInsertId()
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 		tags[tag] = id
 	}
 
@@ -174,6 +190,11 @@ func (d *DB) StartInsert() {
 
 L:
 	for log := range d.logChan {
+		ts := log.Timestamp
+		if ts == nil {
+			ts = &time.Time{}
+		}
+
 		_, err := d.db.Exec(`
 INSERT INTO logs (
   host,
@@ -185,7 +206,7 @@ INSERT INTO logs (
 ) VALUES ($1, $2, $3, $4, $5, $6);`,
 			log.Host,
 			log.Path,
-			log.Timestamp,
+			ts.UnixNano(),
 			log.Target.Id,
 			log.FilledByPrevTs,
 			log.Content,
@@ -245,6 +266,12 @@ ORDER BY logs.ts, logs.rowid ASC;`, cond))
 		}
 		for rows.Next() {
 			err := rows.StructScan(&log)
+			if log.TimestampUnixNano < 0 {
+				log.Timestamp = nil
+			} else {
+				ts := time.Unix(0, log.TimestampUnixNano)
+				log.Timestamp = &ts
+			}
 			if err != nil {
 				d.logger.Error("DB error", zap.String("error", err.Error()))
 				break
