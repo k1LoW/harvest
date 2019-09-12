@@ -6,7 +6,22 @@
 <summary><strong>Table Definition</strong></summary>
 
 ```sql
-CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id INTEGER, ts INTEGER, filled_by_prev_ts INTEGER, content)
+CREATE VIRTUAL TABLE logs USING FTS4(
+  host,
+  path,
+  target_id INTEGER,
+  ts,
+  ts_unixnano INTEGER,
+  ts_year INTEGER,
+  ts_month INTEGER,
+  ts_day INTEGER,
+  ts_hour INTEGER,
+  ts_minute INTEGER,
+  ts_second INTEGER,
+  ts_time_zone,
+  filled_by_prev_ts INTEGER,
+  content
+)
 ```
 
 </details>
@@ -19,6 +34,14 @@ CREATE VIRTUAL TABLE logs USING FTS4(host, path, target_id INTEGER, ts INTEGER, 
 | path              |      |         | true     |          |                       |         |
 | target_id         |      |         | true     |          | [targets](targets.md) |         |
 | ts                |      |         | true     |          |                       |         |
+| ts_unixnano       |      |         | true     |          |                       |         |
+| ts_year           |      |         | true     |          |                       |         |
+| ts_month          |      |         | true     |          |                       |         |
+| ts_day            |      |         | true     |          |                       |         |
+| ts_hour           |      |         | true     |          |                       |         |
+| ts_minute         |      |         | true     |          |                       |         |
+| ts_second         |      |         | true     |          |                       |         |
+| ts_time_zone      |      |         | true     |          |                       |         |
 | filled_by_prev_ts |      |         | true     |          |                       |         |
 | content           |      |         | true     |          |                       |         |
 
