@@ -65,13 +65,15 @@ CREATE VIRTUAL TABLE logs USING FTS4(
   host,
   path,
   target_id INTEGER,
-  ts INTEGER,
-  year INTEGER,
-  month INTEGER,
-  day INTEGER,
-  hour INTEGER,
-  minute INTEGER,
-  second INTEGER,
+  ts,
+  ts_unixnano INTEGER,
+  ts_year INTEGER,
+  ts_month INTEGER,
+  ts_day INTEGER,
+  ts_hour INTEGER,
+  ts_minute INTEGER,
+  ts_second INTEGER,
+  ts_time_zone,
   filled_by_prev_ts INTEGER,
   content
 );
@@ -200,13 +202,29 @@ INSERT INTO logs (
   host,
   path,
   ts,
+  ts_unixnano,
+  ts_year,
+  ts_month,
+  ts_day,
+  ts_hour,
+  ts_minute,
+  ts_second,
+  ts_time_zone,
   target_id,
   filled_by_prev_ts,
   content
-) VALUES ($1, $2, $3, $4, $5, $6);`,
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);`,
 			log.Host,
 			log.Path,
+			ts,
 			ts.UnixNano(),
+			ts.Year(),
+			ts.Month(),
+			ts.Day(),
+			ts.Hour(),
+			ts.Minute(),
+			ts.Second(),
+			ts.Format("-0700"),
 			log.Target.Id,
 			log.FilledByPrevTs,
 			log.Content,
@@ -241,7 +259,7 @@ func (d *DB) Cat(cond string) chan parser.Log {
 SELECT
   logs.host,
   logs.path,
-  logs.ts,
+  logs.ts_unixnano,
   logs.filled_by_prev_ts,
   logs.content,
   targets.id AS "target.id",
@@ -259,13 +277,14 @@ SELECT
 	targets.path AS "target.path"
 FROM logs LEFT JOIN targets ON logs.target_id = targets.id
 %s
-ORDER BY logs.ts, logs.rowid ASC;`, cond))
+ORDER BY logs.ts_unixnano, logs.rowid ASC;`, cond))
 		if err != nil {
 			d.logger.Error("DB error", zap.String("error", err.Error()))
 			return
 		}
 		for rows.Next() {
 			err := rows.StructScan(&log)
+			// restore log.Timestamp from log.TimestampUnixNano
 			if log.TimestampUnixNano < 0 {
 				log.Timestamp = nil
 			} else {
