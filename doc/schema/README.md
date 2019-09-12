@@ -7,7 +7,7 @@
 | [targets](targets.md)           | 13      |         | table         |
 | [tags](tags.md)                 | 2       |         | table         |
 | [targets_tags](targets_tags.md) | 3       |         | table         |
-| [logs](logs.md)                 | 6       |         | virtual table |
+| [logs](logs.md)                 | 14      |         | virtual table |
 
 ## Relations
 

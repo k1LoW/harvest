@@ -16,7 +16,7 @@ type Log struct {
 	Host              string `db:"host"`
 	Path              string `db:"path"`
 	Timestamp         *time.Time
-	TimestampUnixNano int64          `db:"ts"`
+	TimestampUnixNano int64          `db:"ts_unixnano"`
 	FilledByPrevTs    bool           `db:"filled_by_prev_ts"`
 	Content           string         `db:"content"`
 	Target            *config.Target `db:"target"`

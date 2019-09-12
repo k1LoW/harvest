@@ -53,6 +53,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 		for line := range lineChan {
 			var (
 				ts             *time.Time
+				err            error
 				filledByPrevTs bool
 			)
 			if tz == "" {
@@ -61,7 +62,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 			if p.target.TimeFormat != "" {
 				m := re.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
-					ts, err := parseTime(p.target.TimeFormat, lineTZ, m[1])
+					ts, err = parseTime(p.target.TimeFormat, lineTZ, m[1])
 					if err == nil {
 						if !logStarted && (st == nil || ts.UnixNano() > st.UnixNano()) {
 							logStarted = true
