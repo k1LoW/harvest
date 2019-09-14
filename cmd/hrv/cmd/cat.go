@@ -144,14 +144,14 @@ func buildCondition(db *db.DB) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		cond = append(cond, fmt.Sprintf("ts >= %d", t.UnixNano()))
+		cond = append(cond, fmt.Sprintf("ts_unixnano >= %d", t.UnixNano()))
 	}
 	if et != "" {
 		t, err := time.ParseInLocation("2006-01-02 15:04:05", et, loc)
 		if err != nil {
 			return "", err
 		}
-		cond = append(cond, fmt.Sprintf("ts <= %d", t.UnixNano()))
+		cond = append(cond, fmt.Sprintf("ts_unixnano <= %d", t.UnixNano()))
 	}
 	if tag != "" {
 		tagExpr := strings.Replace(tag, ",", " or ", -1)
