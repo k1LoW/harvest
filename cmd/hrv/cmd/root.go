@@ -114,9 +114,6 @@ func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	if duStr == "" {
-		duStr = defaultDuration
-	}
 	switch {
 	case stStr != "" && etStr != "":
 		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
@@ -135,12 +132,17 @@ func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
 			return nil, nil, err
 		}
 		st = &stt
-		du, err := duration.Parse(duStr)
-		if err != nil {
-			return nil, nil, err
+		if duStr == "" {
+			ett := time.Now()
+			et = &ett
+		} else {
+			du, err := duration.Parse(duStr)
+			if err != nil {
+				return nil, nil, err
+			}
+			ett := stt.Add(du)
+			et = &ett
 		}
-		ett := stt.Add(du)
-		et = &ett
 	case stStr == "" && etStr != "":
 		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
 		if err != nil {
@@ -154,12 +156,15 @@ func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
 		stt := ett.Add(-du)
 		st = &stt
 	case stStr == "" && etStr == "":
+		ett := time.Now()
+		et = &ett
+		if duStr == "" {
+			duStr = defaultDuration
+		}
 		du, err := duration.Parse(duStr)
 		if err != nil {
 			return nil, nil, err
 		}
-		ett := time.Now()
-		et = &ett
 		stt := ett.Add(-du)
 		st = &stt
 	}

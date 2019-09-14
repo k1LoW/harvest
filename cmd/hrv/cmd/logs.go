@@ -129,7 +129,7 @@ func init() {
 	logsCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 	logsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
 	logsCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
-	logsCmd.Flags().StringVarP(&duStr, "duration", "", "1 hour", "log duration (default: 1 hour)")
+	logsCmd.Flags().StringVarP(&duStr, "duration", "", "", "log duration")
 	logsCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 	logsCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }
