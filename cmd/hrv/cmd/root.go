@@ -31,6 +31,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	defaultDuration = "1 hour"
+)
+
 var (
 	tag                    string
 	configPath             string
@@ -111,7 +115,7 @@ func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
 		return nil, nil, err
 	}
 	if duStr == "" {
-		duStr = "1 hour"
+		duStr = defaultDuration
 	}
 	switch {
 	case stStr != "" && etStr != "":

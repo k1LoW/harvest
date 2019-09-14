@@ -44,8 +44,7 @@ var (
 )
 
 const (
-	defaultConcurrency       = 10
-	defaultStartTimeDuration = -1 * time.Hour
+	defaultConcurrency = 10
 )
 
 // fetchCmd represents the fetch command
