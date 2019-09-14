@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/harvest/config"
 	"github.com/spf13/cobra"
 )
@@ -100,39 +101,63 @@ func presetSSHKeyPassphraseToTargets(targets []*config.Target) error {
 	return nil
 }
 
-func setStartTime(stStr string) (*time.Time, error) {
-	var st *time.Time
-	if stStr != "" {
-		loc, err := time.LoadLocation("Local")
-		if err != nil {
-			return nil, err
-		}
+func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
+	var (
+		st *time.Time
+		et *time.Time
+	)
+	loc, err := time.LoadLocation("Local")
+	if err != nil {
+		return nil, nil, err
+	}
+	if duStr == "" {
+		duStr = "1 hour"
+	}
+	switch {
+	case stStr != "" && etStr != "":
 		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		st = &stt
-	} else {
-		stt := time.Now().Add(defaultStartTimeDuration)
-		st = &stt
-	}
-	return st, nil
-}
-
-func setEndTime(etStr string) (*time.Time, error) {
-	var et *time.Time
-	if etStr != "" {
-		loc, err := time.LoadLocation("Local")
-		if err != nil {
-			return nil, err
-		}
 		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		et = &ett
-	} else {
-		et = nil
+	case stStr != "" && etStr == "":
+		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
+		if err != nil {
+			return nil, nil, err
+		}
+		st = &stt
+		du, err := duration.Parse(duStr)
+		if err != nil {
+			return nil, nil, err
+		}
+		ett := stt.Add(du)
+		et = &ett
+	case stStr == "" && etStr != "":
+		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
+		if err != nil {
+			return nil, nil, err
+		}
+		et = &ett
+		du, err := duration.Parse(duStr)
+		if err != nil {
+			return nil, nil, err
+		}
+		stt := ett.Add(-du)
+		st = &stt
+	case stStr == "" && etStr == "":
+		du, err := duration.Parse(duStr)
+		if err != nil {
+			return nil, nil, err
+		}
+		ett := time.Now()
+		et = &ett
+		stt := ett.Add(-du)
+		st = &stt
 	}
-	return et, nil
+	return st, et, nil
 }
