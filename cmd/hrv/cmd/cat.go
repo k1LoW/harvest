@@ -32,14 +32,9 @@ import (
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
 	"github.com/k1LoW/harvest/stdout"
-	"github.com/labstack/gommon/color"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-)
-
-const (
-	delimiter = ","
 )
 
 var (
@@ -117,15 +112,6 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 	},
-}
-
-func colorizeTag(colorFunc func(interface{}, ...string) string, tag string) string {
-	colorized := []string{}
-	tags := strings.Split(tag, " ")
-	for _, t := range tags {
-		colorized = append(colorized, colorFunc(t, color.B))
-	}
-	return strings.Join(colorized, " ")
 }
 
 // buildCondition ...
