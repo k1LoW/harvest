@@ -162,7 +162,7 @@ func (c *Config) FilterTargets(tagExpr, sourceRe string) ([]*Target, error) {
 		tags := map[string]interface{}{
 			"hrv_source": target.Source,
 		}
-		for tag, _ := range allTags {
+		for tag := range allTags {
 			if contains(target.Tags, tag) {
 				tags[tag] = true
 			} else {

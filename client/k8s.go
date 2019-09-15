@@ -17,7 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/rest"
 )
 
 type K8sClient struct {
@@ -56,15 +55,13 @@ func NewK8sClient(l *zap.Logger, host, path string) (Client, error) {
 
 // Read ...
 func (c *K8sClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
-	var sinceSeconds int64
-	sinceSeconds = time.Now().Unix() - st.Unix()
+	sinceSeconds := time.Now().Unix() - st.Unix()
 	return c.Stream(ctx, false, &sinceSeconds, nil)
 }
 
 // Tailf ...
 func (c *K8sClient) Tailf(ctx context.Context) error {
-	var sinceSeconds int64
-	sinceSeconds = 1
+	sinceSeconds := int64(1)
 	return c.Stream(ctx, true, &sinceSeconds, nil)
 }
 
@@ -100,8 +97,7 @@ func (c *K8sClient) Copy(ctx context.Context, filePath string, dstDir string) er
 
 // RandomOne ...
 func (c *K8sClient) RandomOne(ctx context.Context) error {
-	var tailLines int64
-	tailLines = 1
+	tailLines := int64(1)
 	return c.Stream(ctx, false, nil, &tailLines)
 }
 
@@ -274,7 +270,6 @@ type Tail struct {
 	ContainerName string
 	Closed        bool
 	lineChan      chan Line
-	req           *rest.Request
 	closed        chan struct{}
 	logger        *zap.Logger
 }

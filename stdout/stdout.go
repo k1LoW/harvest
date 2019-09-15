@@ -77,7 +77,7 @@ func NewStdout(withTimestamp bool,
 }
 
 // Out ...
-func (s *Stdout) Out(logChan chan parser.Log, hosts []string) error {
+func (s *Stdout) Out(logChan chan parser.Log, hosts []string) {
 	if s.noColor {
 		color.Disable()
 	} else {
@@ -145,7 +145,6 @@ func (s *Stdout) Out(logChan chan parser.Log, hosts []string) error {
 
 		fmt.Printf("%s%s%s%s%s%s\n", bar, colorFunc(ts), color.White(filledByPrevTs, color.B), colorizeTag(colorFunc, tag), color.Grey(host), log.Content)
 	}
-	return nil
 }
 
 func colorizeTag(colorFunc func(interface{}, ...string) string, tag string) string {

@@ -103,11 +103,7 @@ var catCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		err = sout.Out(d.Cat(cond), hosts)
-		if err != nil {
-			l.Error("fetch error", zap.String("error", err.Error()))
-			os.Exit(1)
-		}
+		sout.Out(d.Cat(cond), hosts)
 	},
 }
 
