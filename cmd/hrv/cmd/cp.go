@@ -98,24 +98,14 @@ var cpCmd = &cobra.Command{
 			}
 		}
 
-		st, err := setStartTime(stStr)
-		if err != nil {
-			l.Error("option error", zap.String("error", err.Error()))
-			os.Exit(1)
-		}
-
-		et, err := setEndTime(etStr)
+		st, et, err := parseTimes(stStr, etStr, duStr)
 		if err != nil {
 			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
 		l.Debug(fmt.Sprintf("Client concurrency: %d", concurrency))
-		if et != nil {
-			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
-		} else {
-			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
-		}
+		l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
 
 		l.Debug("Start copying logs from targets")
 
@@ -173,8 +163,9 @@ func init() {
 	cpCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	cpCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	cpCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
-	cpCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
+	cpCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
 	cpCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
+	cpCmd.Flags().StringVarP(&duStr, "duration", "", "", "log duration")
 	cpCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 	cpCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }

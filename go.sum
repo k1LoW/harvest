@@ -106,6 +106,8 @@ github.com/json-iterator/go v1.1.6 h1:MrUvLMLTMxbqFJ9kzlvat/rYZqZnW3u4wkLzWTaFwK
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
+github.com/k1LoW/duration v1.0.0 h1:3RbcoNlKj0JJpi+aRdT8Ewmh7fOsLYU4P2O093YHYB4=
+github.com/k1LoW/duration v1.0.0/go.mod h1:MEWYmZ4Agei4RDvERiInjZAhcZStYLp6y7+ZrpaAMJQ=
 github.com/k1LoW/sshc v0.0.0-20190401143141-dafe6dec2b54 h1:u2fxA6aG1SiT35AYPRdyZ6qp370SCaNFiDifi2n69do=
 github.com/k1LoW/sshc v0.0.0-20190401143141-dafe6dec2b54/go.mod h1:mkS3x1T6YiaRhdKm3m4TGhFhJQl+stbqAPjVQkkO8BE=
 github.com/kevinburke/ssh_config v0.0.0-20180830205328-81db2a75821e h1:RgQk53JHp/Cjunrr1WlsXSZpqXn+uREuHvUVcK82CV8=

@@ -38,13 +38,13 @@ import (
 var (
 	stStr       string
 	etStr       string
+	duStr       string
 	dbPath      string
 	concurrency int
 )
 
 const (
-	defaultConcurrency       = 10
-	defaultStartTimeDuration = -1 * time.Hour
+	defaultConcurrency = 10
 )
 
 // fetchCmd represents the fetch command
@@ -101,25 +101,14 @@ var fetchCmd = &cobra.Command{
 			}
 		}
 
-		st, err := setStartTime(stStr)
-		if err != nil {
-			l.Error("option error", zap.String("error", err.Error()))
-			os.Exit(1)
-		}
-
-		et, err := setEndTime(etStr)
+		st, et, err := parseTimes(stStr, etStr, duStr)
 		if err != nil {
 			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
 		l.Debug(fmt.Sprintf("Client concurrency: %d", concurrency))
-		if et != nil {
-			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
-		} else {
-			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
-		}
-
+		l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
 		l.Debug("Start fetching from targets")
 
 		go d.StartInsert()
@@ -157,8 +146,9 @@ func init() {
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	fetchCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
-	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
+	fetchCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
 	fetchCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
+	fetchCmd.Flags().StringVarP(&duStr, "duration", "", "", "log duration")
 	fetchCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 	fetchCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 }

@@ -26,7 +26,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/antonmedv/expr"
 	"github.com/k1LoW/harvest/db"
@@ -39,8 +38,6 @@ import (
 
 var (
 	match string
-	st    string
-	et    string
 )
 
 // catCmd represents the cat command
@@ -114,31 +111,22 @@ var catCmd = &cobra.Command{
 	},
 }
 
-// buildCondition ...
 func buildCondition(db *db.DB) (string, error) {
 	matchCond := []string{}
 	cond := []string{}
 	if match != "" {
 		matchCond = append(matchCond, match)
 	}
-	loc, err := time.LoadLocation("Local")
-	if err != nil {
-		return "", err
-	}
-	if st != "" {
-		t, err := time.ParseInLocation("2006-01-02 15:04:05", st, loc)
+
+	if stStr != "" || etStr != "" || duStr != "" {
+		st, et, err := parseTimes(stStr, etStr, duStr)
 		if err != nil {
 			return "", err
 		}
-		cond = append(cond, fmt.Sprintf("ts_unixnano >= %d", t.UnixNano()))
+		cond = append(cond, fmt.Sprintf("ts_unixnano >= %d", st.UnixNano()))
+		cond = append(cond, fmt.Sprintf("ts_unixnano <= %d", et.UnixNano()))
 	}
-	if et != "" {
-		t, err := time.ParseInLocation("2006-01-02 15:04:05", et, loc)
-		if err != nil {
-			return "", err
-		}
-		cond = append(cond, fmt.Sprintf("ts_unixnano <= %d", t.UnixNano()))
-	}
+
 	if tag != "" {
 		tagExpr := strings.Replace(tag, ",", " or ", -1)
 		allTags, err := db.GetTags()
@@ -233,8 +221,9 @@ func init() {
 	catCmd.Flags().BoolVarP(&withoutMark, "without-mark", "", false, "output without prefix mark")
 	catCmd.Flags().StringVarP(&match, "match", "", "", "filter logs using SQLite FTS `MATCH` query")
 	catCmd.Flags().StringVarP(&tag, "tag", "", "", "filter logs using tag")
-	catCmd.Flags().StringVarP(&st, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
-	catCmd.Flags().StringVarP(&et, "end-time", "", "", "log end time (format: 2006-01-02 15:04:05)")
+	catCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
+	catCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (format: 2006-01-02 15:04:05)")
+	catCmd.Flags().StringVarP(&duStr, "duration", "", "", "log duration")
 	catCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 	catCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")
 }

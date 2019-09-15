@@ -13,6 +13,7 @@ require (
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/json-iterator/go v1.1.6 // indirect
+	github.com/k1LoW/duration v1.0.0
 	github.com/k1LoW/sshc v0.0.0-20190401143141-dafe6dec2b54
 	github.com/labstack/gommon v0.2.8
 	github.com/lib/pq v1.1.1 // indirect
@@ -23,7 +24,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
-	github.com/stretchr/objx v0.1.1 // indirect
 	go.opencensus.io v0.22.0 // indirect
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect

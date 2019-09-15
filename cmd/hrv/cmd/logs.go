@@ -74,23 +74,13 @@ var logsCmd = &cobra.Command{
 			}
 		}
 
-		st, err := setStartTime(stStr)
+		st, et, err := parseTimes(stStr, etStr, duStr)
 		if err != nil {
 			l.Error("option error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
-		et, err := setEndTime(etStr)
-		if err != nil {
-			l.Error("option error", zap.String("error", err.Error()))
-			os.Exit(1)
-		}
-
-		if et != nil {
-			l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
-		} else {
-			l.Info(fmt.Sprintf("Log timestamp: %s - latest", st.Format("2006-01-02 15:04:05-0700")))
-		}
+		l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
 
 		logChan := make(chan parser.Log)
 
@@ -137,8 +127,9 @@ func init() {
 	logsCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	logsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	logsCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
-	logsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (default: 1 hours ago) (format: 2006-01-02 15:04:05)")
+	logsCmd.Flags().StringVarP(&stStr, "start-time", "", "", "log start time (format: 2006-01-02 15:04:05)")
 	logsCmd.Flags().StringVarP(&etStr, "end-time", "", "", "log end time (default: latest) (format: 2006-01-02 15:04:05)")
+	logsCmd.Flags().StringVarP(&duStr, "duration", "", "", "log duration")
 	logsCmd.Flags().BoolVarP(&presetSSHKeyPassphrase, "preset-ssh-key-passphrase", "", false, "preset SSH key passphrase")
 	logsCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 }
