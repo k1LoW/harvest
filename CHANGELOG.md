@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.13.0](https://github.com/k1LoW/harvest/compare/v0.12.0...v0.13.0) (2019-09-15)
+
+* Add araddon/dataparse to parse `--*-time` option [#42](https://github.com/k1LoW/harvest/pull/42) ([k1LoW](https://github.com/k1LoW))
+* Add `--duration` option [#41](https://github.com/k1LoW/harvest/pull/41) ([k1LoW](https://github.com/k1LoW))
+* Fix `hrv cat` ts condition [#40](https://github.com/k1LoW/harvest/pull/40) ([k1LoW](https://github.com/k1LoW))
+* Separate timestamp columns for grouping [#39](https://github.com/k1LoW/harvest/pull/39) ([k1LoW](https://github.com/k1LoW))
+* Increase maxScanTokenSize [#38](https://github.com/k1LoW/harvest/pull/38) ([k1LoW](https://github.com/k1LoW))
+* Refactor parser.Log struct [#37](https://github.com/k1LoW/harvest/pull/37) ([k1LoW](https://github.com/k1LoW))
+* Refactor log pipeline [#36](https://github.com/k1LoW/harvest/pull/36) ([k1LoW](https://github.com/k1LoW))
+* io.EOF is successful completion [#35](https://github.com/k1LoW/harvest/pull/35) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.12.0](https://github.com/k1LoW/harvest/compare/v0.11.0...v0.12.0) (2019-08-19)
 
 * Use STDERR instead of STDOUT [#34](https://github.com/k1LoW/harvest/pull/34) ([k1LoW](https://github.com/k1LoW))
