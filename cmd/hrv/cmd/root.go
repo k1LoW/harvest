@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/araddon/dateparse"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/harvest/config"
 	"github.com/spf13/cobra"
@@ -107,57 +108,54 @@ func presetSSHKeyPassphraseToTargets(targets []*config.Target) error {
 
 func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
 	var (
-		st *time.Time
-		et *time.Time
+		stt time.Time
+		ett time.Time
 	)
 	loc, err := time.LoadLocation("Local")
 	if err != nil {
 		return nil, nil, err
 	}
+	if stStr != "" {
+		layout, err := dateparse.ParseFormat(stStr)
+		if err != nil {
+			return nil, nil, err
+		}
+		stt, err = time.ParseInLocation(layout, stStr, loc)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+	if etStr != "" {
+		layout, err := dateparse.ParseFormat(etStr)
+		if err != nil {
+			return nil, nil, err
+		}
+		ett, err = time.ParseInLocation(layout, etStr, loc)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
 	switch {
 	case stStr != "" && etStr != "":
-		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
-		if err != nil {
-			return nil, nil, err
-		}
-		st = &stt
-		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
-		if err != nil {
-			return nil, nil, err
-		}
-		et = &ett
 	case stStr != "" && etStr == "":
-		stt, err := time.ParseInLocation("2006-01-02 15:04:05", stStr, loc)
-		if err != nil {
-			return nil, nil, err
-		}
-		st = &stt
 		if duStr == "" {
-			ett := time.Now()
-			et = &ett
+			ett = time.Now()
 		} else {
 			du, err := duration.Parse(duStr)
 			if err != nil {
 				return nil, nil, err
 			}
-			ett := stt.Add(du)
-			et = &ett
+			ett = stt.Add(du)
 		}
 	case stStr == "" && etStr != "":
-		ett, err := time.ParseInLocation("2006-01-02 15:04:05", etStr, loc)
-		if err != nil {
-			return nil, nil, err
-		}
-		et = &ett
 		du, err := duration.Parse(duStr)
 		if err != nil {
 			return nil, nil, err
 		}
-		stt := ett.Add(-du)
-		st = &stt
+		stt = ett.Add(-du)
 	case stStr == "" && etStr == "":
 		ett := time.Now()
-		et = &ett
 		if duStr == "" {
 			duStr = defaultDuration
 		}
@@ -165,8 +163,7 @@ func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
 		if err != nil {
 			return nil, nil, err
 		}
-		stt := ett.Add(-du)
-		st = &stt
+		stt = ett.Add(-du)
 	}
-	return st, et, nil
+	return &stt, &ett, nil
 }

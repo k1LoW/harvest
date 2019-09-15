@@ -5,6 +5,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.2.0 // indirect
 	github.com/Songmu/prompter v0.2.0
 	github.com/antonmedv/expr v1.1.4
+	github.com/araddon/dateparse v0.0.0-20190622164848-0fb0a474d195
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
