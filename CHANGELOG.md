@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.14.0](https://github.com/k1LoW/harvest/compare/v0.13.1...v0.14.0) (2019-09-18)
+
+* Do faster `hrv fetch` via ssh/file using grep timestamp [#44](https://github.com/k1LoW/harvest/pull/44) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.13.1](https://github.com/k1LoW/harvest/compare/v0.13.0...v0.13.1) (2019-09-17)
 
 * Fix endtime (time.Time) is nil when no --end-time [#43](https://github.com/k1LoW/harvest/pull/43) ([k1LoW](https://github.com/k1LoW))
