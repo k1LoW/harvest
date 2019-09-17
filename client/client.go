@@ -19,7 +19,7 @@ const (
 
 // Client ...
 type Client interface {
-	Read(ctx context.Context, st *time.Time, et *time.Time) error
+	Read(ctx context.Context, st, et *time.Time, timeFormat, timeZone string) error
 	Tailf(ctx context.Context) error
 	RandomOne(ctx context.Context) error
 	Ls(ctx context.Context, st *time.Time, et *time.Time) error
@@ -37,13 +37,24 @@ type Line struct {
 }
 
 // buildReadCommand ...
-func buildReadCommand(path string, st *time.Time) string {
+func buildReadCommand(path string, st, et *time.Time, timeFormat, timeZone string) string {
 	dir := filepath.Dir(path)
 	base := filepath.Base(path)
 
-	stStr := st.Format("2006-01-02 15:04:05 MST")
+	stRunes := []rune(st.Format(fmt.Sprintf("%s %s", timeFormat, timeZone)))
+	etRunes := []rune(et.Format(fmt.Sprintf("%s %s", timeFormat, timeZone)))
 
-	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr | xargs sudo zcat -f", dir, base, stStr)
+	matches := []rune{}
+	for idx, r := range stRunes {
+		if r != etRunes[idx] {
+			break
+		}
+		matches = append(matches, r)
+	}
+
+	findStart := st.Format("2006-01-02 15:04:05 MST")
+
+	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr | xargs sudo zcat -f | grep '%s'", dir, base, findStart, string(matches))
 
 	return cmd
 }
@@ -82,24 +93,22 @@ func buildRandomOneCommand(path string) string {
 	return cmd
 }
 
-func bindReaderAndChan(ctx context.Context, cancel context.CancelFunc, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
-	defer cancel()
-
+func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
 	scanner := bufio.NewScanner(*r)
 	buf := make([]byte, initialScanTokenSize)
 	scanner.Buffer(buf, maxScanTokenSize)
 L:
 	for scanner.Scan() {
-		lineChan <- Line{
-			Host:     host,
-			Path:     path,
-			Content:  scanner.Text(),
-			TimeZone: tz,
-		}
 		select {
 		case <-ctx.Done():
 			break L
 		default:
+			lineChan <- Line{
+				Host:     host,
+				Path:     path,
+				Content:  scanner.Text(),
+				TimeZone: tz,
+			}
 		}
 	}
 	if scanner.Err() != nil {

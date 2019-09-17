@@ -54,7 +54,7 @@ func NewK8sClient(l *zap.Logger, host, path string) (Client, error) {
 }
 
 // Read ...
-func (c *K8sClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
+func (c *K8sClient) Read(ctx context.Context, st, et *time.Time, timeFormat, timeZone string) error {
 	sinceSeconds := time.Now().Unix() - st.Unix()
 	return c.Stream(ctx, false, &sinceSeconds, nil)
 }
@@ -322,18 +322,18 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 			if err != nil {
 				t.logger.Error(fmt.Sprintf("%s", err))
 			}
-			t.lineChan <- Line{
-				Host:               t.ContextName,
-				Path:               strings.Join([]string{"", t.Namespace, t.PodName, t.ContainerName}, "/"),
-				Content:            strings.Join(splitted[1:], " "),
-				TimeZone:           "",
-				TimestampViaClient: &ts,
-			}
 
 			select {
 			case <-ctx.Done():
 				break L
 			default:
+				t.lineChan <- Line{
+					Host:               t.ContextName,
+					Path:               strings.Join([]string{"", t.Namespace, t.PodName, t.ContainerName}, "/"),
+					Content:            strings.Join(splitted[1:], " "),
+					TimeZone:           "",
+					TimestampViaClient: &ts,
+				}
 			}
 		}
 		t.Close()

@@ -23,7 +23,7 @@ sec:
 
 integration:
 	@cat testdata/test.yml.template | sed -e "s|__PWD__|${PWD}|" > testdata/test.yml
-	@./hrv fetch -c testdata/test.yml -o test.db --start-time='2019-01-01 00:00:00'
+	@./hrv fetch -c testdata/test.yml -o test.db --start-time='2019-01-01 00:00:00' -v
 	test `./hrv cat test.db | grep -c ''` -gt 0 || exit 1
 	@rm test.db
 

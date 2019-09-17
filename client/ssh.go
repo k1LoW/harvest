@@ -49,8 +49,8 @@ func NewSSHClient(l *zap.Logger, host string, user string, port int, path string
 }
 
 // Read ...
-func (c *SSHClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
-	cmd := buildReadCommand(c.path, st)
+func (c *SSHClient) Read(ctx context.Context, st, et *time.Time, timeFormat, timeZone string) error {
+	cmd := buildReadCommand(c.path, st, et, timeFormat, timeZone)
 	return c.Exec(ctx, cmd)
 }
 
@@ -131,27 +131,25 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	// 	return err
 	// }
 
-	innerCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	go bindReaderAndChan(innerCtx, cancel, c.logger, &stdout, c.lineChan, c.host, c.path, strings.TrimRight(string(tzOut), "\n"))
+	go bindReaderAndChan(ctx, c.logger, &stdout, c.lineChan, c.host, c.path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = session.Start(cmd)
 	if err != nil {
 		return err
 	}
 
-	err = session.Wait()
-	if err != nil {
-		return err
-	}
+	go func() {
+		<-ctx.Done()
+		err = session.Close()
+		if err != nil && err != io.EOF {
+			c.logger.Error(fmt.Sprintf("%s", err))
+		}
+	}()
 
-	<-innerCtx.Done()
+	// TODO: use session.Signal()
+	// https://github.com/golang/go/issues/16597
+	_ = session.Wait()
 
-	err = session.Close()
-	if err != nil && err != io.EOF {
-		return err
-	}
 	c.logger.Info("Close SSH session")
 
 	return nil

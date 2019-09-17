@@ -36,6 +36,7 @@ func (p *RegexpParser) Parse(ctx context.Context, cancel context.CancelFunc, lin
 func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
+	logEnded := false
 	re := regexp.MustCompile(p.target.Regexp)
 
 	var prevTs *time.Time
@@ -51,6 +52,9 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 		}()
 		lineTZ := tz
 		for line := range lineChan {
+			if logEnded {
+				continue
+			}
 			var (
 				ts             *time.Time
 				err            error
@@ -86,6 +90,8 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 			}
 
 			if et != nil && ts.UnixNano() > et.UnixNano() {
+				p.logger.Debug("Cancel parse, because timestamp period out")
+				logEnded = true
 				cancel()
 				continue
 			}
@@ -107,6 +113,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log {
 	logChan := make(chan Log)
 	logStarted := false
+	logEnded := false
 	re := regexp.MustCompile(p.target.Regexp)
 	contentStash := []string{}
 	var (
@@ -135,6 +142,9 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 
 		lineTZ := tz
 		for line := range lineChan {
+			if logEnded {
+				continue
+			}
 			var (
 				ts *time.Time
 			)
@@ -162,6 +172,8 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 				continue
 			}
 			if et != nil && ts.UnixNano() > et.UnixNano() {
+				p.logger.Debug("Cancel parse, because timestamp period out")
+				logEnded = true
 				cancel()
 				continue
 			}
