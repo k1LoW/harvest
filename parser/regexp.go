@@ -86,6 +86,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 			}
 
 			if et != nil && ts.UnixNano() > et.UnixNano() {
+				p.logger.Debug("Cancel parse, because timestamp period out")
 				cancel()
 				continue
 			}
@@ -162,6 +163,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 				continue
 			}
 			if et != nil && ts.UnixNano() > et.UnixNano() {
+				p.logger.Debug("Cancel parse, because timestamp period out")
 				cancel()
 				continue
 			}

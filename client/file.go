@@ -31,8 +31,8 @@ func NewFileClient(l *zap.Logger, path string) (Client, error) {
 }
 
 // Read ...
-func (c *FileClient) Read(ctx context.Context, st *time.Time, et *time.Time) error {
-	cmd := buildReadCommand(c.path, st)
+func (c *FileClient) Read(ctx context.Context, st, et *time.Time, timeFormat, timeZone string) error {
+	cmd := buildReadCommand(c.path, st, et, timeFormat, timeZone)
 	if runtime.GOOS == "darwin" {
 		cmd = strings.Replace(cmd, "zcat", "gzcat", -1)
 	}
@@ -91,10 +91,7 @@ func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 		return err
 	}
 
-	innerCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	cmd := exec.CommandContext(innerCtx, "sh", "-c", cmdStr) // #nosec
+	cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr) // #nosec
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -113,13 +110,13 @@ func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 		return err
 	}
 
-	bindReaderAndChan(innerCtx, cancel, c.logger, &r, c.lineChan, "localhost", c.path, strings.TrimRight(string(tzOut), "\n"))
+	bindReaderAndChan(ctx, c.logger, &r, c.lineChan, "localhost", c.path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = cmd.Wait()
 	if err != nil {
 		return err
 	}
-	<-innerCtx.Done()
+	<-ctx.Done()
 	c.logger.Info("Close local exec session")
 	return nil
 }

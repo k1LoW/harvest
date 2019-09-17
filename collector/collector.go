@@ -103,7 +103,7 @@ func (c *Collector) Fetch(dbChan chan parser.Log, st *time.Time, et *time.Time, 
 		}
 	}()
 
-	err := c.client.Read(innerCtx, st, et)
+	err := c.client.Read(innerCtx, st, et, c.target.TimeFormat, c.target.TimeZone)
 	if err != nil {
 		return err
 	}
