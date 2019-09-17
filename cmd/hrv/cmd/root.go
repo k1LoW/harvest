@@ -155,7 +155,7 @@ func parseTimes(stStr, etStr, duStr string) (*time.Time, *time.Time, error) {
 		}
 		stt = ett.Add(-du)
 	case stStr == "" && etStr == "":
-		ett := time.Now()
+		ett = time.Now()
 		if duStr == "" {
 			duStr = defaultDuration
 		}
