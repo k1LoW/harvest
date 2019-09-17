@@ -91,7 +91,9 @@ func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 		return err
 	}
 
-	cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr) // #nosec
+	innerCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	cmd := exec.CommandContext(innerCtx, "sh", "-c", cmdStr) // #nosec
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -111,12 +113,13 @@ func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
 	}
 
 	bindReaderAndChan(ctx, c.logger, &r, c.lineChan, "localhost", c.path, strings.TrimRight(string(tzOut), "\n"))
+	cancel()
 
 	err = cmd.Wait()
 	if err != nil {
 		return err
 	}
-	<-ctx.Done()
+
 	c.logger.Info("Close local exec session")
 	return nil
 }
