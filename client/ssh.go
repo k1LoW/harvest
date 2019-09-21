@@ -92,10 +92,6 @@ func (c *SSHClient) RandomOne(ctx context.Context) error {
 
 // Exec ...
 func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
-	defer func() {
-		c.logger.Debug("Close chan client.Line")
-		close(c.lineChan)
-	}()
 	session, err := c.client.NewSession()
 	if err != nil {
 		return err
@@ -131,7 +127,10 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	// 	return err
 	// }
 
-	go bindReaderAndChan(ctx, c.logger, &stdout, c.lineChan, c.host, c.path, strings.TrimRight(string(tzOut), "\n"))
+	innerCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	go bindReaderAndChan(innerCtx, c.logger, &stdout, c.lineChan, c.host, c.path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = session.Start(cmd)
 	if err != nil {
@@ -146,6 +145,7 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 		}
 	}()
 
+	c.logger.Debug("Wait session close")
 	// TODO: use session.Signal()
 	// https://github.com/golang/go/issues/16597
 	_ = session.Wait()
