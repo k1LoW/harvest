@@ -94,6 +94,10 @@ func buildRandomOneCommand(path string) string {
 }
 
 func bindReaderAndChan(ctx context.Context, l *zap.Logger, r *io.Reader, lineChan chan Line, host string, path string, tz string) {
+	defer func() {
+		l.Debug("Close chan client.Line")
+		close(lineChan)
+	}()
 	scanner := bufio.NewScanner(*r)
 	buf := make([]byte, initialScanTokenSize)
 	scanner.Buffer(buf, maxScanTokenSize)

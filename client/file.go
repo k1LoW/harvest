@@ -80,10 +80,6 @@ func (c *FileClient) RandomOne(ctx context.Context) error {
 
 // Exec ...
 func (c *FileClient) Exec(ctx context.Context, cmdStr string) error {
-	defer func() {
-		c.logger.Debug("Close chan client.Line")
-		close(c.lineChan)
-	}()
 	c.logger.Info("Create new local exec session")
 	tzCmd := exec.Command("date", `+%z`) // #nosec
 	tzOut, err := tzCmd.Output()
