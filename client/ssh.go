@@ -145,7 +145,6 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 		}
 	}()
 
-	c.logger.Debug("Wait session close")
 	// TODO: use session.Signal()
 	// https://github.com/golang/go/issues/16597
 	_ = session.Wait()
