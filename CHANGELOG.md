@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.14.2](https://github.com/k1LoW/harvest/compare/v0.14.1...v0.14.2) (2019-09-25)
+
+* Fix fetch error handling [#47](https://github.com/k1LoW/harvest/pull/47) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.14.1](https://github.com/k1LoW/harvest/compare/v0.14.0...v0.14.1) (2019-09-21)
 
 * Fix chan close timing (panic: send on closed channel) [#45](https://github.com/k1LoW/harvest/pull/45) ([k1LoW](https://github.com/k1LoW))
