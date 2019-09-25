@@ -116,11 +116,16 @@ var fetchCmd = &cobra.Command{
 		cChan := make(chan struct{}, concurrency)
 		var wg sync.WaitGroup
 
+		finished := 0
 		for _, t := range targets {
 			wg.Add(1)
 			go func(t *config.Target) {
 				cChan <- struct{}{}
-				defer wg.Done()
+				defer func() {
+					finished = finished + 1
+					l.Info(fmt.Sprintf("Fetching progress: %d/%d", finished, len(targets)))
+					wg.Done()
+				}()
 				c, err := collector.NewCollector(ctx, t, l)
 				if err != nil {
 					l.Error("Fetch error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
@@ -136,7 +141,7 @@ var fetchCmd = &cobra.Command{
 
 		wg.Wait()
 
-		l.Debug("Fetch finished")
+		l.Info("Fetch finished")
 	},
 }
 
