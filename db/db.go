@@ -387,7 +387,85 @@ func (d *DB) GetTargetIdAndTags() (map[int64][]string, error) {
 	return targets, nil
 }
 
+type resultTargetName struct {
+	Target string `db:"target"`
+}
+
 func (d *DB) Count(groups []string) ([][]string, error) {
-	counts := [][]string{}
-	return counts, nil
+	targetGroup := []string{}
+	tsGroupBy := []string{}
+	tsColmun := "ts"
+	for _, g := range groups {
+		switch g {
+		case "year":
+			tsColmun = `strftime("%Y-01-01 00:00:00", datetime(ts))`
+			tsGroupBy = []string{"year"}
+		case "month":
+			tsColmun = `strftime("%Y-%m-01 00:00:00", datetime(ts))`
+			tsGroupBy = []string{"ts_year", "ts_month"}
+		case "day":
+			tsColmun = `strftime("%Y-%m-%d 00:00:00", datetime(ts))`
+			tsGroupBy = []string{"ts_year", "ts_month", "ts_day"}
+		case "hour":
+			tsColmun = `strftime("%Y-%m-%d %H:00:00", datetime(ts))`
+			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour"}
+		case "minute":
+			tsColmun = `strftime("%Y-%m-%d %H:%M:00", datetime(ts))`
+			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute"}
+		case "second":
+			tsColmun = `strftime("%Y-%m-%d %H:%M:%S", datetime(ts))`
+			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute", "ts_second"}
+		case "description":
+			targetGroup = append(targetGroup, "t.description")
+		case "host":
+			targetGroup = append(targetGroup, "t.host")
+		case "target":
+			targetGroup = append(targetGroup, "t.source")
+		default:
+			// TODO: allow tag
+			return nil, errors.New("invalid group")
+		}
+	}
+	columns := []string{tsColmun}
+	if len(targetGroup) > 0 {
+		// SELECT t.host FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY t.host;
+		groupColumnQuery := strings.Join(targetGroup, `||"/"||`)
+		groupByQuery := strings.Join(targetGroup, ",")
+		query := fmt.Sprintf("SELECT %s AS target FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s;", groupColumnQuery, groupByQuery)
+		tn := []resultTargetName{}
+		err := d.db.Select(&tn, query)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range tn {
+			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" THEN 1 ELSE 0 END) AS "%s"`, groupColumnQuery, n.Target, n.Target))
+		}
+	} else {
+		columns = append(columns, "COUNT(*)")
+	}
+
+	query := fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s ORDER BY ts;`, strings.Join(columns, ", "), strings.Join(tsGroupBy, ", "))
+	rows, err := d.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	results := [][]string{}
+
+	// TODO append header
+
+	for rows.Next() {
+		rowColumns := make([]string, len(columns))
+		columnPointers := make([]interface{}, len(columns))
+		for i := range rowColumns {
+			columnPointers[i] = &rowColumns[i]
+		}
+		err := rows.Scan(columnPointers...)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, rowColumns)
+	}
+
+	return results, nil
 }
