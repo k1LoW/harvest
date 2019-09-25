@@ -386,3 +386,8 @@ func (d *DB) GetTargetIdAndTags() (map[int64][]string, error) {
 	}
 	return targets, nil
 }
+
+func (d *DB) Count(groups []string) ([][]string, error) {
+	counts := [][]string{}
+	return counts, nil
+}

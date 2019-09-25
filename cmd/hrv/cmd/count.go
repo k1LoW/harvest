@@ -22,21 +22,58 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"os"
 
+	"github.com/k1LoW/harvest/db"
+	"github.com/k1LoW/harvest/logger"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
+
+var groups []string
 
 // countCmd represents the count command
 var countCmd = &cobra.Command{
-	Use:   "count",
-	Short: "count logs",
-	Long:  `count logs.`,
+	Use:   "count [DB_FILE]",
+	Short: "count logs from harvest-*.db",
+	Long:  `count logs from harvest-*.db.`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("count called")
+		os.Exit(runCount(args, groups))
 	},
 }
 
+// runCount ...
+func runCount(args, groups []string) int {
+	l := logger.NewLogger(verbose)
+	dbPath := args[0]
+
+	if _, err := os.Lstat(dbPath); err != nil {
+		l.Error(fmt.Sprintf("%s not exists", dbPath), zap.String("error", err.Error()))
+		return 1
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	d, err := db.AttachDB(ctx, l, dbPath)
+	if err != nil {
+		l.Error("DB attach error", zap.String("error", err.Error()))
+		return 1
+	}
+
+	counts, err := d.Count(groups)
+	if err != nil {
+		l.Error("DB attach error", zap.String("error", err.Error()))
+		return 1
+	}
+
+	return 0
+}
+
 func init() {
+	countCmd.Flags().StringSliceVarP(&groups, "group-by", "g", []string{}, "count grouping")
 	rootCmd.AddCommand(countCmd)
 }
