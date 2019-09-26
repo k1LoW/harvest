@@ -35,6 +35,7 @@ import (
 
 var (
 	groups    []string
+	matches   []string
 	delimiter string
 )
 
@@ -45,12 +46,12 @@ var countCmd = &cobra.Command{
 	Long:  `count logs from harvest-*.db.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		os.Exit(runCount(args, groups))
+		os.Exit(runCount(args, groups, matches))
 	},
 }
 
 // runCount ...
-func runCount(args, groups []string) int {
+func runCount(args, groups, matches []string) int {
 	l := logger.NewLogger(verbose)
 	dbPath := args[0]
 
@@ -68,7 +69,7 @@ func runCount(args, groups []string) int {
 		return 1
 	}
 
-	results, err := d.Count(groups)
+	results, err := d.Count(groups, matches)
 	if err != nil {
 		l.Error("DB attach error", zap.String("error", err.Error()))
 		return 1
@@ -82,7 +83,9 @@ func runCount(args, groups []string) int {
 }
 
 func init() {
-	countCmd.Flags().StringSliceVarP(&groups, "group-by", "g", []string{}, "count grouping")
+	countCmd.Flags().StringSliceVarP(&groups, "group-by", "g", []string{}, "group logs using time, host, desctiption, and tag")
+	countCmd.Flags().StringSliceVarP(&matches, "match", "m", []string{}, "group logs using SQLite `%LIKE%` query")
 	countCmd.Flags().StringVarP(&delimiter, "delimiter", "d", "\t", "delmiter")
+	countCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 	rootCmd.AddCommand(countCmd)
 }

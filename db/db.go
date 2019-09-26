@@ -391,7 +391,7 @@ type resultTargetName struct {
 	Target string `db:"target"`
 }
 
-func (d *DB) Count(groups []string) ([][]string, error) {
+func (d *DB) Count(groups []string, matches []string) ([][]string, error) {
 	targetGroup := []string{}
 	tagGroup := []string{}
 	tsGroupBy := []string{}
@@ -424,7 +424,6 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 			targetGroup = append(targetGroup, "t.source")
 		default:
 			tagGroup = append(tagGroup, g)
-
 		}
 	}
 
@@ -436,7 +435,7 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 	}
 
 	switch {
-	case len(targetGroup) > 0 && len(tagGroup) > 0:
+	case len(targetGroup) > 0:
 		// SELECT t.host FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY t.host;
 		columnNameQuery := strings.Join(targetGroup, `||"/"||`)
 		groupByQuery := strings.Join(targetGroup, ",")
@@ -447,35 +446,55 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 			return nil, err
 		}
 		for _, n := range tn {
-			for _, tag := range tagGroup {
-				columnName := strings.Join([]string{n.Target, tag}, "/")
-				header = append(header, columnName)
-				columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" AND l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, tag, columnName))
+			if len(tagGroup) > 0 {
+				for _, tag := range tagGroup {
+					if len(matches) > 0 {
+						for _, m := range matches {
+							columnName := strings.Join([]string{n.Target, tag, m}, "/")
+							header = append(header, columnName)
+							columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" AND l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") AND l.content LIKE "%%%s%%" THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, tag, m, columnName))
+						}
+					} else {
+						columnName := strings.Join([]string{n.Target, tag}, "/")
+						header = append(header, columnName)
+						columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" AND l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, tag, columnName))
+					}
+				}
+			} else {
+				if len(matches) > 0 {
+					for _, m := range matches {
+						columnName := strings.Join([]string{n.Target, m}, "/")
+						header = append(header, columnName)
+						columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" AND l.content LIKE "%%%s%%" THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, m, columnName))
+					}
+				} else {
+					header = append(header, n.Target)
+					columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, n.Target))
+				}
 			}
-		}
-	case len(targetGroup) > 0 && len(tagGroup) == 0:
-		// SELECT t.host FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY t.host;
-		columnNameQuery := strings.Join(targetGroup, `||"/"||`)
-		groupByQuery := strings.Join(targetGroup, ",")
-		query := fmt.Sprintf("SELECT %s AS target FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s;", columnNameQuery, groupByQuery)
-		tn := []resultTargetName{}
-		err := d.db.Select(&tn, query)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range tn {
-			header = append(header, n.Target)
-			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, n.Target))
 		}
 	case len(targetGroup) == 0 && len(tagGroup) > 0:
 		for _, tag := range tagGroup {
-			header = append(header, tag)
-			// SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = 'compute') THEN 1 ELSE 0 END)
-			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") THEN 1 ELSE 0 END) AS "%s"`, tag, tag))
+			if len(matches) > 0 {
+				for _, m := range matches {
+					columnName := strings.Join([]string{tag, m}, "/")
+					header = append(header, columnName)
+					columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") AND l.content LIKE "%%%s%%" THEN 1 ELSE 0 END) AS "%s"`, tag, m, columnName))
+				}
+			} else {
+				header = append(header, tag)
+				// SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = 'compute') THEN 1 ELSE 0 END)
+				columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") THEN 1 ELSE 0 END) AS "%s"`, tag, tag))
+			}
 		}
-	case len(targetGroup) == 0 && len(tagGroup) == 0:
-		header = []string{"count"}
-		columns = []string{"COUNT(*)"}
+	case len(targetGroup) == 0 && len(tagGroup) == 0 && len(matches) > 0:
+		for _, m := range matches {
+			header = append(header, m)
+			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN l.content LIKE "%%%s%%" THEN 1 ELSE 0 END) AS "%s"`, m, m))
+		}
+	case len(targetGroup) == 0 && len(tagGroup) == 0 && len(matches) == 0:
+		header = append(header, "count")
+		columns = append(columns, "COUNT(*)")
 	}
 
 	var query string
@@ -484,6 +503,8 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 	} else {
 		query = fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id;`, strings.Join(columns, ", "))
 	}
+
+	d.logger.Debug(fmt.Sprintf("Execute query: %s", query))
 
 	rows, err := d.db.Query(query)
 	if err != nil {
