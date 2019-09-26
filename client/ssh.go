@@ -96,7 +96,7 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	if err != nil {
 		return err
 	}
-	c.logger.Info("Create new SSH session")
+	c.logger.Debug("Create new SSH session")
 	defer session.Close()
 
 	var tzOut []byte
@@ -149,7 +149,7 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	// https://github.com/golang/go/issues/16597
 	_ = session.Wait()
 
-	c.logger.Info("Close SSH session")
+	c.logger.Debug("Close SSH session")
 
 	return nil
 }
