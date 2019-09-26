@@ -428,8 +428,13 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 		}
 	}
 
-	header := []string{"ts"}
-	columns := []string{tsColmun}
+	header := []string{}
+	columns := []string{}
+	if len(tsGroupBy) > 0 {
+		header = []string{"ts"}
+		columns = []string{tsColmun}
+	}
+
 	switch {
 	case len(targetGroup) > 0 && len(tagGroup) > 0:
 		// SELECT t.host FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY t.host;
@@ -469,11 +474,17 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") THEN 1 ELSE 0 END) AS "%s"`, tag, tag))
 		}
 	case len(targetGroup) == 0 && len(tagGroup) == 0:
-		header = append(header, "count")
-		columns = append(columns, "COUNT(*)")
+		header = []string{"count"}
+		columns = []string{"COUNT(*)"}
 	}
 
-	query := fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s ORDER BY ts;`, strings.Join(columns, ", "), strings.Join(tsGroupBy, ", "))
+	var query string
+	if len(tsGroupBy) > 0 {
+		query = fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s ORDER BY ts;`, strings.Join(columns, ", "), strings.Join(tsGroupBy, ", "))
+	} else {
+		query = fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id;`, strings.Join(columns, ", "))
+	}
+
 	rows, err := d.db.Query(query)
 	if err != nil {
 		return nil, err
