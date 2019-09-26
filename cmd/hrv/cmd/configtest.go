@@ -76,7 +76,7 @@ var configtestCmd = &cobra.Command{
 			}
 		}
 
-		l.Info("Test tmestamp parsing")
+		l.Info("Test timestamp parsing")
 		fmt.Println("")
 
 		cChan := make(chan struct{}, 1)
