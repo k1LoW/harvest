@@ -25,6 +25,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
@@ -32,7 +33,10 @@ import (
 	"go.uber.org/zap"
 )
 
-var groups []string
+var (
+	groups    []string
+	delimiter string
+)
 
 // countCmd represents the count command
 var countCmd = &cobra.Command{
@@ -64,10 +68,14 @@ func runCount(args, groups []string) int {
 		return 1
 	}
 
-	counts, err := d.Count(groups)
+	results, err := d.Count(groups)
 	if err != nil {
 		l.Error("DB attach error", zap.String("error", err.Error()))
 		return 1
+	}
+
+	for _, line := range results {
+		fmt.Println(strings.Join(line, delimiter))
 	}
 
 	return 0
@@ -75,5 +83,6 @@ func runCount(args, groups []string) int {
 
 func init() {
 	countCmd.Flags().StringSliceVarP(&groups, "group-by", "g", []string{}, "count grouping")
+	countCmd.Flags().StringVarP(&delimiter, "delimiter", "d", "\t", "delmiter")
 	rootCmd.AddCommand(countCmd)
 }
