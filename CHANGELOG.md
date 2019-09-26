@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.15.0](https://github.com/k1LoW/harvest/compare/v0.14.2...v0.15.0) (2019-09-26)
+
+* Add `hrv count` [#46](https://github.com/k1LoW/harvest/pull/46) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.14.2](https://github.com/k1LoW/harvest/compare/v0.14.1...v0.14.2) (2019-09-25)
 
 * Fix fetch error handling [#47](https://github.com/k1LoW/harvest/pull/47) ([k1LoW](https://github.com/k1LoW))
