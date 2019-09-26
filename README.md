@@ -114,6 +114,27 @@ $ hrv fetch -c config.yml --tag=webproxy,db
 $ hrv cat harvest-20181215T2338+900.db --with-timestamp --with-host --with-path | less -R
 ```
 
+#### 4. Count log data ( `hrv count` )
+
+``` console
+$ hrv count harvest-20191015T2338+900.db -g minute -g webproxy -b db
+ts      webproxy db
+2019-09-24 08:01:00     9618    5910
+2019-09-24 08:02:00     9767    5672
+2019-09-24 08:03:00     10815   7394
+2019-09-24 08:04:00     11782   7109
+2019-09-24 08:05:00     9896    6346
+[...]
+2019-09-24 08:24:00     11619   5646
+2019-09-24 08:25:00     10541   6097
+2019-09-24 08:26:00     11336   5264
+2019-09-24 08:27:00     1102    5261
+2019-09-24 08:28:00     1318    6660
+2019-09-24 08:29:00     10362   5663
+2019-09-24 08:30:00     11136   5373
+2019-09-24 08:31:00     1748    1340
+```
+
 ### :beetle: Stream remote/local logs
 
 #### 1. [Set config.yml](#1-set-log-sources-and-log-type-in-configyml)
@@ -215,7 +236,6 @@ Let's consider agent-base log collector/platform, service mesh and distributed t
 
 ## WANT
 
-- `hrv analyze`
 - tag DAG
 - Viewer / Visualizer
 

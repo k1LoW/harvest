@@ -31,7 +31,6 @@ import (
 	"github.com/k1LoW/harvest/db"
 	"github.com/k1LoW/harvest/logger"
 	"github.com/k1LoW/harvest/stdout"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -43,14 +42,9 @@ var (
 // catCmd represents the cat command
 var catCmd = &cobra.Command{
 	Use:   "cat [DB_FILE]",
-	Short: "cat",
-	Long:  `cat`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return errors.WithStack(errors.New("requires one arg"))
-		}
-		return nil
-	},
+	Short: "cat logs from harvest-*.db",
+	Long:  `cat logs from harvest-*.db`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		l := logger.NewLogger(verbose)
 		dbPath := args[0]
