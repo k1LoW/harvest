@@ -399,22 +399,22 @@ func (d *DB) Count(groups []string, matches []string) ([][]string, error) {
 	for _, g := range groups {
 		switch g {
 		case "year":
-			tsColmun = `strftime("%Y-01-01 00:00:00", datetime(ts))`
+			tsColmun = `strftime("%Y-01-01 00:00:00", datetime(ts), "localtime")`
 			tsGroupBy = []string{"year"}
 		case "month":
-			tsColmun = `strftime("%Y-%m-01 00:00:00", datetime(ts))`
+			tsColmun = `strftime("%Y-%m-01 00:00:00", datetime(ts), "localtime")`
 			tsGroupBy = []string{"ts_year", "ts_month"}
 		case "day":
-			tsColmun = `strftime("%Y-%m-%d 00:00:00", datetime(ts))`
+			tsColmun = `strftime("%Y-%m-%d 00:00:00", datetime(ts), "localtime")`
 			tsGroupBy = []string{"ts_year", "ts_month", "ts_day"}
 		case "hour":
-			tsColmun = `strftime("%Y-%m-%d %H:00:00", datetime(ts))`
+			tsColmun = `strftime("%Y-%m-%d %H:00:00", datetime(ts), "localtime")`
 			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour"}
 		case "minute":
-			tsColmun = `strftime("%Y-%m-%d %H:%M:00", datetime(ts))`
+			tsColmun = `strftime("%Y-%m-%d %H:%M:00", datetime(ts), "localtime")`
 			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute"}
 		case "second":
-			tsColmun = `strftime("%Y-%m-%d %H:%M:%S", datetime(ts))`
+			tsColmun = `strftime("%Y-%m-%d %H:%M:%S", datetime(ts), "localtime")`
 			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute", "ts_second"}
 		case "description":
 			targetGroup = append(targetGroup, "t.description")
