@@ -426,6 +426,8 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 			return nil, errors.New("invalid group")
 		}
 	}
+
+	header := []string{"ts"}
 	columns := []string{tsColmun}
 	if len(targetGroup) > 0 {
 		// SELECT t.host FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY t.host;
@@ -438,9 +440,11 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 			return nil, err
 		}
 		for _, n := range tn {
+			header = append(header, n.Target)
 			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" THEN 1 ELSE 0 END) AS "%s"`, groupColumnQuery, n.Target, n.Target))
 		}
 	} else {
+		header = append(header, "count")
 		columns = append(columns, "COUNT(*)")
 	}
 
@@ -450,9 +454,7 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 		return nil, err
 	}
 
-	results := [][]string{}
-
-	// TODO append header
+	results := [][]string{header}
 
 	for rows.Next() {
 		rowColumns := make([]string, len(columns))
