@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.15.1](https://github.com/k1LoW/harvest/compare/v0.15.0...v0.15.1) (2019-09-26)
+
+* Fix configtest [#48](https://github.com/k1LoW/harvest/pull/48) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.0](https://github.com/k1LoW/harvest/compare/v0.14.2...v0.15.0) (2019-09-26)
 
 * Add `hrv count` [#46](https://github.com/k1LoW/harvest/pull/46) ([k1LoW](https://github.com/k1LoW))
