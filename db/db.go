@@ -393,6 +393,7 @@ type resultTargetName struct {
 
 func (d *DB) Count(groups []string) ([][]string, error) {
 	targetGroup := []string{}
+	tagGroup := []string{}
 	tsGroupBy := []string{}
 	tsColmun := "ts"
 	for _, g := range groups {
@@ -422,18 +423,36 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 		case "target":
 			targetGroup = append(targetGroup, "t.source")
 		default:
-			// TODO: allow tag
-			return nil, errors.New("invalid group")
+			tagGroup = append(tagGroup, g)
+
 		}
 	}
 
 	header := []string{"ts"}
 	columns := []string{tsColmun}
-	if len(targetGroup) > 0 {
+	switch {
+	case len(targetGroup) > 0 && len(tagGroup) > 0:
 		// SELECT t.host FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY t.host;
-		groupColumnQuery := strings.Join(targetGroup, `||"/"||`)
+		columnNameQuery := strings.Join(targetGroup, `||"/"||`)
 		groupByQuery := strings.Join(targetGroup, ",")
-		query := fmt.Sprintf("SELECT %s AS target FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s;", groupColumnQuery, groupByQuery)
+		query := fmt.Sprintf("SELECT %s AS target FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s;", columnNameQuery, groupByQuery)
+		tn := []resultTargetName{}
+		err := d.db.Select(&tn, query)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range tn {
+			for _, tag := range tagGroup {
+				columnName := strings.Join([]string{n.Target, tag}, "/")
+				header = append(header, columnName)
+				columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" AND l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, tag, columnName))
+			}
+		}
+	case len(targetGroup) > 0 && len(tagGroup) == 0:
+		// SELECT t.host FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY t.host;
+		columnNameQuery := strings.Join(targetGroup, `||"/"||`)
+		groupByQuery := strings.Join(targetGroup, ",")
+		query := fmt.Sprintf("SELECT %s AS target FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s;", columnNameQuery, groupByQuery)
 		tn := []resultTargetName{}
 		err := d.db.Select(&tn, query)
 		if err != nil {
@@ -441,9 +460,15 @@ func (d *DB) Count(groups []string) ([][]string, error) {
 		}
 		for _, n := range tn {
 			header = append(header, n.Target)
-			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" THEN 1 ELSE 0 END) AS "%s"`, groupColumnQuery, n.Target, n.Target))
+			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN %s = "%s" THEN 1 ELSE 0 END) AS "%s"`, columnNameQuery, n.Target, n.Target))
 		}
-	} else {
+	case len(targetGroup) == 0 && len(tagGroup) > 0:
+		for _, tag := range tagGroup {
+			header = append(header, tag)
+			// SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = 'compute') THEN 1 ELSE 0 END)
+			columns = append(columns, fmt.Sprintf(`SUM(CASE WHEN l.target_id IN (SELECT tt.target_id FROM tags AS t LEFT JOIN targets_tags AS tt ON t.id = tt.tag_id WHERE t.name = "%s") THEN 1 ELSE 0 END) AS "%s"`, tag, tag))
+		}
+	case len(targetGroup) == 0 && len(tagGroup) == 0:
 		header = append(header, "count")
 		columns = append(columns, "COUNT(*)")
 	}
