@@ -54,7 +54,7 @@ func buildReadCommand(path string, st, et *time.Time, timeFormat, timeZone strin
 
 	findStart := st.Format("2006-01-02 15:04:05 MST")
 
-	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr | xargs sudo zcat -f | grep '%s'", dir, base, findStart, string(matches))
+	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr | xargs sudo zcat -f | grep -a '%s'", dir, base, findStart, string(matches))
 
 	return cmd
 }
