@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.15.2](https://github.com/k1LoW/harvest/compare/v0.15.1...v0.15.2) (2019-09-28)
+
+* Fix: grep error Binary file (standard input) matches [#49](https://github.com/k1LoW/harvest/pull/49) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.1](https://github.com/k1LoW/harvest/compare/v0.15.0...v0.15.1) (2019-09-26)
 
 * Fix configtest [#48](https://github.com/k1LoW/harvest/pull/48) ([k1LoW](https://github.com/k1LoW))
