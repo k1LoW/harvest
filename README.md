@@ -50,7 +50,7 @@ targetSets:
     description: app log
     type: regexp
     regexp: 'time:([^\t]+)'
-    timeFormat: 'Jan 02 15:04:05'
+    timeFormat: 'Jan 02 15:04:05' # Golang time format and 'unixtime'
     timeZone: '+0900'
     sources:
       - 'ssh://app-1.example.com/var/log/ltsv.log*'
