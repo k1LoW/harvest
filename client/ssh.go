@@ -127,10 +127,7 @@ func (c *SSHClient) Exec(ctx context.Context, cmd string) error {
 	// 	return err
 	// }
 
-	innerCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	go bindReaderAndChan(innerCtx, c.logger, &stdout, c.lineChan, c.host, c.path, strings.TrimRight(string(tzOut), "\n"))
+	go bindReaderAndChan(ctx, c.logger, &stdout, c.lineChan, c.host, c.path, strings.TrimRight(string(tzOut), "\n"))
 
 	err = session.Start(cmd)
 	if err != nil {
