@@ -3,6 +3,7 @@ package parser
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/k1LoW/harvest/client"
@@ -27,8 +28,12 @@ type Parser interface {
 	Parse(ctx context.Context, cancel context.CancelFunc, lineChan <-chan client.Line, tz string, st *time.Time, et *time.Time) <-chan Log
 }
 
-// parseTime ...
 func parseTime(tf string, tz string, content string) (*time.Time, error) {
+	if tf == "unixtime" {
+		ui, _ := strconv.ParseInt(content, 10, 64)
+		ut := time.Unix(ui, 0)
+		return &ut, nil
+	}
 	if tz == "" {
 		t, err := time.Parse(fmt.Sprintf("2006-01-02 %s", tf), fmt.Sprintf("%s %s", time.Now().Format("2006-01-02"), content))
 		return &t, err
