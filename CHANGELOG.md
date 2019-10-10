@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.15.3](https://github.com/k1LoW/harvest/compare/v0.15.2...v0.15.3) (2019-10-10)
+
+* SSH Client should fetch last line when SSH session closed. [#51](https://github.com/k1LoW/harvest/pull/51) ([k1LoW](https://github.com/k1LoW))
+* Support parse 'unixtime' [#50](https://github.com/k1LoW/harvest/pull/50) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.2](https://github.com/k1LoW/harvest/compare/v0.15.1...v0.15.2) (2019-09-28)
 
 * Fix: grep error Binary file (standard input) matches [#49](https://github.com/k1LoW/harvest/pull/49) ([k1LoW](https://github.com/k1LoW))
