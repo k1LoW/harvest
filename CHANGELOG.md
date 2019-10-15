@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.15.4](https://github.com/k1LoW/harvest/compare/v0.15.3...v0.15.4) (2019-10-15)
+
+* Fix k8s timestamp parse [#52](https://github.com/k1LoW/harvest/pull/52) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.3](https://github.com/k1LoW/harvest/compare/v0.15.2...v0.15.3) (2019-10-10)
 
 * SSH Client should fetch last line when SSH session closed. [#51](https://github.com/k1LoW/harvest/pull/51) ([k1LoW](https://github.com/k1LoW))
