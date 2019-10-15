@@ -43,8 +43,9 @@ func (p *NoneParser) parseSingleLine(ctx context.Context, cancel context.CancelF
 	L:
 		for line := range lineChan {
 			var ts *time.Time
+
 			if line.TimestampViaClient != nil {
-				ts := line.TimestampViaClient
+				ts = line.TimestampViaClient
 				prevTs = ts
 			} else {
 				ts = prevTs
