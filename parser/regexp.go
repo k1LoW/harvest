@@ -78,7 +78,7 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 					prevTs = ts
 				} else {
 					ts = prevTs
-					if prevTs != nil {
+					if ts != nil {
 						filledByPrevTs = true
 					}
 				}
@@ -208,6 +208,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			}
 
 			// ts > 0
+
 			if len(contentStash) > 0 {
 				logChan <- Log{
 					Host:           line.Host,
