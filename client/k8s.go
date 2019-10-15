@@ -290,7 +290,7 @@ func NewTail(l *zap.Logger, lineChan chan Line, contextName, namespace, podName,
 // Start starts tailing
 func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceSeconds, tailLines *int64) {
 	go func() {
-		t.logger.Info(fmt.Sprintf("Open stream: /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
+		t.logger.Debug(fmt.Sprintf("Open stream: /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
 		req := i.GetLogs(t.PodName, &corev1.PodLogOptions{
 			Follow:       follow,
 			Timestamps:   true,
@@ -342,7 +342,7 @@ func (t *Tail) Start(ctx context.Context, i v1.PodInterface, follow bool, sinceS
 
 // Close stops tailing
 func (t *Tail) Close() {
-	t.logger.Info(fmt.Sprintf("Close stream to /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
+	t.logger.Debug(fmt.Sprintf("Close stream to /%s/%s/%s", t.Namespace, t.PodName, t.ContainerName))
 	t.Closed = true
 	close(t.closed)
 }

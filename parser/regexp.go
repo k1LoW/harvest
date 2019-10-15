@@ -50,19 +50,24 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 			p.logger.Debug("Close chan parser.Log")
 			close(logChan)
 		}()
+
 		lineTZ := tz
+
 		for line := range lineChan {
 			if logEnded {
 				continue
 			}
+
 			var (
 				ts             *time.Time
 				err            error
 				filledByPrevTs bool
 			)
+
 			if tz == "" {
 				lineTZ = line.TimeZone
 			}
+
 			if p.target.TimeFormat != "" {
 				m := re.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
@@ -197,7 +202,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 					logChan <- Log{
 						Host:           line.Host,
 						Path:           line.Path,
-						Timestamp:      ts,
+						Timestamp:      prevTs,
 						FilledByPrevTs: false,
 						Content:        "Harvest parse error: too many rows",
 						Target:         p.target,
