@@ -68,9 +68,6 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 				if len(m) > 1 {
 					ts, err = parseTime(p.target.TimeFormat, lineTZ, m[1])
 					if err == nil {
-						if !logStarted && (st == nil || ts.UnixNano() > st.UnixNano()) {
-							logStarted = true
-						}
 						prevTs = ts
 					}
 				}
@@ -81,15 +78,21 @@ func (p *RegexpParser) parseSingleLine(ctx context.Context, cancel context.Cance
 					prevTs = ts
 				} else {
 					ts = prevTs
-					filledByPrevTs = true
+					if prevTs != nil {
+						filledByPrevTs = true
+					}
 				}
+			}
+
+			if !logStarted && ts != nil && ts.UnixNano() > st.UnixNano() {
+				logStarted = true
 			}
 
 			if !logStarted {
 				continue
 			}
 
-			if et != nil && ts.UnixNano() > et.UnixNano() {
+			if ts != nil && et != nil && ts.UnixNano() > et.UnixNano() {
 				p.logger.Debug("Cancel parse, because timestamp period out")
 				logEnded = true
 				cancel()
@@ -145,9 +148,7 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			if logEnded {
 				continue
 			}
-			var (
-				ts *time.Time
-			)
+			var ts *time.Time
 
 			hostStash = line.Host
 			pathStash = line.Path
@@ -158,20 +159,24 @@ func (p *RegexpParser) parseMultipleLine(ctx context.Context, cancel context.Can
 			if p.target.TimeFormat != "" {
 				m := re.FindStringSubmatch(line.Content)
 				if len(m) > 1 {
-					t, err := parseTime(p.target.TimeFormat, lineTZ, m[1])
-					if err == nil {
-						ts = t
-						if !logStarted && (st == nil || ts.UnixNano() > st.UnixNano()) {
-							logStarted = true
-						}
-					}
+					ts, _ = parseTime(p.target.TimeFormat, lineTZ, m[1])
 				}
+			}
+			if ts == nil {
+				if line.TimestampViaClient != nil {
+					ts = line.TimestampViaClient
+				}
+			}
+
+			if !logStarted && ts != nil && ts.UnixNano() > st.UnixNano() {
+				logStarted = true
 			}
 
 			if !logStarted {
 				continue
 			}
-			if et != nil && ts.UnixNano() > et.UnixNano() {
+
+			if ts != nil && et != nil && ts.UnixNano() > et.UnixNano() {
 				p.logger.Debug("Cancel parse, because timestamp period out")
 				logEnded = true
 				cancel()
