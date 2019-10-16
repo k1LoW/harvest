@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.15.5](https://github.com/k1LoW/harvest/compare/v0.15.4...v0.15.5) (2019-10-16)
+
+* k8s client use --start-time and --end-time [#54](https://github.com/k1LoW/harvest/pull/54) ([k1LoW](https://github.com/k1LoW))
+* Refactor RegexpParser [#53](https://github.com/k1LoW/harvest/pull/53) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.4](https://github.com/k1LoW/harvest/compare/v0.15.3...v0.15.4) (2019-10-15)
 
 * Fix k8s timestamp parse [#52](https://github.com/k1LoW/harvest/pull/52) ([k1LoW](https://github.com/k1LoW))
