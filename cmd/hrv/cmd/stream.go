@@ -114,6 +114,7 @@ var streamCmd = &cobra.Command{
 				c, err := collector.NewCollector(ctx, t, l)
 				if err != nil {
 					l.Error("Stream error", zap.String("host", t.Host), zap.String("path", t.Path), zap.String("error", err.Error()))
+					return
 				}
 				err = c.Stream(logChan, t.MultiLine)
 				if err != nil {
