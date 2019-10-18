@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.16.0](https://github.com/k1LoW/harvest/compare/v0.15.5...v0.16.0) (2019-10-18)
+
+* Add `hrv info [DB_FILE]` [#57](https://github.com/k1LoW/harvest/pull/57) ([k1LoW](https://github.com/k1LoW))
+* Fix timestamp grouping [#56](https://github.com/k1LoW/harvest/pull/56) ([k1LoW](https://github.com/k1LoW))
+* Add table `metas` for saving `hrv fetch` info [#55](https://github.com/k1LoW/harvest/pull/55) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.5](https://github.com/k1LoW/harvest/compare/v0.15.4...v0.15.5) (2019-10-16)
 
 * k8s client use --start-time and --end-time [#54](https://github.com/k1LoW/harvest/pull/54) ([k1LoW](https://github.com/k1LoW))
