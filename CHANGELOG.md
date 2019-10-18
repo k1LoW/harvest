@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.16.1](https://github.com/k1LoW/harvest/compare/v0.16.0...v0.16.1) (2019-10-18)
+
+* Fix panic: runtime error: invalid memory address or nil pointer dereference [#58](https://github.com/k1LoW/harvest/pull/58) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.16.0](https://github.com/k1LoW/harvest/compare/v0.15.5...v0.16.0) (2019-10-18)
 
 * Add `hrv info [DB_FILE]` [#57](https://github.com/k1LoW/harvest/pull/57) ([k1LoW](https://github.com/k1LoW))
