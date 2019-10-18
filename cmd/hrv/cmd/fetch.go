@@ -24,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 
@@ -82,6 +83,13 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		_ = d.SetMeta("option.tag", tag)
+		_ = d.SetMeta("option.source", sourceRe)
+		_ = d.SetMeta("option.start-time", stStr)
+		_ = d.SetMeta("option.end-time", etStr)
+		_ = d.SetMeta("option.duration", duStr)
+		_ = d.SetMeta("option.concurrency", strconv.Itoa(concurrency))
+
 		targets, err := cfg.FilterTargets(tag, sourceRe)
 		if err != nil {
 			l.Error("tag option error", zap.String("error", err.Error()))
@@ -92,6 +100,8 @@ var fetchCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		l.Info(fmt.Sprintf("Target count: %d", len(targets)))
+
+		_ = d.SetMeta("fetch.target-count", strconv.Itoa(len(targets)))
 
 		if presetSSHKeyPassphrase {
 			err = presetSSHKeyPassphraseToTargets(targets)
@@ -108,8 +118,10 @@ var fetchCmd = &cobra.Command{
 		}
 
 		l.Debug(fmt.Sprintf("Client concurrency: %d", concurrency))
-		l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format("2006-01-02 15:04:05-0700"), et.Format("2006-01-02 15:04:05-0700")))
+		l.Info(fmt.Sprintf("Log timestamp: %s - %s", st.Format(time.RFC3339), et.Format(time.RFC3339)))
 		l.Debug("Start fetching from targets")
+
+		_ = d.SetMeta("fetch.started_at", time.Now().Format(time.RFC3339))
 
 		go d.StartInsert()
 
@@ -142,6 +154,7 @@ var fetchCmd = &cobra.Command{
 		wg.Wait()
 
 		l.Info("Fetch finished")
+		_ = d.SetMeta("fetch.finished_at", time.Now().Format(time.RFC3339))
 	},
 }
 

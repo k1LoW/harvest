@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/k1LoW/harvest/config"
 	"github.com/k1LoW/harvest/parser"
+	"github.com/k1LoW/harvest/version"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -77,6 +78,12 @@ CREATE VIRTUAL TABLE logs USING FTS4(
   filled_by_prev_ts INTEGER,
   content
 );
+CREATE TABLE metas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  UNIQUE(key)
+);
 `,
 	)
 
@@ -142,12 +149,23 @@ INSERT INTO targets (
 	db.MustExec("PRAGMA journal_mode = MEMORY")
 	db.MustExec("PRAGMA synchronous = NORMAL")
 
-	return &DB{
+	d := &DB{
 		ctx:     ctx,
 		db:      db,
 		logger:  l,
 		logChan: make(chan parser.Log),
-	}, nil
+	}
+
+	err = d.SetMeta("harvest.version", version.Version)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+	err = d.SetMeta("db.initialized_at", time.Now().Format(time.RFC3339))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return d, nil
 }
 
 // AttachDB ...
@@ -525,4 +543,12 @@ func (d *DB) Count(groups []string, matches []string) ([][]string, error) {
 	}
 
 	return results, nil
+}
+
+func (d *DB) SetMeta(key string, value string) error {
+	_, err := d.db.Exec(`INSERT INTO metas (key, value) VALUES ($1, $2);`, key, value)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 }
