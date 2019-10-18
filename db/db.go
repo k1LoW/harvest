@@ -558,3 +558,18 @@ func (d *DB) SetMeta(key string, value string) error {
 	}
 	return nil
 }
+
+type resultMeta struct {
+	Key   string `db:"key"`
+	Value string `db:"value"`
+}
+
+func (d *DB) GetMetaAll() ([]resultMeta, error) {
+	mm := []resultMeta{}
+	query := "SELECT key, value FROM metas ORDER BY key;"
+	err := d.db.Select(&mm, query)
+	if err != nil {
+		return nil, err
+	}
+	return mm, nil
+}
