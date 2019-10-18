@@ -236,12 +236,12 @@ INSERT INTO logs (
 			log.Path,
 			ts,
 			ts.UnixNano(),
-			ts.Year(),
-			ts.Month(),
-			ts.Day(),
-			ts.Hour(),
-			ts.Minute(),
-			ts.Second(),
+			ts.Local().Year(),
+			ts.Local().Month(),
+			ts.Local().Day(),
+			ts.Local().Hour(),
+			ts.Local().Minute(),
+			ts.Local().Second(),
 			ts.Format("-0700"),
 			log.Target.Id,
 			log.FilledByPrevTs,
@@ -418,22 +418,28 @@ func (d *DB) Count(groups []string, matches []string) ([][]string, error) {
 		switch g {
 		case "year":
 			tsColmun = `strftime("%Y-01-01 00:00:00", datetime(ts), "localtime")`
-			tsGroupBy = []string{"year"}
+			//tsGroupBy = []string{"year"}
+			tsGroupBy = []string{tsColmun}
 		case "month":
 			tsColmun = `strftime("%Y-%m-01 00:00:00", datetime(ts), "localtime")`
-			tsGroupBy = []string{"ts_year", "ts_month"}
+			//tsGroupBy = []string{"ts_year", "ts_month"}
+			tsGroupBy = []string{tsColmun}
 		case "day":
 			tsColmun = `strftime("%Y-%m-%d 00:00:00", datetime(ts), "localtime")`
-			tsGroupBy = []string{"ts_year", "ts_month", "ts_day"}
+			//tsGroupBy = []string{"ts_year", "ts_month", "ts_day"}
+			tsGroupBy = []string{tsColmun}
 		case "hour":
 			tsColmun = `strftime("%Y-%m-%d %H:00:00", datetime(ts), "localtime")`
-			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour"}
+			//tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour"}
+			tsGroupBy = []string{tsColmun}
 		case "minute":
 			tsColmun = `strftime("%Y-%m-%d %H:%M:00", datetime(ts), "localtime")`
-			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute"}
+			//tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute"}
+			tsGroupBy = []string{tsColmun}
 		case "second":
 			tsColmun = `strftime("%Y-%m-%d %H:%M:%S", datetime(ts), "localtime")`
-			tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute", "ts_second"}
+			//tsGroupBy = []string{"ts_year", "ts_month", "ts_day", "ts_hour", "ts_minute", "ts_second"}
+			tsGroupBy = []string{tsColmun}
 		case "description":
 			targetGroup = append(targetGroup, "t.description")
 		case "host":
