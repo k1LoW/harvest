@@ -8,6 +8,7 @@
 | [tags](tags.md)                 | 2       |         | table         |
 | [targets_tags](targets_tags.md) | 3       |         | table         |
 | [logs](logs.md)                 | 14      |         | virtual table |
+| [metas](metas.md)               | 3       |         | table         |
 
 ## Relations
 
