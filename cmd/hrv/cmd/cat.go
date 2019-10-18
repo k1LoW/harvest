@@ -93,7 +93,7 @@ var catCmd = &cobra.Command{
 			noColor,
 		)
 		if err != nil {
-			l.Error("fetch error", zap.String("error", err.Error()))
+			l.Error("cat error", zap.String("error", err.Error()))
 			os.Exit(1)
 		}
 
