@@ -521,7 +521,7 @@ func (d *DB) Count(groups []string, matches []string) ([][]string, error) {
 
 	var query string
 	if len(tsGroupBy) > 0 {
-		query = fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s ORDER BY ts;`, strings.Join(columns, ", "), strings.Join(tsGroupBy, ", ")) // #nosec
+		query = fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id GROUP BY %s ORDER BY %s;`, strings.Join(columns, ", "), strings.Join(tsGroupBy, ", "), tsColmun) // #nosec
 	} else {
 		query = fmt.Sprintf(`SELECT %s FROM logs AS l LEFT JOIN targets AS t ON l.target_id = t.id;`, strings.Join(columns, ", ")) // #nosec
 	}
