@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.16.2](https://github.com/k1LoW/harvest/compare/v0.16.1...v0.16.2) (2019-11-27)
+
+* Fix `hrv count` timestamp ordering [#60](https://github.com/k1LoW/harvest/pull/60) ([k1LoW](https://github.com/k1LoW))
+* Use GitHub Actions [#59](https://github.com/k1LoW/harvest/pull/59) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.16.1](https://github.com/k1LoW/harvest/compare/v0.16.0...v0.16.1) (2019-10-18)
 
 * Fix panic: runtime error: invalid memory address or nil pointer dereference [#58](https://github.com/k1LoW/harvest/pull/58) ([k1LoW](https://github.com/k1LoW))
