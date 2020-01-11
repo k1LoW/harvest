@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.17.0](https://github.com/k1LoW/harvest/compare/v0.16.2...v0.17.0) (2020-01-11)
+
+* Add `hrv completion` [#61](https://github.com/k1LoW/harvest/pull/61) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.16.2](https://github.com/k1LoW/harvest/compare/v0.16.1...v0.16.2) (2019-11-27)
 
 * Fix `hrv count` timestamp ordering [#60](https://github.com/k1LoW/harvest/pull/60) ([k1LoW](https://github.com/k1LoW))
