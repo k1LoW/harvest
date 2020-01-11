@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var outFile string
+var out string
 
 // completionCmd represents the completion command
 var completionCmd = &cobra.Command{
@@ -45,9 +45,8 @@ hrv completion zsh > $fpath[1]/_hrv
 `,
 	ValidArgs: []string{"bash", "zsh"},
 	Args: func(cmd *cobra.Command, args []string) error {
-		n := 1
-		if len(args) != n {
-			return fmt.Errorf("accepts %d arg(s), received %d", n, len(args))
+		if len(args) != 1 {
+			return fmt.Errorf("accepts 1 arg, received %d", len(args))
 		}
 		if err := cobra.OnlyValidArgs(cmd, args); err != nil {
 			return err
@@ -55,26 +54,30 @@ hrv completion zsh > $fpath[1]/_hrv
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
+		var (
+			o   *os.File
+			err error
+		)
 		sh := args[0]
-		out := os.Stdout
-		if outFile != "" {
-			out, err = os.Create(outFile)
+		if out == "" {
+			o = os.Stdout
+		} else {
+			o, err = os.Create(out)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 				os.Exit(1)
 			}
-			defer out.Close()
+			defer o.Close()
 		}
 
 		switch sh {
 		case "bash":
-			if err := rootCmd.GenBashCompletion(out); err != nil {
+			if err := rootCmd.GenBashCompletion(o); err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 				os.Exit(1)
 			}
 		case "zsh":
-			if err := rootCmd.GenZshCompletion(out); err != nil {
+			if err := rootCmd.GenZshCompletion(o); err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 				os.Exit(1)
 			}
@@ -84,5 +87,5 @@ hrv completion zsh > $fpath[1]/_hrv
 
 func init() {
 	rootCmd.AddCommand(completionCmd)
-	completionCmd.Flags().StringVarP(&outFile, "out", "o", "", "output file path")
+	completionCmd.Flags().StringVarP(&out, "out", "o", "", "output file path")
 }
