@@ -62,7 +62,12 @@ brews:
     email: k1lowxb@gmail.com
   homepage: https://github.com/k1LoW/harvest
   description: Portable log aggregation tool for middle-scale system operation/observation.
-  install: bin.install 'hrv'
+  install: |
+    system 'hrv', 'completion', 'bash', '--out', 'hrv.bash'
+    system 'hrv', 'completion', 'zsh', '--out', 'hrv.zsh'
+    bin.install 'hrv'
+    bash_completion.install "hrv.bash" => "hrv"
+    zsh_completion.install "hrv.zsh" => "_hrv"
 nfpms:
   -
     id: harvest-nfpms
