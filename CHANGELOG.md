@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.17.1](https://github.com/k1LoW/harvest/compare/v0.17.0...v0.17.1) (2020-03-05)
+
+* Fix zsh completion [#62](https://github.com/k1LoW/harvest/pull/62) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.17.0](https://github.com/k1LoW/harvest/compare/v0.16.2...v0.17.0) (2020-01-11)
 
 * Add `hrv completion` [#61](https://github.com/k1LoW/harvest/pull/61) ([k1LoW](https://github.com/k1LoW))
