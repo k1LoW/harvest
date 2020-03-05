@@ -87,5 +87,10 @@ func init() {
 	countCmd.Flags().StringSliceVarP(&matches, "match", "m", []string{}, "group logs using SQLite `%LIKE%` query")
 	countCmd.Flags().StringVarP(&delimiter, "delimiter", "d", "\t", "delmiter")
 	countCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
+	err := countCmd.MarkZshCompPositionalArgumentFile(1)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
 	rootCmd.AddCommand(countCmd)
 }

@@ -68,6 +68,11 @@ var infoCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(infoCmd)
 	infoCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
+	err := infoCmd.MarkZshCompPositionalArgumentFile(1)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+	rootCmd.AddCommand(infoCmd)
 }
