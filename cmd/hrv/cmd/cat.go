@@ -216,4 +216,9 @@ func init() {
 	catCmd.Flags().StringVarP(&duStr, "duration", "", "", "log duration")
 	catCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "print debugging messages.")
 	catCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "disable colorize output")
+	err := catCmd.MarkZshCompPositionalArgumentFile(1)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
 }
