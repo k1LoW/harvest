@@ -71,7 +71,7 @@ brews:
 nfpms:
   -
     id: harvest-nfpms
-    name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
     builds:
     - hrv-linux
     homepage: https://github.com/k1LoW/harvest
