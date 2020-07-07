@@ -7,6 +7,7 @@ import (
 	"io"
 	"math/rand"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"go.uber.org/zap"
@@ -36,6 +37,8 @@ type Line struct {
 	TimestampViaClient *time.Time
 }
 
+var syslogTimestampAMRe = regexp.MustCompile(`^([a-zA-Z]{3}) ([0-9] .+)$`)
+
 // buildReadCommand ...
 func buildReadCommand(path string, st, et *time.Time, timeFormat, timeZone string) string {
 	dir := filepath.Dir(path)
@@ -52,9 +55,15 @@ func buildReadCommand(path string, st, et *time.Time, timeFormat, timeZone strin
 		matches = append(matches, r)
 	}
 
+	grepStr := string(matches)
+	// for syslog timestamp
+	if syslogTimestampAMRe.MatchString(grepStr) {
+		grepStr = syslogTimestampAMRe.ReplaceAllString(string(matches), "$1  $2")
+	}
+
 	findStart := st.Format("2006-01-02 15:04:05 MST")
 
-	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr | xargs sudo zcat -f | grep -a '%s'", dir, base, findStart, string(matches))
+	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr | xargs sudo zcat -f | grep -a '%s'", dir, base, findStart, grepStr)
 	if timeFormat == "unixtime" {
 		cmd = fmt.Sprintf("sudo find %s/ -type f -name '%s' -newermt '%s' | xargs sudo ls -tr | xargs sudo zcat -f", dir, base, findStart)
 	}
