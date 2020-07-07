@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.17.2](https://github.com/k1LoW/harvest/compare/v0.17.1...v0.17.2) (2020-07-07)
+
+* Fix log collect command for syslog (2 space like `Jun  6 19`) [#63](https://github.com/k1LoW/harvest/pull/63) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.17.1](https://github.com/k1LoW/harvest/compare/v0.17.0...v0.17.1) (2020-03-05)
 
 * Fix zsh completion [#62](https://github.com/k1LoW/harvest/pull/62) ([k1LoW](https://github.com/k1LoW))
