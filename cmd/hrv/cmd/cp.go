@@ -160,6 +160,7 @@ func init() {
 	rootCmd.AddCommand(cpCmd)
 	cpCmd.Flags().StringVarP(&dstDir, "out", "o", "", "dst dir")
 	cpCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	_ = cpCmd.MarkFlagFilename("config", "yaml", "yml")
 	cpCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	cpCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	cpCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")

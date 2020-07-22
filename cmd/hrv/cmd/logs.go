@@ -124,6 +124,7 @@ var logsCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(logsCmd)
 	logsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	_ = logsCmd.MarkFlagFilename("config", "yaml", "yml")
 	logsCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	logsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	logsCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
