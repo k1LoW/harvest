@@ -5,16 +5,13 @@ require (
 	github.com/Songmu/prompter v0.2.0
 	github.com/antonmedv/expr v1.1.4
 	github.com/araddon/dateparse v0.0.0-20190622164848-0fb0a474d195
-	github.com/armon/consul-api v0.0.0-20180202201655-eb2c6b5be1b6 // indirect
-	github.com/coreos/go-etcd v2.0.0+incompatible // indirect
-	github.com/cpuguy83/go-md2man v1.0.10 // indirect
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/google/gofuzz v1.0.0 // indirect
 	github.com/googleapis/gnostic v0.0.0-20170729233727-0c5108395e2d // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.9.2 // indirect
 	github.com/imdario/mergo v0.3.7 // indirect
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/k1LoW/duration v1.0.0
+	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/sshc v0.0.0-20190816012013-f54f6b90bfef
 	github.com/kevinburke/ssh_config v0.0.0-20190725054713-01f96b0aa0cd // indirect
 	github.com/labstack/gommon v0.2.8
@@ -25,8 +22,6 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v1.0.1-0.20200719220246-c6fe2d4df810
 	github.com/stretchr/testify v1.4.0 // indirect
-	github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8 // indirect
-	github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77 // indirect
 	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
