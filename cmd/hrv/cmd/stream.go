@@ -201,6 +201,7 @@ func getMaxLength(targets []*config.Target, key string) (int, error) {
 func init() {
 	rootCmd.AddCommand(streamCmd)
 	streamCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	_ = streamCmd.MarkFlagFilename("config", "yaml", "yml")
 	streamCmd.Flags().BoolVarP(&withTimestamp, "with-timestamp", "", false, "output with timestamp")
 	streamCmd.Flags().BoolVarP(&withTimestampNano, "with-timestamp-nano", "", false, "output with timestamp nano sec")
 	streamCmd.Flags().BoolVarP(&withHost, "with-host", "", false, "output with host")

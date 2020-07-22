@@ -162,6 +162,7 @@ func init() {
 	rootCmd.AddCommand(fetchCmd)
 	fetchCmd.Flags().StringVarP(&dbPath, "out", "o", "", "db path")
 	fetchCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	_ = fetchCmd.MarkFlagFilename("config", "yaml", "yml")
 	fetchCmd.Flags().IntVarP(&concurrency, "concurrency", "C", defaultConcurrency, "concurrency")
 	fetchCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag")
 	fetchCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
