@@ -1,6 +1,6 @@
 hrv
 dist/
-coverage.txt
+coverage.out
 *.db
 *.log
 *.yml
