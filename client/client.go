@@ -100,7 +100,7 @@ func buildRandomOneCommand(path string) string {
 	rand.Seed(time.Now().UnixNano())
 
 	// why tail -2 -> for 0 line log
-	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' | xargs sudo ls -tr | tail -2 | xargs sudo zcat -f | head -%d | tail -1", dir, base, rand.Intn(100))
+	cmd := fmt.Sprintf("sudo find %s/ -type f -name '%s' | xargs sudo ls -tr | tail -2 | xargs sudo zcat -f | head -%d | tail -1", dir, base, rand.Intn(100)) // #nosec
 
 	return cmd
 }
