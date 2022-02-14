@@ -70,6 +70,7 @@ var targetsCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(targetsCmd)
 	targetsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	_ = targetsCmd.MarkFlagFilename("config", "yaml", "yml")
 	targetsCmd.Flags().StringVarP(&tag, "tag", "", "", "filter targets using tag (format: foo,bar)")
 	targetsCmd.Flags().StringVarP(&sourceRe, "source", "", "", "filter targets using source regexp")
 }

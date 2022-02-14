@@ -38,6 +38,7 @@ archives:
     - goos: darwin
       format: zip
   files:
+    - CREDITS
     - README.md
     - CHANGELOG.md
 checksum:
