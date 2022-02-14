@@ -58,4 +58,5 @@ var tagsCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(tagsCmd)
 	tagsCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+	_ = tagsCmd.MarkFlagFilename("config", "yaml", "yml")
 }

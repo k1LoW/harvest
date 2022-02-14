@@ -42,8 +42,11 @@ echo '. <(hrv completion bash)' > ~/.bashrc
 
 # zsh
 hrv completion zsh > $fpath[1]/_hrv
+
+# fish
+hrv completion fish ~/.config/fish/completions/hrv.fish
 `,
-	ValidArgs: []string{"bash", "zsh"},
+	ValidArgs: []string{"bash", "zsh", "fish", "powershell"},
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			return fmt.Errorf("accepts 1 arg, received %d", len(args))
@@ -78,12 +81,22 @@ hrv completion zsh > $fpath[1]/_hrv
 
 		switch sh {
 		case "bash":
-			if err := rootCmd.GenBashCompletion(o); err != nil {
+			if err := cmd.Root().GenBashCompletion(o); err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 				os.Exit(1)
 			}
 		case "zsh":
-			if err := rootCmd.GenZshCompletion(o); err != nil {
+			if err := cmd.Root().GenZshCompletion(o); err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+				os.Exit(1)
+			}
+		case "fish":
+			if err := cmd.Root().GenFishCompletion(o, true); err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+				os.Exit(1)
+			}
+		case "powershell":
+			if err := cmd.Root().GenPowerShellCompletion(o); err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 				os.Exit(1)
 			}
