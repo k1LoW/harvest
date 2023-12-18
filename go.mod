@@ -23,7 +23,7 @@ require (
 	github.com/spf13/cobra v1.0.1-0.20200719220246-c6fe2d4df810
 	github.com/stretchr/testify v1.4.0 // indirect
 	go.uber.org/zap v1.10.0
-	golang.org/x/crypto v0.14.0
+	golang.org/x/crypto v0.17.0
 	golang.org/x/net v0.17.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/inf.v0 v0.9.0 // indirect
