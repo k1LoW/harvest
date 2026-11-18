@@ -65,7 +65,7 @@ hrv completion fish ~/.config/fish/completions/hrv.fish
 		if out == "" {
 			o = os.Stdout
 		} else {
-			o, err = os.Create(out)
+			o, err = os.Create(out) // #nosec G304 -- out is the --out flag value given by the user running the command.
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
 				os.Exit(1)
